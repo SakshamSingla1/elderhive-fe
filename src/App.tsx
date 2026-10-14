@@ -5,6 +5,9 @@ import SuperAdminLoginPage from './components/pages/Authentication/SuperAdminLog
 import ElderLoginPage from './components/pages/Authentication/ElderLogin.page';
 import CaretakerLoginPage from './components/pages/Authentication/CaretakerLogin.page';
 import FamilyLoginPage from './components/pages/Authentication/FamilyLogin.page';
+import RegisterPage from './components/pages/Authentication/Register.page';
+import ForgotPasswordPage from './components/pages/Authentication/ForgotPassword.page';
+import ResetPasswordPage from './components/pages/Authentication/ResetPassword.page';
 
 // "/" keeps this placeholder until Phase 4 builds a real Landing page — not this
 // prompt's concern (just wiring the Authentication pages into routing).
@@ -26,6 +29,9 @@ function App() {
       <Route path="/login/caretaker" element={<CaretakerLoginPage />} />
       <Route path="/login/family" element={<FamilyLoginPage />} />
       <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
     </Routes>
   );
 }

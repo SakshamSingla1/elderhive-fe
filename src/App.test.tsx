@@ -33,6 +33,9 @@ describe('App', () => {
     ['/login/family', 'Family Login'],
     ['/login/super-admin', 'Super Admin Access'],
     ['/admin/login', 'Administrator Access'],
+    ['/register', 'Create your account'],
+    ['/forgot-password', 'Forgot your password?'],
+    ['/reset-password', 'Reset your password'],
   ])('renders the right role-specific login page at %s', (path, expectedHeading) => {
     render(
       <MemoryRouter initialEntries={[path]}>
