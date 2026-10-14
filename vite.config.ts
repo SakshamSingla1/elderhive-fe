@@ -19,10 +19,13 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-mui': [
             '@mui/material',
-            '@mui/icons-material',
             '@emotion/react',
             '@emotion/styled',
           ],
+          // Icons are sourced from react-icons exclusively (never @mui/icons-material or
+          // any other icon package) — see src/hooks/useSidebarNavItems.ts and the
+          // Authentication pages for the convention.
+          'vendor-icons': ['react-icons'],
           // Split out separately from vendor-mui — @mui/x-date-pickers alone is large
           // enough to push that chunk well past a reasonable single-chunk size.
           'vendor-datepickers': ['@mui/x-date-pickers'],

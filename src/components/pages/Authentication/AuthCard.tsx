@@ -2,12 +2,8 @@ import React from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { Box, Card, Link as MuiLink, Stack, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import SecurityIcon from "@mui/icons-material/Security";
-import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
-import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
-import ElderlyIcon from "@mui/icons-material/Elderly";
+import { FiHeart } from "react-icons/fi";
+import { MdAdminPanelSettings, MdElderly, MdFamilyRestroom, MdSecurity, MdVolunteerActivism } from "react-icons/md";
 
 export type AuthCardVariant = "default" | "admin" | "super-admin" | "family" | "caretaker" | "elder";
 
@@ -29,44 +25,46 @@ interface VariantMeta {
   staffTone: boolean;
 }
 
+const ICON_SIZE = 24;
+
 const VARIANT_META: Record<AuthCardVariant, VariantMeta> = {
   default: {
-    icon: <FavoriteIcon />,
+    icon: <FiHeart size={ICON_SIZE} />,
     brandSuffix: "",
     headline: "Compassionate care, right at home.",
     body: "Connecting families, elders, and caretakers on one coordinated platform.",
     staffTone: false,
   },
   admin: {
-    icon: <AdminPanelSettingsIcon />,
+    icon: <MdAdminPanelSettings size={ICON_SIZE} />,
     brandSuffix: " Admin",
     headline: "Internal access for platform administrators.",
     body: "This portal is reserved for ElderHive staff. Sign in with your administrator credentials.",
     staffTone: true,
   },
   "super-admin": {
-    icon: <SecurityIcon />,
+    icon: <MdSecurity size={ICON_SIZE} />,
     brandSuffix: " Super Admin",
     headline: "Full platform access for super administrators.",
     body: "Reserved for super administrator accounts with unrestricted control over the platform.",
     staffTone: true,
   },
   family: {
-    icon: <FamilyRestroomIcon />,
+    icon: <MdFamilyRestroom size={ICON_SIZE} />,
     brandSuffix: "",
     headline: "Caring for your family, together.",
     body: "Manage bookings and care for the people you love, all from one place.",
     staffTone: false,
   },
   caretaker: {
-    icon: <VolunteerActivismIcon />,
+    icon: <MdVolunteerActivism size={ICON_SIZE} />,
     brandSuffix: "",
     headline: "Meaningful care work, made simple.",
     body: "Manage your schedule and bookings as a verified ElderHive caretaker.",
     staffTone: false,
   },
   elder: {
-    icon: <ElderlyIcon />,
+    icon: <MdElderly size={ICON_SIZE} />,
     brandSuffix: "",
     headline: "Your care, your way.",
     body: "View your bookings and stay connected with your family and caretakers.",
@@ -146,7 +144,10 @@ const AuthCard: React.FC<AuthCardProps> = ({ title, subtitle, children, variant 
               >
                 <MuiLink component={RouterLink} to="/" underline="none" color="inherit">
                   <Stack direction="row" alignItems="center" spacing={1}>
-                    {React.cloneElement(meta.icon as React.ReactElement, { color: "primary" } as object)}
+                    {/* Tinted primary via CSS color inheritance (react-icons icons default
+                        to fill="currentColor") rather than an MUI-style semantic color prop
+                        injected onto the icon element. */}
+                    <Box sx={{ display: "inline-flex", color: "primary.main" }}>{meta.icon}</Box>
                     <Typography variant="h6" component="span" fontWeight={800}>
                       ElderHive{meta.brandSuffix}
                     </Typography>

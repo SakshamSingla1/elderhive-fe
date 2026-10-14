@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Box, Divider, Drawer, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Tooltip, Typography } from "@mui/material";
-import FavoriteIcon from "@mui/icons-material/Favorite";
+import { FiHeart } from "react-icons/fi";
 
 export interface SidebarNavItem {
   label: string;
@@ -75,7 +75,7 @@ const Sidebar: React.FC<SidebarProps> = ({ navItems, roleLabel, mobileOpen = fal
             flexShrink: 0,
           }}
         >
-          <FavoriteIcon fontSize="small" />
+          <FiHeart size={18} />
         </Box>
         {!rail && (
           <Box minWidth={0}>

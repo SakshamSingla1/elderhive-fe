@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import HomeIcon from "@mui/icons-material/Home";
+import { FiHome } from "react-icons/fi";
 import { UserTypeEnum } from "../utils/enums";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
 import DashboardLayout, { type SidebarNavItem } from "./DashboardLayout";
@@ -43,8 +43,8 @@ function mockAuth(overrides: Partial<ReturnType<typeof useAuthenticatedUser>> = 
 }
 
 const navItems: SidebarNavItem[] = [
-  { label: "Dashboard", path: "/elder/dashboard", icon: <HomeIcon />, end: true },
-  { label: "Bookings", path: "/elder/bookings", icon: <HomeIcon /> },
+  { label: "Dashboard", path: "/elder/dashboard", icon: <FiHome />, end: true },
+  { label: "Bookings", path: "/elder/bookings", icon: <FiHome /> },
 ];
 
 function renderLayout(initialPath = "/elder/dashboard") {

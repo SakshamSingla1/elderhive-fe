@@ -10,12 +10,8 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
-import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
-import ElderlyIcon from "@mui/icons-material/Elderly";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import SecurityIcon from "@mui/icons-material/Security";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import { FiArrowRight } from "react-icons/fi";
+import { MdAdminPanelSettings, MdElderly, MdFamilyRestroom, MdSecurity, MdVolunteerActivism } from "react-icons/md";
 import { UserTypeEnum } from "../../../utils/enums";
 import { loginPathForUserType } from "../../../routes/ProtectedRoute";
 
@@ -32,35 +28,35 @@ const ROLE_OPTIONS: RoleOption[] = [
     key: "family",
     label: "Family Member",
     description: "Manage care for your loved ones",
-    icon: <FamilyRestroomIcon fontSize="large" />,
+    icon: <MdFamilyRestroom size={32} />,
     to: loginPathForUserType(UserTypeEnum.FAMILY_MEMBER),
   },
   {
     key: "caretaker",
     label: "Caretaker",
     description: "Manage your bookings and schedule",
-    icon: <VolunteerActivismIcon fontSize="large" />,
+    icon: <MdVolunteerActivism size={32} />,
     to: loginPathForUserType(UserTypeEnum.CARETAKER),
   },
   {
     key: "elder",
     label: "Elder",
     description: "View your care and bookings",
-    icon: <ElderlyIcon fontSize="large" />,
+    icon: <MdElderly size={32} />,
     to: loginPathForUserType(UserTypeEnum.ELDER),
   },
   {
     key: "admin",
     label: "Admin",
     description: "Manage the platform",
-    icon: <AdminPanelSettingsIcon fontSize="large" />,
+    icon: <MdAdminPanelSettings size={32} />,
     to: loginPathForUserType(UserTypeEnum.ADMIN),
   },
   {
     key: "super-admin",
     label: "Super Admin",
     description: "Full platform access",
-    icon: <SecurityIcon fontSize="large" />,
+    icon: <MdSecurity size={32} />,
     to: loginPathForUserType(UserTypeEnum.SUPER_ADMIN),
   },
 ];
@@ -121,7 +117,9 @@ const LoginPage: React.FC = () => {
                         {option.description}
                       </Typography>
                     </Box>
-                    <ArrowForwardIcon color="action" />
+                    <Box sx={{ display: "flex", color: "action.active" }}>
+                      <FiArrowRight />
+                    </Box>
                   </Stack>
                 </CardContent>
               </CardActionArea>

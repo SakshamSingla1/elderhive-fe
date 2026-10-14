@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
-import HomeIcon from "@mui/icons-material/Home";
+import { FiHome } from "react-icons/fi";
 import Sidebar, { type SidebarNavItem } from "./Sidebar";
 
 function renderSidebar(navItems: SidebarNavItem[], props: Partial<React.ComponentProps<typeof Sidebar>> = {}) {
@@ -16,9 +16,9 @@ function renderSidebar(navItems: SidebarNavItem[], props: Partial<React.Componen
 describe("Sidebar", () => {
   it("renders items sorted by navIndex, regardless of the order they're passed in", () => {
     const navItems: SidebarNavItem[] = [
-      { label: "Third", path: "/admin/third", icon: <HomeIcon />, navIndex: 3 },
-      { label: "First", path: "/admin/first", icon: <HomeIcon />, navIndex: 1 },
-      { label: "Second", path: "/admin/second", icon: <HomeIcon />, navIndex: 2 },
+      { label: "Third", path: "/admin/third", icon: <FiHome />, navIndex: 3 },
+      { label: "First", path: "/admin/first", icon: <FiHome />, navIndex: 1 },
+      { label: "Second", path: "/admin/second", icon: <FiHome />, navIndex: 2 },
     ];
     renderSidebar(navItems);
 
@@ -28,9 +28,9 @@ describe("Sidebar", () => {
 
   it("shows one group heading per group boundary, not once per item", () => {
     const navItems: SidebarNavItem[] = [
-      { label: "Dashboard", path: "/admin/dashboard", icon: <HomeIcon />, navIndex: 0, group: "Overview" },
-      { label: "Roles", path: "/admin/roles", icon: <HomeIcon />, navIndex: 1, group: "Platform" },
-      { label: "Permissions", path: "/admin/permissions", icon: <HomeIcon />, navIndex: 2, group: "Platform" },
+      { label: "Dashboard", path: "/admin/dashboard", icon: <FiHome />, navIndex: 0, group: "Overview" },
+      { label: "Roles", path: "/admin/roles", icon: <FiHome />, navIndex: 1, group: "Platform" },
+      { label: "Permissions", path: "/admin/permissions", icon: <FiHome />, navIndex: 2, group: "Platform" },
     ];
     renderSidebar(navItems);
 
@@ -39,7 +39,7 @@ describe("Sidebar", () => {
   });
 
   it("renders an ungrouped item with no heading at all", () => {
-    const navItems: SidebarNavItem[] = [{ label: "Dashboard", path: "/admin/dashboard", icon: <HomeIcon />, navIndex: 0 }];
+    const navItems: SidebarNavItem[] = [{ label: "Dashboard", path: "/admin/dashboard", icon: <FiHome />, navIndex: 0 }];
     renderSidebar(navItems);
 
     expect(screen.getByRole("link", { name: "Dashboard" })).toBeInTheDocument();
@@ -54,7 +54,7 @@ describe("Sidebar", () => {
 
   it("hides labels but keeps icons and tooltips when collapsed to a rail", async () => {
     const user = userEvent.setup();
-    const navItems: SidebarNavItem[] = [{ label: "Dashboard", path: "/admin/dashboard", icon: <HomeIcon />, navIndex: 0, end: true }];
+    const navItems: SidebarNavItem[] = [{ label: "Dashboard", path: "/admin/dashboard", icon: <FiHome />, navIndex: 0, end: true }];
     renderSidebar(navItems, { collapsed: true });
 
     expect(screen.queryByText("Dashboard")).not.toBeInTheDocument();
@@ -66,7 +66,7 @@ describe("Sidebar", () => {
   it("on mobile, clicking a nav item closes the drawer via onMobileClose", async () => {
     const user = userEvent.setup();
     const onMobileClose = vi.fn();
-    const navItems: SidebarNavItem[] = [{ label: "Bookings", path: "/admin/bookings", icon: <HomeIcon /> }];
+    const navItems: SidebarNavItem[] = [{ label: "Bookings", path: "/admin/bookings", icon: <FiHome /> }];
     renderSidebar(navItems, { isMobile: true, mobileOpen: true, onMobileClose });
 
     await user.click(screen.getByRole("link", { name: "Bookings" }));

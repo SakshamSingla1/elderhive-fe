@@ -3,10 +3,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AppBar, Avatar, Box, Divider, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { AnimatePresence, motion } from "framer-motion";
-import MenuIcon from "@mui/icons-material/Menu";
-import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
-import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import LogoutIcon from "@mui/icons-material/Logout";
+import { FiChevronLeft, FiChevronRight, FiLogOut, FiMenu } from "react-icons/fi";
 import Sidebar, { SIDEBAR_WIDTH, SIDEBAR_WIDTH_COLLAPSED, type SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
 
@@ -127,7 +124,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ navItems, roleLabel }
                 "&:hover": { bgcolor: "action.hover" },
               }}
             >
-              {rail ? <ChevronRightRoundedIcon fontSize="small" /> : <ChevronLeftRoundedIcon fontSize="small" />}
+              {rail ? <FiChevronRight size={18} /> : <FiChevronLeft size={18} />}
             </IconButton>
           </Tooltip>
         </Box>
@@ -150,7 +147,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ navItems, roleLabel }
           <Box display="flex" alignItems="center" gap={1} minWidth={0}>
             {isMobile && (
               <IconButton onClick={() => setMobileOpen(true)} aria-label="Open navigation menu" edge="start">
-                <MenuIcon />
+                <FiMenu />
               </IconButton>
             )}
             <Typography variant="h6" component="div" fontWeight={700} textTransform="capitalize" noWrap>
@@ -177,7 +174,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ navItems, roleLabel }
               </Box>
               <Divider />
               <MenuItem onClick={handleLogout}>
-                <LogoutIcon fontSize="small" sx={{ mr: 1.5 }} /> Sign out
+                <FiLogOut size={18} style={{ marginRight: 12 }} /> Sign out
               </MenuItem>
             </Menu>
           </Box>

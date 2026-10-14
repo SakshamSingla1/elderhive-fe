@@ -1,16 +1,6 @@
 import React, { useEffect, useState } from "react";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import PeopleIcon from "@mui/icons-material/People";
-import SecurityIcon from "@mui/icons-material/Security";
-import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import PaletteIcon from "@mui/icons-material/Palette";
-import RoomServiceIcon from "@mui/icons-material/RoomService";
-import EventNoteIcon from "@mui/icons-material/EventNote";
-import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import EmergencyIcon from "@mui/icons-material/Emergency";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import CircleIcon from "@mui/icons-material/Circle";
+import { FiBook, FiCalendar, FiCircle, FiKey, FiUserCheck, FiUsers } from "react-icons/fi";
+import { MdBarChart, MdDashboard, MdEmergency, MdPalette, MdRoomService, MdSecurity } from "react-icons/md";
 import { useNavLinkService } from "../services/useNavLinkService";
 import { NavLinkStatusEnum } from "../utils/enums";
 import type { SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
@@ -23,23 +13,23 @@ import type { SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
  * unrecognized (including no icon at all) falls back to a plain circle rather than
  * rendering nothing.
  */
-const ICON_REGISTRY: Record<string, React.ComponentType<{ fontSize?: "small" | "medium" | "large" | "inherit" }>> = {
-  dashboard: DashboardIcon,
-  users: PeopleIcon,
-  roles: SecurityIcon,
-  permissions: VpnKeyIcon,
-  "nav-links": MenuBookIcon,
-  theme: PaletteIcon,
-  services: RoomServiceIcon,
-  bookings: EventNoteIcon,
-  caretakers: VerifiedUserIcon,
-  emergency: EmergencyIcon,
-  analytics: BarChartIcon,
+const ICON_REGISTRY: Record<string, React.ComponentType<{ size?: number }>> = {
+  dashboard: MdDashboard,
+  users: FiUsers,
+  roles: MdSecurity,
+  permissions: FiKey,
+  "nav-links": FiBook,
+  theme: MdPalette,
+  services: MdRoomService,
+  bookings: FiCalendar,
+  caretakers: FiUserCheck,
+  emergency: MdEmergency,
+  analytics: MdBarChart,
 };
 
 function resolveIcon(iconKey: string | null | undefined): React.ReactNode {
-  const IconComponent = (iconKey && ICON_REGISTRY[iconKey.toLowerCase()]) || CircleIcon;
-  return React.createElement(IconComponent, { fontSize: "small" });
+  const IconComponent = (iconKey && ICON_REGISTRY[iconKey.toLowerCase()]) || FiCircle;
+  return React.createElement(IconComponent, { size: 18 });
 }
 
 export interface UseSidebarNavItemsResult {

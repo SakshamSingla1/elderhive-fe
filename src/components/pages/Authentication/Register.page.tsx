@@ -3,9 +3,7 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Alert, Box, Button, Link as MuiLink, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
-import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
-import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
-import ElderlyIcon from "@mui/icons-material/Elderly";
+import { MdElderly, MdFamilyRestroom, MdVolunteerActivism } from "react-icons/md";
 import AuthCard from "./AuthCard";
 import { useAuthService } from "../../../services/useAuthService";
 import { UserTypeEnum } from "../../../utils/enums";
@@ -18,9 +16,9 @@ import { loginPathForUserType } from "../../../routes/ProtectedRoute";
 type SelfRegisterableUserType = typeof UserTypeEnum.FAMILY_MEMBER | typeof UserTypeEnum.CARETAKER | typeof UserTypeEnum.ELDER;
 
 const SELF_REGISTERABLE_OPTIONS: Array<{ userType: SelfRegisterableUserType; label: string; icon: React.ReactNode }> = [
-  { userType: UserTypeEnum.FAMILY_MEMBER, label: "Family Member", icon: <FamilyRestroomIcon fontSize="small" /> },
-  { userType: UserTypeEnum.CARETAKER, label: "Caretaker", icon: <VolunteerActivismIcon fontSize="small" /> },
-  { userType: UserTypeEnum.ELDER, label: "Elder", icon: <ElderlyIcon fontSize="small" /> },
+  { userType: UserTypeEnum.FAMILY_MEMBER, label: "Family Member", icon: <MdFamilyRestroom size={20} /> },
+  { userType: UserTypeEnum.CARETAKER, label: "Caretaker", icon: <MdVolunteerActivism size={20} /> },
+  { userType: UserTypeEnum.ELDER, label: "Elder", icon: <MdElderly size={20} /> },
 ];
 
 interface RegisterFormValues {
