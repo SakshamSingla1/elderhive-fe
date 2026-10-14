@@ -15,3 +15,14 @@ export function getErrorMessage(error: unknown, fallback = "Something went wrong
   }
   return fallback;
 }
+
+// Fills ":param" placeholders in a URL template, e.g. replaceUrlParams("/roles/:id", { id: 5 })
+// -> "/roles/5". Keeps service hooks' URL constants readable (named placeholders instead of
+// string concatenation at every call site).
+export function replaceUrlParams(url: string, params: Record<string, string | number>): string {
+  let result = url;
+  for (const [key, value] of Object.entries(params)) {
+    result = result.replace(`:${key}`, String(value));
+  }
+  return result;
+}

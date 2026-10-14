@@ -1,60 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import {
-  AppBar,
-  Avatar,
-  Box,
-  Divider,
-  Drawer,
-  IconButton,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Toolbar,
-  Tooltip,
-  Typography,
-  useMediaQuery,
-} from "@mui/material";
+import { AppBar, Avatar, Box, Divider, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { AnimatePresence, motion } from "framer-motion";
-import { NavLink } from "react-router-dom";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import LogoutIcon from "@mui/icons-material/Logout";
+import Sidebar, { SIDEBAR_WIDTH, SIDEBAR_WIDTH_COLLAPSED, type SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
 
-export interface SidebarNavItem {
-  label: string;
-  path: string;
-  icon: React.ReactNode;
-  /** Passed straight through to react-router's NavLink `end` prop — set true for a nav
-   *  item whose path is a prefix of another item's (e.g. the shell's own root/dashboard
-   *  path), so it isn't shown "active" while actually viewing a different page under it. */
-  end?: boolean;
-}
+export type { SidebarNavItem };
 
 export interface DashboardLayoutProps {
   /**
-   * Fed by Phase 4 Prompt 35's useSidebarNavItems hook (GET /nav-links/me, mapped to this
-   * shape) once the real route shells exist — deliberately just a prop here, not fetched
-   * by this component itself, so DashboardLayout stays a pure shell with no data-fetching
-   * of its own and no knowledge of where its nav items come from.
+   * Fed by hooks/useSidebarNavItems.ts (GET /nav-links/me, mapped to this shape) by each
+   * role's route shell (routes/*Routes.tsx, Prompt 35) — deliberately just a prop here,
+   * not fetched by this component itself, so DashboardLayout stays a pure shell with no
+   * data-fetching of its own and no knowledge of where its nav items come from.
    */
   navItems: SidebarNavItem[];
-  /** Shown under the brand in the sidebar header and used to derive the account menu's
-   *  display — e.g. "Admin", "Elder", "Caretaker". */
+  /** Shown under the brand in the sidebar header and used in the account menu's display —
+   *  e.g. "Admin", "Elder", "Caretaker". */
   roleLabel: string;
 }
-
-export const SIDEBAR_WIDTH = 248;
-/** Width of the desktop rail once collapsed — wide enough for a centered 24px icon plus
- *  its hit target, narrow enough to read as "minimized" rather than a second full drawer. */
-export const SIDEBAR_WIDTH_COLLAPSED = 84;
 
 // Device/screen preference, not tied to which of the 5 dashboards is open or which
 // account is logged in — "I like a slim sidebar" doesn't vary per role or per user.
@@ -64,91 +33,6 @@ const pageTransitionVariants = {
   initial: { opacity: 0, y: 10 },
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -10 },
-};
-
-interface SidebarContentProps {
-  navItems: SidebarNavItem[];
-  roleLabel: string;
-  rail: boolean;
-  onItemClick?: () => void;
-}
-
-const SidebarContent: React.FC<SidebarContentProps> = ({ navItems, roleLabel, rail, onItemClick }) => {
-  const location = useLocation();
-
-  return (
-  <>
-    <Toolbar sx={{ gap: 1.25, py: 2.25, px: rail ? 1.5 : 2.5, justifyContent: rail ? "center" : "flex-start" }}>
-      <Box
-        sx={{
-          width: 38,
-          height: 38,
-          borderRadius: "11px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          bgcolor: "primary.main",
-          color: "primary.contrastText",
-          flexShrink: 0,
-        }}
-      >
-        <FavoriteIcon fontSize="small" />
-      </Box>
-      {!rail && (
-        <Box minWidth={0}>
-          {/* component="span": persistent chrome repeated on every authenticated page,
-              not this page's own content heading — kept out of the h1-h6 outline so each
-              page's own <h1> is the first heading a screen reader encounters. */}
-          <Typography variant="subtitle1" component="span" fontWeight={800} lineHeight={1.1} noWrap>
-            ElderHive
-          </Typography>
-          <Typography variant="caption" color="text.secondary" noWrap display="block">
-            {roleLabel}
-          </Typography>
-        </Box>
-      )}
-    </Toolbar>
-    <Divider />
-    <List sx={{ px: rail ? 1 : 1.5, py: 2, display: "flex", flexDirection: "column", gap: 0.5 }}>
-      {navItems.map((item) => {
-        // Computed manually (not via NavLink's own auto-applied "active" class) — the
-        // same approach ElderSphere's Sidebar uses, since relying on that class making it
-        // through MUI's styled-component layer intact is less certain than just checking
-        // the current location directly.
-        const isActive = item.end ? location.pathname === item.path : location.pathname.startsWith(item.path);
-        const button = (
-          <ListItemButton
-            component={NavLink}
-            to={item.path}
-            end={item.end}
-            onClick={onItemClick}
-            sx={{
-              borderRadius: "12px",
-              minHeight: 46,
-              justifyContent: rail ? "center" : "flex-start",
-              px: rail ? 1 : 1.75,
-              ...(isActive && {
-                bgcolor: "primary.main",
-                color: "primary.contrastText",
-                "& .MuiListItemIcon-root": { color: "inherit" },
-              }),
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: rail ? "auto" : 38, "& svg": { fontSize: 21 } }}>{item.icon}</ListItemIcon>
-            {!rail && <ListItemText primary={item.label} primaryTypographyProps={{ fontSize: 14, fontWeight: 600 }} />}
-          </ListItemButton>
-        );
-        return rail ? (
-          <Tooltip key={item.path} title={item.label} placement="right" arrow>
-            {button}
-          </Tooltip>
-        ) : (
-          <React.Fragment key={item.path}>{button}</React.Fragment>
-        );
-      })}
-    </List>
-  </>
-  );
 };
 
 // Shared chrome for every authenticated shell (Super Admin / Admin / Caretaker / Family /
@@ -187,8 +71,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ navItems, roleLabel }
   }, [collapsed]);
 
   // Mobile's temporary drawer never collapses to a rail — a phone-width overlay has no
-  // "docked rail" affordance to shrink to, so everything downstream reads `rail`, not the
-  // raw `collapsed` state, so it can't do so by accident.
+  // "docked rail" affordance to shrink to.
   const rail = collapsed && !isMobile;
   const sidebarWidth = rail ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH;
 
@@ -214,34 +97,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ navItems, roleLabel }
           passing roleLabel + navItems the same way ElderSphere's does. */}
 
       {isMobile ? (
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={() => setMobileOpen(false)}
-          ModalProps={{ keepMounted: true }}
-          sx={{ "& .MuiDrawer-paper": { width: SIDEBAR_WIDTH, boxSizing: "border-box" } }}
-        >
-          <SidebarContent navItems={navItems} roleLabel={roleLabel} rail={false} onItemClick={() => setMobileOpen(false)} />
-        </Drawer>
+        <Sidebar
+          navItems={navItems}
+          roleLabel={roleLabel}
+          isMobile
+          mobileOpen={mobileOpen}
+          onMobileClose={() => setMobileOpen(false)}
+        />
       ) : (
         <Box sx={{ position: "relative", flexShrink: 0, width: sidebarWidth, transition: "width 0.2s ease" }}>
-          <Drawer
-            variant="permanent"
-            sx={{
-              width: sidebarWidth,
-              flexShrink: 0,
-              [`& .MuiDrawer-paper`]: {
-                width: sidebarWidth,
-                boxSizing: "border-box",
-                borderRight: "1px solid",
-                borderColor: "divider",
-                overflowX: "hidden",
-                transition: "width 0.2s ease",
-              },
-            }}
-          >
-            <SidebarContent navItems={navItems} roleLabel={roleLabel} rail={rail} />
-          </Drawer>
+          <Sidebar navItems={navItems} roleLabel={roleLabel} collapsed={collapsed} />
           {/* Floating edge tab, half on/half off the drawer's border. */}
           <Tooltip title={rail ? "Expand sidebar" : "Collapse sidebar"} placement="right">
             <IconButton

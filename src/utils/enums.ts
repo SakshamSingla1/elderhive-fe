@@ -19,3 +19,20 @@ export const UserStatusEnum = {
   SUSPENDED: "SUSPENDED",
 } as const;
 export type UserStatusEnum = (typeof UserStatusEnum)[keyof typeof UserStatusEnum];
+
+// Must stay in sync with com.elderhive.enums.RoleStatusEnum (backend) — needed to type
+// useRoleService.ts's RoleResponse/RoleRequest.
+export const RoleStatusEnum = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+  DELETED: "DELETED",
+} as const;
+export type RoleStatusEnum = (typeof RoleStatusEnum)[keyof typeof RoleStatusEnum];
+
+// Must stay in sync with com.elderhive.enums.NavLinkStatusEnum (backend) — needed to type
+// useNavLinkService.ts's NavLinkResponse/NavLinkRequest.
+export const NavLinkStatusEnum = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+} as const;
+export type NavLinkStatusEnum = (typeof NavLinkStatusEnum)[keyof typeof NavLinkStatusEnum];
