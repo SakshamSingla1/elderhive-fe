@@ -8,6 +8,11 @@ import { UserTypeEnum } from "../utils/enums";
 
 const PlaceholderDashboardPage = lazy(() => import("../components/pages/Dashboard/PlaceholderDashboard.page"));
 const PlatformSettingsPage = lazy(() => import("../components/pages/Admin/PlatformSettings.page"));
+const ListingColorThemePage = lazy(() => import("../components/pages/ColorTheme/ListingColorTheme.page"));
+const AddColorThemePage = lazy(() => import("../components/pages/ColorTheme/AddColorTheme.page"));
+const EditColorThemePage = lazy(() => import("../components/pages/ColorTheme/EditColorTheme.page"));
+const ViewColorThemePage = lazy(() => import("../components/pages/ColorTheme/ViewColorTheme.page"));
+const AccountSettingsPage = lazy(() => import("../components/pages/Shared/AccountSettings.page"));
 
 const LoadingFallback: React.FC = () => (
   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
@@ -51,6 +56,23 @@ const AdminRoutes: React.FC = () => {
             path="platform-settings"
             element={isSuperAdmin ? <PlatformSettingsPage /> : <Navigate to="/admin/dashboard" replace />}
           />
+          {/* Listing/View are open to both roles (ColorThemeController's GETs are just
+              isAuthenticated()); Add/Edit are SUPER_ADMIN-only, same reasoning and same
+              redirect-not-render pattern as platform-settings above — matches
+              ColorThemeController's hasRole('SUPER_ADMIN') on POST/PUT (Prompt 43). */}
+          <Route path="color-themes" element={<ListingColorThemePage />} />
+          <Route
+            path="color-themes/new"
+            element={isSuperAdmin ? <AddColorThemePage /> : <Navigate to="/admin/color-themes" replace />}
+          />
+          <Route
+            path="color-themes/:id/edit"
+            element={isSuperAdmin ? <EditColorThemePage /> : <Navigate to="/admin/color-themes" replace />}
+          />
+          <Route path="color-themes/:id" element={<ViewColorThemePage />} />
+          {/* Every role's shared "pick your theme" entry point (Prompt 51) — reached via
+              DashboardLayout's account menu, not the DB-driven sidebar. */}
+          <Route path="account-settings" element={<AccountSettingsPage />} />
           <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
         </Route>
       </Routes>

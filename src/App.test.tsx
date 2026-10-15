@@ -206,6 +206,122 @@ describe('App', () => {
       expect(screen.queryByRole('heading', { name: 'Platform Settings' })).not.toBeInTheDocument();
     });
 
+    it('a SUPER_ADMIN can reach /admin/color-themes and sees Add Theme', async () => {
+      seedCachedUser(UserTypeEnum.SUPER_ADMIN);
+      mockedRequest.mockImplementation(async (method: string, url: string) => {
+        if (method === 'POST' && url === '/auth/refresh') return undefined;
+        if (method === 'GET' && url === '/nav-links/me') return [];
+        if (method === 'GET' && url === '/api/v1/color-themes') {
+          return { content: [], totalElements: 0, totalPages: 0, number: 0, size: 9, first: true, last: true, numberOfElements: 0, empty: true };
+        }
+        throw new Error(`Unexpected request: ${method} ${url}`);
+      });
+
+      render(
+        <MemoryRouter initialEntries={['/admin/color-themes']}>
+          <AuthenticatedUserProvider>
+            <App />
+          </AuthenticatedUserProvider>
+        </MemoryRouter>
+      );
+
+      expect(await screen.findByText('Color Themes')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Add Theme' })).toBeInTheDocument();
+    });
+
+    it('a curated ADMIN can reach /admin/color-themes but never sees Add Theme', async () => {
+      seedCachedUser(UserTypeEnum.ADMIN);
+      mockedRequest.mockImplementation(async (method: string, url: string) => {
+        if (method === 'POST' && url === '/auth/refresh') return undefined;
+        if (method === 'GET' && url === '/nav-links/me') return [];
+        if (method === 'GET' && url === '/api/v1/color-themes') {
+          return { content: [], totalElements: 0, totalPages: 0, number: 0, size: 9, first: true, last: true, numberOfElements: 0, empty: true };
+        }
+        throw new Error(`Unexpected request: ${method} ${url}`);
+      });
+
+      render(
+        <MemoryRouter initialEntries={['/admin/color-themes']}>
+          <AuthenticatedUserProvider>
+            <App />
+          </AuthenticatedUserProvider>
+        </MemoryRouter>
+      );
+
+      expect(await screen.findByText('Color Themes')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Add Theme' })).not.toBeInTheDocument();
+    });
+
+    it('an ADMIN hitting /admin/color-themes/new directly is redirected back to the listing', async () => {
+      seedCachedUser(UserTypeEnum.ADMIN);
+      mockedRequest.mockImplementation(async (method: string, url: string) => {
+        if (method === 'POST' && url === '/auth/refresh') return undefined;
+        if (method === 'GET' && url === '/nav-links/me') return [];
+        if (method === 'GET' && url === '/api/v1/color-themes') {
+          return { content: [], totalElements: 0, totalPages: 0, number: 0, size: 9, first: true, last: true, numberOfElements: 0, empty: true };
+        }
+        throw new Error(`Unexpected request: ${method} ${url}`);
+      });
+
+      render(
+        <MemoryRouter initialEntries={['/admin/color-themes/new']}>
+          <AuthenticatedUserProvider>
+            <App />
+          </AuthenticatedUserProvider>
+        </MemoryRouter>
+      );
+
+      expect(await screen.findByText('Color Themes')).toBeInTheDocument();
+      expect(screen.queryByText('Create Color Theme')).not.toBeInTheDocument();
+    });
+
+    it('a SUPER_ADMIN can reach /admin/color-themes/new', async () => {
+      seedCachedUser(UserTypeEnum.SUPER_ADMIN);
+      mockedRequest.mockImplementation(async (method: string, url: string) => {
+        if (method === 'POST' && url === '/auth/refresh') return undefined;
+        if (method === 'GET' && url === '/nav-links/me') return [];
+        throw new Error(`Unexpected request: ${method} ${url}`);
+      });
+
+      render(
+        <MemoryRouter initialEntries={['/admin/color-themes/new']}>
+          <AuthenticatedUserProvider>
+            <App />
+          </AuthenticatedUserProvider>
+        </MemoryRouter>
+      );
+
+      expect(await screen.findByText('Create Color Theme')).toBeInTheDocument();
+    });
+
+    it.each([
+      ['/admin/account-settings', UserTypeEnum.SUPER_ADMIN],
+      ['/caretaker/account-settings', UserTypeEnum.CARETAKER],
+      ['/elder/account-settings', UserTypeEnum.ELDER],
+      ['/family/account-settings', UserTypeEnum.FAMILY_MEMBER],
+    ])('every role (here: %s) can reach its own account-settings "pick your theme" entry point', async (path, role) => {
+      seedCachedUser(role);
+      mockedRequest.mockImplementation(async (method: string, url: string) => {
+        if (method === 'POST' && url === '/auth/refresh') return undefined;
+        if (method === 'GET' && url === '/nav-links/me') return [];
+        if (method === 'GET' && url === '/api/v1/color-themes') {
+          return { content: [], totalElements: 0, totalPages: 0, number: 0, size: 9, first: true, last: true, numberOfElements: 0, empty: true };
+        }
+        throw new Error(`Unexpected request: ${method} ${url}`);
+      });
+
+      render(
+        <MemoryRouter initialEntries={[path]}>
+          <AuthenticatedUserProvider>
+            <App />
+          </AuthenticatedUserProvider>
+        </MemoryRouter>
+      );
+
+      expect(await screen.findByText('Account Settings')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Add Theme' })).not.toBeInTheDocument();
+    });
+
     it('still resolves /admin/login to the Administrator Access page, not the admin shell (route-ranking check)', () => {
       render(
         <MemoryRouter initialEntries={['/admin/login']}>

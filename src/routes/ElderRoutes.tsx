@@ -5,6 +5,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 
 const PlaceholderDashboardPage = lazy(() => import("../components/pages/Dashboard/PlaceholderDashboard.page"));
+const AccountSettingsPage = lazy(() => import("../components/pages/Shared/AccountSettings.page"));
 
 const LoadingFallback: React.FC = () => (
   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
@@ -29,6 +30,9 @@ const ElderRoutes: React.FC = () => {
         <Route element={<DashboardLayout navItems={navItems} roleLabel={ROLE_LABEL} />}>
           <Route index element={<Navigate to="/elder/dashboard" replace />} />
           <Route path="dashboard" element={<PlaceholderDashboardPage roleLabel={ROLE_LABEL} />} />
+          {/* Every role's shared "pick your theme" entry point (Prompt 51) — reached via
+              DashboardLayout's account menu, not the (currently empty) DB-driven sidebar. */}
+          <Route path="account-settings" element={<AccountSettingsPage />} />
           <Route path="*" element={<Navigate to="/elder/dashboard" replace />} />
         </Route>
       </Routes>

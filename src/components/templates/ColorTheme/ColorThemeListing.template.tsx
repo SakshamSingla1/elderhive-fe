@@ -39,6 +39,11 @@ interface ColorThemeListingTemplateProps {
    *  not built yet) can refetch its current page. */
   onRefresh?: () => void;
   isLoading?: boolean;
+  /** Forces "Add Theme" off and passes the same override down to every ColorCard,
+   *  regardless of role - used by the non-admin "pick your theme" entry point
+   *  (Shared/AccountSettings.page.tsx). Defaults to true (defer to the SUPER_ADMIN
+   *  check), matching the admin listing page. */
+  allowMutations?: boolean;
 }
 
 /**
@@ -62,12 +67,13 @@ const ColorThemeListingTemplate: React.FC<ColorThemeListingTemplateProps> = ({
   onPageChange,
   onRefresh,
   isLoading = false,
+  allowMutations = true,
 }) => {
   const navigate = useNavigate();
   const { activeThemeName, isPreviewActive, resetTheme } = useTheme();
   const { deleteColorTheme } = useColorThemeService();
   const { user } = useAuthenticatedUser();
-  const isSuperAdmin = user?.primaryRole === UserTypeEnum.SUPER_ADMIN;
+  const isSuperAdmin = allowMutations && user?.primaryRole === UserTypeEnum.SUPER_ADMIN;
 
   const [idPendingDelete, setIdPendingDelete] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -137,7 +143,7 @@ const ColorThemeListingTemplate: React.FC<ColorThemeListingTemplateProps> = ({
         <>
           <Box sx={{ display: "grid", gridTemplateColumns: GRID_COLUMNS, gap: 3, mb: 4 }}>
             {colorThemes.map((theme) => (
-              <ColorCard key={theme.id} colorTheme={theme} onDelete={(id) => setIdPendingDelete(id)} />
+              <ColorCard key={theme.id} colorTheme={theme} onDelete={(id) => setIdPendingDelete(id)} allowMutations={allowMutations} />
             ))}
           </Box>
 

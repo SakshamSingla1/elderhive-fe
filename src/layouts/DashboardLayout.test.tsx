@@ -142,4 +142,24 @@ describe("DashboardLayout", () => {
 
     expect(await screen.findByText("elder@example.com")).toBeInTheDocument();
   });
+
+  it("Account Settings navigates to <rolePrefix>/account-settings, derived from the current URL", async () => {
+    const user = userEvent.setup();
+    mockAuth();
+    render(
+      <MemoryRouter initialEntries={["/elder/dashboard"]}>
+        <Routes>
+          <Route path="/elder" element={<DashboardLayout navItems={navItems} roleLabel="Elder" />}>
+            <Route path="dashboard" element={<div>Dashboard content</div>} />
+            <Route path="account-settings" element={<div>Account settings content</div>} />
+          </Route>
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await user.click(screen.getByRole("button", { name: "Open account menu" }));
+    await user.click(await screen.findByText("Account Settings"));
+
+    expect(await screen.findByText("Account settings content")).toBeInTheDocument();
+  });
 });

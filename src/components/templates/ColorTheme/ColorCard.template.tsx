@@ -13,6 +13,12 @@ import { getErrorMessage } from "../../../utils/helper";
 interface ColorCardProps {
   colorTheme: ColorThemeResponse;
   onDelete?: (id: number) => void;
+  /** Forces edit/delete off regardless of role - used by the non-admin "pick your
+   *  theme" entry point (Shared/AccountSettings.page.tsx), which reuses this same card
+   *  for every role including a SUPER_ADMIN viewing their OWN account settings, not the
+   *  admin theme-management surface. Defaults to true (defer to the SUPER_ADMIN check
+   *  below), matching every other existing caller. */
+  allowMutations?: boolean;
 }
 
 function findShadeColor(theme: ColorThemeResponse, needle: string): string | undefined {
@@ -58,12 +64,12 @@ function deriveThemeColors(theme: ColorThemeResponse): ThemeColors {
  * currently being previewed (isPreviewActive + activeThemeName, the lighter mechanism
  * Apply also drives for instant feedback before the save round-trip resolves).
  */
-const ColorCard: React.FC<ColorCardProps> = ({ colorTheme, onDelete }) => {
+const ColorCard: React.FC<ColorCardProps> = ({ colorTheme, onDelete, allowMutations = true }) => {
   const navigate = useNavigate();
   const { activeThemeName, activeColorTheme, isPreviewActive, setActiveTheme, resetTheme } = useTheme();
   const userThemeService = useUserThemeService();
   const { user } = useAuthenticatedUser();
-  const isSuperAdmin = user?.primaryRole === UserTypeEnum.SUPER_ADMIN;
+  const isSuperAdmin = allowMutations && user?.primaryRole === UserTypeEnum.SUPER_ADMIN;
 
   const [copiedColor, setCopiedColor] = useState<string | null>(null);
   const [isApplying, setIsApplying] = useState(false);

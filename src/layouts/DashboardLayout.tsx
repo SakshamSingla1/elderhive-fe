@@ -3,7 +3,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AppBar, Avatar, Box, Divider, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { AnimatePresence, motion } from "framer-motion";
-import { FiChevronLeft, FiChevronRight, FiLogOut, FiMenu } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiLogOut, FiMenu, FiSettings } from "react-icons/fi";
 import Sidebar, { SIDEBAR_WIDTH, SIDEBAR_WIDTH_COLLAPSED, type SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
 
@@ -78,14 +78,20 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ navItems, roleLabel }
     navigate("/login");
   };
 
-  const pageTitle =
-    location.pathname
-      .split("/")
-      .filter(Boolean)
-      .slice(1)
-      .join(" / ")
-      .split("-")
-      .join(" ") || "Dashboard";
+  const pathSegments = location.pathname.split("/").filter(Boolean);
+  // First segment is always this shell's own role prefix ("admin"/"caretaker"/"elder"/
+  // "family") regardless of which of the 5 roles is logged in — used below to reach
+  // the shared Account Settings page without this component needing a dedicated prop
+  // for it (every route shell already mounts it at "<rolePrefix>/account-settings",
+  // Prompt 51).
+  const rolePrefix = pathSegments[0];
+
+  const handleAccountSettings = () => {
+    setAccountMenuAnchor(null);
+    navigate(`/${rolePrefix}/account-settings`);
+  };
+
+  const pageTitle = pathSegments.slice(1).join(" / ").split("-").join(" ") || "Dashboard";
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -173,6 +179,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ navItems, roleLabel }
                 </Typography>
               </Box>
               <Divider />
+              <MenuItem onClick={handleAccountSettings}>
+                <FiSettings size={18} style={{ marginRight: 12 }} /> Account Settings
+              </MenuItem>
               <MenuItem onClick={handleLogout}>
                 <FiLogOut size={18} style={{ marginRight: 12 }} /> Sign out
               </MenuItem>
