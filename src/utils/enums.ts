@@ -36,3 +36,11 @@ export const NavLinkStatusEnum = {
   INACTIVE: "INACTIVE",
 } as const;
 export type NavLinkStatusEnum = (typeof NavLinkStatusEnum)[keyof typeof NavLinkStatusEnum];
+
+// Must stay in sync with com.elderhive.enums.ColorThemeStatusEnum (backend) — needed to
+// type useColorThemeService.ts's ColorThemeResponse/ColorThemePayload.
+export const ColorThemeStatusEnum = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+} as const;
+export type ColorThemeStatusEnum = (typeof ColorThemeStatusEnum)[keyof typeof ColorThemeStatusEnum];
