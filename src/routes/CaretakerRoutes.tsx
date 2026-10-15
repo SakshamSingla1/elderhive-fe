@@ -27,9 +27,9 @@ const CaretakerRoutes: React.FC = () => {
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
         <Route element={<DashboardLayout navItems={navItems} roleLabel={ROLE_LABEL} />}>
-          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route index element={<Navigate to="/caretaker/dashboard" replace />} />
           <Route path="dashboard" element={<PlaceholderDashboardPage roleLabel={ROLE_LABEL} />} />
-          <Route path="*" element={<Navigate to="dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/caretaker/dashboard" replace />} />
         </Route>
       </Routes>
     </Suspense>

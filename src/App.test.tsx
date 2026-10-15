@@ -166,6 +166,46 @@ describe('App', () => {
       expect(await screen.findByRole('heading', { name: 'Elder Dashboard' })).toBeInTheDocument();
     });
 
+    it('a SUPER_ADMIN can reach /admin/platform-settings', async () => {
+      seedCachedUser(UserTypeEnum.SUPER_ADMIN);
+      mockedRequest.mockImplementation(async (method: string, url: string) => {
+        if (method === 'POST' && url === '/auth/refresh') return undefined;
+        if (method === 'GET' && url === '/nav-links/me') return [];
+        if (method === 'GET' && url === '/meta-configs') return [];
+        throw new Error(`Unexpected request: ${method} ${url}`);
+      });
+
+      render(
+        <MemoryRouter initialEntries={['/admin/platform-settings']}>
+          <AuthenticatedUserProvider>
+            <App />
+          </AuthenticatedUserProvider>
+        </MemoryRouter>
+      );
+
+      expect(await screen.findByRole('heading', { name: 'Platform Settings' })).toBeInTheDocument();
+    });
+
+    it('an ADMIN hitting /admin/platform-settings is redirected back to the admin dashboard', async () => {
+      seedCachedUser(UserTypeEnum.ADMIN);
+      mockedRequest.mockImplementation(async (method: string, url: string) => {
+        if (method === 'POST' && url === '/auth/refresh') return undefined;
+        if (method === 'GET' && url === '/nav-links/me') return [];
+        throw new Error(`Unexpected request: ${method} ${url}`);
+      });
+
+      render(
+        <MemoryRouter initialEntries={['/admin/platform-settings']}>
+          <AuthenticatedUserProvider>
+            <App />
+          </AuthenticatedUserProvider>
+        </MemoryRouter>
+      );
+
+      expect(await screen.findByRole('heading', { name: 'Admin Dashboard' })).toBeInTheDocument();
+      expect(screen.queryByRole('heading', { name: 'Platform Settings' })).not.toBeInTheDocument();
+    });
+
     it('still resolves /admin/login to the Administrator Access page, not the admin shell (route-ranking check)', () => {
       render(
         <MemoryRouter initialEntries={['/admin/login']}>

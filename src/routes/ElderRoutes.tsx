@@ -27,9 +27,9 @@ const ElderRoutes: React.FC = () => {
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
         <Route element={<DashboardLayout navItems={navItems} roleLabel={ROLE_LABEL} />}>
-          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route index element={<Navigate to="/elder/dashboard" replace />} />
           <Route path="dashboard" element={<PlaceholderDashboardPage roleLabel={ROLE_LABEL} />} />
-          <Route path="*" element={<Navigate to="dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/elder/dashboard" replace />} />
         </Route>
       </Routes>
     </Suspense>
