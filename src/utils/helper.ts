@@ -1,3 +1,5 @@
+import dayjs from "dayjs";
+
 // Extracts a human-readable message from a failed services/index.ts request<T>() call.
 // The backend's GlobalExceptionHandler always sets ResponseModel.message on a failure
 // response, so that's checked first; falls back to the raw Error's own message, then to
@@ -25,4 +27,13 @@ export function replaceUrlParams(url: string, params: Record<string, string | nu
     result = result.replace(`:${key}`, String(value));
   }
   return result;
+}
+
+// Formats a backend LocalDateTime ISO string (e.g. Notification.createdAt) for display —
+// first use of dayjs for plain read-only formatting (the existing dependency is otherwise
+// only pulled in by @mui/x-date-pickers today).
+export function formatDateTime(isoString: string | undefined | null): string {
+  if (!isoString) return "";
+  const parsed = dayjs(isoString);
+  return parsed.isValid() ? parsed.format("MMM D, YYYY h:mm A") : "";
 }

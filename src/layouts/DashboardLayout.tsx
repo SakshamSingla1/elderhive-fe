@@ -5,6 +5,7 @@ import { useTheme } from "@mui/material/styles";
 import { AnimatePresence, motion } from "framer-motion";
 import { FiChevronLeft, FiChevronRight, FiLogOut, FiMenu, FiSettings } from "react-icons/fi";
 import Sidebar, { SIDEBAR_WIDTH, SIDEBAR_WIDTH_COLLAPSED, type SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
+import NotificationBell from "../components/molecules/NotificationBell/NotificationBell";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
 
 export type { SidebarNavItem };
@@ -164,9 +165,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ navItems, roleLabel }
             {/* TODO (later phase): command palette trigger (Cmd+K quick nav), mirroring
                 ElderSphere's CommandPalette — reuse this shell's own navItems so it can
                 never offer a destination this role can't actually reach. */}
-            {/* TODO (later phase): notification bell, mirroring ElderSphere's
-                NotificationBell — wire up once Notification/NotificationDeliveryLog
-                endpoints exist. */}
+            <NotificationBell />
             <IconButton onClick={(e) => setAccountMenuAnchor(e.currentTarget)} aria-label="Open account menu">
               <Avatar sx={{ width: 36, height: 36, fontSize: 15 }}>
                 {user?.email?.[0]?.toUpperCase() ?? "?"}

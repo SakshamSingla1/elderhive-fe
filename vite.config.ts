@@ -31,6 +31,7 @@ export default defineConfig({
           'vendor-datepickers': ['@mui/x-date-pickers'],
           'vendor-motion': ['framer-motion'],
           'vendor-forms': ['formik', 'yup'],
+          'vendor-realtime': ['@stomp/stompjs', 'sockjs-client'],
         },
       },
     },

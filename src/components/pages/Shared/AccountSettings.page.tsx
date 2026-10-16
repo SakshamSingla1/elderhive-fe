@@ -1,6 +1,7 @@
 import React from "react";
 import { Alert, Box, Typography } from "@mui/material";
 import ColorThemeListingTemplate from "../../templates/ColorTheme/ColorThemeListing.template";
+import NotificationPreferences from "../../molecules/NotificationPreferences/NotificationPreferences";
 import { useColorThemeListing } from "../../../hooks/useColorThemeListing";
 
 /**
@@ -10,12 +11,13 @@ import { useColorThemeListing } from "../../../hooks/useColorThemeListing";
  * own nav gets built. Reached via DashboardLayout's shared account menu instead, so it
  * works identically across all five roles without depending on any seeded NavLink row.
  *
- * Today this holds only the "pick your theme" entry point this prompt asks for - a
- * read-only-mutation view of the full catalog (view + apply only, no add/edit/delete)
- * since every authenticated user can apply a theme to themselves (UserThemeController,
- * Prompt 44) but theme AUTHORING stays an admin-only concern (ColorThemeController,
- * Prompt 43), handled by the separate /admin/color-themes pages instead. Later prompts
- * can add more sections here (profile, notifications, etc.) without a new page or route.
+ * Theme is a read-only-mutation view of the full catalog (view + apply only, no
+ * add/edit/delete) since every authenticated user can apply a theme to themselves
+ * (UserThemeController, Prompt 44) but theme AUTHORING stays an admin-only concern
+ * (ColorThemeController, Prompt 43), handled by the separate /admin/color-themes pages
+ * instead. Notification Preferences (Prompt 60) is the next section added here, exactly
+ * the way this page's own original comment anticipated — later prompts can keep adding
+ * more sections (profile, etc.) without a new page or route.
  */
 const AccountSettingsPage: React.FC = () => {
   const { colorThemes, page, setPage, totalPages, isLoading, loadError, refetch } = useColorThemeListing();
@@ -47,6 +49,11 @@ const AccountSettingsPage: React.FC = () => {
         isLoading={isLoading}
         allowMutations={false}
       />
+
+      <Typography variant="h6" fontWeight={700} mt={4} mb={1}>
+        Notifications
+      </Typography>
+      <NotificationPreferences />
     </Box>
   );
 };

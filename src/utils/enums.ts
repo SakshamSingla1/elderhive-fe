@@ -44,3 +44,13 @@ export const ColorThemeStatusEnum = {
   INACTIVE: "INACTIVE",
 } as const;
 export type ColorThemeStatusEnum = (typeof ColorThemeStatusEnum)[keyof typeof ColorThemeStatusEnum];
+
+// Must stay in sync with com.elderhive.enums.NotificationTypeEnum (backend) — needed to
+// type useNotificationService.ts/useNotificationPreferenceService.ts's response shapes.
+export const NotificationTypeEnum = {
+  BOOKING: "BOOKING",
+  EMERGENCY: "EMERGENCY",
+  ACCOUNT: "ACCOUNT",
+  SYSTEM: "SYSTEM",
+} as const;
+export type NotificationTypeEnum = (typeof NotificationTypeEnum)[keyof typeof NotificationTypeEnum];
