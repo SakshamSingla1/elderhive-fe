@@ -54,3 +54,39 @@ export const NotificationTypeEnum = {
   SYSTEM: "SYSTEM",
 } as const;
 export type NotificationTypeEnum = (typeof NotificationTypeEnum)[keyof typeof NotificationTypeEnum];
+
+// Must stay in sync with com.elderhive.enums.GenderEnum (backend) — needed to type
+// useElderProfileService.ts's ElderProfileResponse/ElderProfileRequest.
+export const GenderEnum = {
+  MALE: "MALE",
+  FEMALE: "FEMALE",
+  OTHER: "OTHER",
+} as const;
+export type GenderEnum = (typeof GenderEnum)[keyof typeof GenderEnum];
+
+// Must stay in sync with com.elderhive.enums.CaretakerVerificationStatusEnum (backend) —
+// needed to type useCaretakerService.ts's CaretakerProfileResponse.
+export const CaretakerVerificationStatusEnum = {
+  PENDING: "PENDING",
+  VERIFIED: "VERIFIED",
+  REJECTED: "REJECTED",
+} as const;
+export type CaretakerVerificationStatusEnum = (typeof CaretakerVerificationStatusEnum)[keyof typeof CaretakerVerificationStatusEnum];
+
+// Must stay in sync with com.elderhive.enums.DocumentReviewStatusEnum (backend) — needed
+// to type useCaretakerService.ts's CaretakerVerificationDocumentResponse.
+export const DocumentReviewStatusEnum = {
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+} as const;
+export type DocumentReviewStatusEnum = (typeof DocumentReviewStatusEnum)[keyof typeof DocumentReviewStatusEnum];
+
+// Must stay in sync with com.elderhive.enums.LinkInviteStatusEnum (backend) — needed to
+// type useInviteService.ts's InviteResponse.
+export const LinkInviteStatusEnum = {
+  PENDING: "PENDING",
+  ACCEPTED: "ACCEPTED",
+  DECLINED: "DECLINED",
+} as const;
+export type LinkInviteStatusEnum = (typeof LinkInviteStatusEnum)[keyof typeof LinkInviteStatusEnum];

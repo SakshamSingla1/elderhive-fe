@@ -69,16 +69,21 @@ describe('App', () => {
   });
 
   describe('authenticated route shells', () => {
+    // Each role shell's sidebar is still backed by an empty GET /nav-links/me response
+    // (that endpoint only ever models the admin portal), but Prompt 69 appends a few
+    // static client-side nav items per role (its own route shell file) pointing at the
+    // real pages it now mounts - so the sidebar is no longer literally empty the way it
+    // was before those pages existed.
     it.each([
-      ['/elder/dashboard', 'Elder Dashboard'],
-      ['/caretaker/dashboard', 'Caretaker Dashboard'],
-      ['/family/dashboard', 'Family Dashboard'],
-    ])('a logged-in matching-role user lands on %s with its placeholder dashboard', async (path, expectedHeading) => {
+      ['/elder/dashboard', 'Elder Dashboard', 'My Profile'],
+      ['/caretaker/dashboard', 'Caretaker Dashboard', 'My Profile'],
+      ['/family/dashboard', 'Family Dashboard', 'Elder Profiles'],
+    ])('a logged-in matching-role user lands on %s with its placeholder dashboard', async (path, expectedHeading, expectedNavItem) => {
       const role = path.includes('elder') ? UserTypeEnum.ELDER : path.includes('caretaker') ? UserTypeEnum.CARETAKER : UserTypeEnum.FAMILY_MEMBER;
       seedCachedUser(role);
       mockedRequest.mockImplementation(async (method: string, url: string) => {
         if (method === 'POST' && url === '/auth/refresh') return undefined;
-        if (method === 'GET' && url === '/nav-links/me') return []; // near-empty sidebar for non-admin roles
+        if (method === 'GET' && url === '/nav-links/me') return []; // near-empty DB-driven sidebar for non-admin roles
         throw new Error(`Unexpected request: ${method} ${url}`);
       });
 
@@ -91,7 +96,7 @@ describe('App', () => {
       );
 
       expect(await screen.findByRole('heading', { name: expectedHeading })).toBeInTheDocument();
-      expect(screen.getByText('Nothing here yet.')).toBeInTheDocument();
+      expect(screen.getAllByText(expectedNavItem).length).toBeGreaterThan(0);
     });
 
     it('an ADMIN lands on the shared admin shell showing "Admin" as the roleLabel', async () => {
