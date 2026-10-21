@@ -128,3 +128,19 @@ export const DayOfWeekShortLabels: Record<DayOfWeekEnum, string> = {
   SATURDAY: "Sat",
   SUNDAY: "Sun",
 };
+
+// Must stay in sync with com.elderhive.enums.ServiceCategoryStatusEnum (backend) — needed
+// to type useServiceCategoryService.ts's ServiceCategoryResponse/ServiceCategoryPayload.
+export const ServiceCategoryStatusEnum = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+} as const;
+export type ServiceCategoryStatusEnum = (typeof ServiceCategoryStatusEnum)[keyof typeof ServiceCategoryStatusEnum];
+
+// Must stay in sync with com.elderhive.enums.ServiceOfferingStatusEnum (backend) — needed
+// to type useServiceOfferingService.ts's ServiceOfferingResponse/ServiceOfferingPayload.
+export const ServiceOfferingStatusEnum = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+} as const;
+export type ServiceOfferingStatusEnum = (typeof ServiceOfferingStatusEnum)[keyof typeof ServiceOfferingStatusEnum];

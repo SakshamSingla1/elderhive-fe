@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiCheckCircle } from "react-icons/fi";
+import { FiCheckCircle, FiShoppingBag, FiTag } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
@@ -18,12 +18,18 @@ const AccountSettingsPage = lazy(() => import("../components/pages/Shared/Accoun
 const NotificationsPage = lazy(() => import("../components/pages/Shared/Notifications.page"));
 const CaretakerVerificationPage = lazy(() => import("../components/pages/Admin/CaretakerVerification.page"));
 const CaretakerVerificationFormPage = lazy(() => import("../components/pages/Admin/CaretakerVerificationForm.page"));
+const ServiceCategoriesPage = lazy(() => import("../components/pages/Admin/ServiceCategories.page"));
+const ServiceCategoriesFormPage = lazy(() => import("../components/pages/Admin/ServiceCategoriesForm.page"));
+const ServicesPage = lazy(() => import("../components/pages/Admin/Services.page"));
+const ServicesFormPage = lazy(() => import("../components/pages/Admin/ServicesForm.page"));
 
 // NavLinkServiceImpl#getMine returns whatever's actually seeded for the admin portal
-// today, which doesn't include this page (Prompt 70's own addition) - appended
+// today, which doesn't include these pages (Prompt 70's/74's own additions) - appended
 // client-side the same way Prompt 69 did for the other three roles' real pages.
 const STATIC_NAV_ITEMS: SidebarNavItem[] = [
   { label: "Caretaker Verification", path: "/admin/caretaker-verification", icon: <FiCheckCircle size={18} />, navIndex: 50 },
+  { label: "Service Categories", path: "/admin/service-categories", icon: <FiTag size={18} />, navIndex: 51 },
+  { label: "Services", path: "/admin/services", icon: <FiShoppingBag size={18} />, navIndex: 52 },
 ];
 
 const LoadingFallback: React.FC = () => (
@@ -89,6 +95,16 @@ const AdminRoutes: React.FC = () => {
               just gets a 403 from the review action itself. */}
           <Route path="caretaker-verification" element={<CaretakerVerificationPage />} />
           <Route path="caretaker-verification/:id" element={<CaretakerVerificationFormPage />} />
+          {/* ServiceCategoryController/ServiceOfferingController's list (and, for
+              offerings, detail) GETs are isAuthenticated()-only (Prompt 73); mutations and
+              GET /service-categories/{id} stay SERVICE_MANAGE-gated server-side only, same
+              documented no-FE-permission-check limitation as caretaker-verification above. */}
+          <Route path="service-categories" element={<ServiceCategoriesPage />} />
+          <Route path="service-categories/new" element={<ServiceCategoriesFormPage />} />
+          <Route path="service-categories/:id" element={<ServiceCategoriesFormPage />} />
+          <Route path="services" element={<ServicesPage />} />
+          <Route path="services/new" element={<ServicesFormPage />} />
+          <Route path="services/:id" element={<ServicesFormPage />} />
           {/* Every role's shared "pick your theme" entry point (Prompt 51) — reached via
               DashboardLayout's account menu, not the DB-driven sidebar. */}
           <Route path="account-settings" element={<AccountSettingsPage />} />

@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiMail, FiUsers } from "react-icons/fi";
+import { FiMail, FiShoppingBag, FiUsers } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import type { SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
@@ -13,6 +13,7 @@ const ElderProfilesPage = lazy(() => import("../components/pages/Family/ElderPro
 const ElderProfilesFormPage = lazy(() => import("../components/pages/Family/ElderProfiles/ElderProfilesForm.page"));
 const LinkElderProfilePage = lazy(() => import("../components/pages/Family/ElderProfiles/LinkElderProfile.page"));
 const InvitesPage = lazy(() => import("../components/pages/Family/Invites.page"));
+const BrowseServicesPage = lazy(() => import("../components/pages/Family/BrowseServices.page"));
 
 const LoadingFallback: React.FC = () => (
   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
@@ -30,6 +31,7 @@ const ROLE_LABEL = "Family";
 const STATIC_NAV_ITEMS: SidebarNavItem[] = [
   { label: "Elder Profiles", path: "/family/elder-profiles", icon: <FiUsers size={18} />, navIndex: 1 },
   { label: "Invites", path: "/family/invites", icon: <FiMail size={18} />, navIndex: 2 },
+  { label: "Browse Services", path: "/family/services", icon: <FiShoppingBag size={18} />, navIndex: 3 },
 ];
 
 const FamilyRoutes: React.FC = () => {
@@ -54,6 +56,7 @@ const FamilyRoutes: React.FC = () => {
           <Route path="elder-profiles/new" element={<ElderProfilesFormPage />} />
           <Route path="elder-profiles/:id" element={<ElderProfilesFormPage />} />
           <Route path="invites" element={<InvitesPage />} />
+          <Route path="services" element={<BrowseServicesPage />} />
           <Route path="*" element={<Navigate to="/family/dashboard" replace />} />
         </Route>
       </Routes>
