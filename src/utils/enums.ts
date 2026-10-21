@@ -90,3 +90,41 @@ export const LinkInviteStatusEnum = {
   DECLINED: "DECLINED",
 } as const;
 export type LinkInviteStatusEnum = (typeof LinkInviteStatusEnum)[keyof typeof LinkInviteStatusEnum];
+
+// Must stay in sync with com.elderhive.enums.DayOfWeekEnum (backend) — needed to type
+// useCaretakerService.ts's availability slot DTOs.
+export const DayOfWeekEnum = {
+  MONDAY: "MONDAY",
+  TUESDAY: "TUESDAY",
+  WEDNESDAY: "WEDNESDAY",
+  THURSDAY: "THURSDAY",
+  FRIDAY: "FRIDAY",
+  SATURDAY: "SATURDAY",
+  SUNDAY: "SUNDAY",
+} as const;
+export type DayOfWeekEnum = (typeof DayOfWeekEnum)[keyof typeof DayOfWeekEnum];
+
+// Calendar order (Monday -> Sunday) - CaretakerAvailabilityRepository's own
+// findByCaretakerIdOrderByDayOfWeekAscStartTimeAsc sorts by the day_of_week STRING column
+// alphabetically (FRIDAY, MONDAY, SATURDAY, ...), not calendar order, so
+// WeeklyAvailabilityView/Editor iterate this constant client-side instead of trusting
+// whatever order the backend returns.
+export const DAYS_OF_WEEK: DayOfWeekEnum[] = [
+  DayOfWeekEnum.MONDAY,
+  DayOfWeekEnum.TUESDAY,
+  DayOfWeekEnum.WEDNESDAY,
+  DayOfWeekEnum.THURSDAY,
+  DayOfWeekEnum.FRIDAY,
+  DayOfWeekEnum.SATURDAY,
+  DayOfWeekEnum.SUNDAY,
+];
+
+export const DayOfWeekShortLabels: Record<DayOfWeekEnum, string> = {
+  MONDAY: "Mon",
+  TUESDAY: "Tue",
+  WEDNESDAY: "Wed",
+  THURSDAY: "Thu",
+  FRIDAY: "Fri",
+  SATURDAY: "Sat",
+  SUNDAY: "Sun",
+};

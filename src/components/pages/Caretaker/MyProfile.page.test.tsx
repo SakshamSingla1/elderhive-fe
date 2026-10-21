@@ -29,14 +29,18 @@ describe("Caretaker MyProfile.page", () => {
   let createOrUpdate: ReturnType<typeof vi.fn>;
   let listVerificationDocuments: ReturnType<typeof vi.fn>;
   let uploadVerificationDocument: ReturnType<typeof vi.fn>;
+  let getAvailability: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     getMyProfile = vi.fn();
     createOrUpdate = vi.fn();
     listVerificationDocuments = vi.fn().mockResolvedValue([]);
     uploadVerificationDocument = vi.fn();
+    getAvailability = vi.fn().mockResolvedValue([]);
     mockedUseCaretakerService.mockReturnValue(
-      { getMyProfile, createOrUpdate, listVerificationDocuments, uploadVerificationDocument } as unknown as ReturnType<typeof useCaretakerService>
+      { getMyProfile, createOrUpdate, listVerificationDocuments, uploadVerificationDocument, getAvailability } as unknown as ReturnType<
+        typeof useCaretakerService
+      >
     );
     mockedUseFileService.mockReturnValue({ getDownloadUrl: (id: number) => `http://x/files/${id}/download` } as ReturnType<
       typeof useFileService
@@ -48,8 +52,17 @@ describe("Caretaker MyProfile.page", () => {
     render(<CaretakerMyProfilePage />);
 
     expect(await screen.findByRole("button", { name: "Create Profile" })).toBeInTheDocument();
-    // No profile id yet - the verification documents section doesn't render.
+    // No profile id yet - the verification documents and availability sections don't render.
     expect(screen.queryByText("Verification Documents")).not.toBeInTheDocument();
+    expect(screen.queryByText("Weekly Availability")).not.toBeInTheDocument();
+  });
+
+  it("renders the Weekly Availability editor once a profile exists, scoped to that profile's id", async () => {
+    getMyProfile.mockResolvedValue(PROFILE);
+    render(<CaretakerMyProfilePage />);
+
+    expect(await screen.findByText("Weekly Availability")).toBeInTheDocument();
+    await waitFor(() => expect(getAvailability).toHaveBeenCalledWith(10));
   });
 
   it("pre-fills the form, shows the verification status chip, and lists documents", async () => {

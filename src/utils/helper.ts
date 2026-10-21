@@ -1,3 +1,4 @@
+import { useCallback, useRef } from "react";
 import dayjs from "dayjs";
 
 // Extracts a human-readable message from a failed services/index.ts request<T>() call.
@@ -36,4 +37,24 @@ export function formatDateTime(isoString: string | undefined | null): string {
   if (!isoString) return "";
   const parsed = dayjs(isoString);
   return parsed.isValid() ? parsed.format("MMM D, YYYY h:mm A") : "";
+}
+
+/**
+ * Returns a stable, debounced wrapper around `callback` — each call resets a `delay`ms
+ * timer, so only the last call within any `delay`ms burst actually fires. Used by the
+ * search autocompletes (Prompt 70) to avoid firing a backend request on every keystroke.
+ * callbackRef keeps the wrapper's identity stable across renders (so effects/memos that
+ * depend on it don't re-run) while still always calling the LATEST closure passed in.
+ */
+export function useDebounce<T extends unknown[]>(callback: (...args: T) => void, delay: number): (...args: T) => void {
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const callbackRef = useRef(callback);
+  callbackRef.current = callback;
+  return useCallback(
+    (...args: T) => {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => callbackRef.current(...args), delay);
+    },
+    [delay]
+  );
 }

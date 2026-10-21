@@ -17,9 +17,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { FiFileText, FiUpload, FiUserCheck } from "react-icons/fi";
+import { FiCalendar, FiFileText, FiUpload, FiUserCheck } from "react-icons/fi";
 import TextField from "../../atoms/TextField/TextField";
 import Button from "../../atoms/Button/Button";
+import WeeklyAvailabilityEditor from "../../molecules/WeeklyAvailability/WeeklyAvailabilityEditor";
 import { useCaretakerService, type CaretakerProfileRequestDTO, type CaretakerVerificationDocumentDTO } from "../../../services/useCaretakerService";
 import { useFileService } from "../../../services/useFileService";
 import { CaretakerVerificationStatusEnum, DocumentReviewStatusEnum } from "../../../utils/enums";
@@ -296,6 +297,23 @@ const CaretakerMyProfilePage: React.FC = () => {
           </Stack>
         </CardContent>
       </Card>
+
+      {profileId && (
+        <Card variant="outlined" sx={{ mt: 3 }}>
+          <CardContent>
+            <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+              <FiCalendar size={18} />
+              <Typography variant="h6" fontWeight={700}>
+                Weekly Availability
+              </Typography>
+            </Stack>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Set the hours you're generally available each week.
+            </Typography>
+            <WeeklyAvailabilityEditor caretakerId={profileId} />
+          </CardContent>
+        </Card>
+      )}
 
       {profileId && (
         <Card variant="outlined" sx={{ mt: 3 }}>

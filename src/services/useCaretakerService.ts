@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { request } from ".";
 import { replaceUrlParams } from "../utils/helper";
 import type { PageResponse } from "../utils/types";
-import type { CaretakerVerificationStatusEnum, DocumentReviewStatusEnum } from "../utils/enums";
+import type { CaretakerVerificationStatusEnum, DayOfWeekEnum, DocumentReviewStatusEnum } from "../utils/enums";
 
 const CARETAKER_URLS = {
   BASE: "/api/v1/caretaker-profiles",
@@ -10,6 +10,10 @@ const CARETAKER_URLS = {
   BY_ID: "/api/v1/caretaker-profiles/:id",
   VERIFICATION_DOCUMENTS: "/api/v1/caretaker-profiles/:id/verification-documents",
   UPLOAD_VERIFICATION_DOCUMENT: "/api/v1/caretaker-profiles/me/verification-documents",
+  REVIEW_VERIFICATION_DOCUMENT: "/api/v1/caretaker-verification-documents/:id/review",
+  AVAILABILITY_FOR_CARETAKER: "/api/v1/caretaker-profiles/:id/availability",
+  ADD_AVAILABILITY: "/api/v1/caretaker-profiles/me/availability",
+  AVAILABILITY_SLOT: "/api/v1/caretaker-profiles/me/availability/:slotId",
 };
 
 // Mirrors com.elderhive.dtos.CaretakerProfile.CaretakerProfileResponse field-for-field.
@@ -58,6 +62,24 @@ export interface CaretakerVerificationDocumentDTO {
   createdAt?: string;
 }
 
+// Mirrors com.elderhive.dtos.CaretakerAvailability.CaretakerAvailabilityResponse.
+export interface CaretakerAvailabilitySlotDTO {
+  id: number;
+  caretakerId: number;
+  dayOfWeek: DayOfWeekEnum;
+  startTime: string;
+  endTime: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Mirrors com.elderhive.dtos.CaretakerAvailability.CaretakerAvailabilityRequest.
+export interface CaretakerAvailabilityRequestDTO {
+  dayOfWeek: DayOfWeekEnum;
+  startTime: string;
+  endTime: string;
+}
+
 export const useCaretakerService = () => {
   return useMemo(
     () => ({
@@ -77,6 +99,27 @@ export const useCaretakerService = () => {
       },
       listVerificationDocuments: (caretakerId: number) =>
         request<CaretakerVerificationDocumentDTO[]>("GET", replaceUrlParams(CARETAKER_URLS.VERIFICATION_DOCUMENTS, { id: caretakerId })),
+      // Admin-only in practice (CARETAKER_VERIFY-gated server-side, Prompt 65) - this
+      // project has no FE-side fine-grained-permission check yet (see AdminRoutes.tsx's
+      // own documented precedent), so a non-permitted admin simply gets a 403 from the
+      // backend when calling this, surfaced the same way any other failed request is.
+      reviewVerificationDocument: (documentId: number, reviewStatus: DocumentReviewStatusEnum) =>
+        request<CaretakerVerificationDocumentDTO>(
+          "PUT",
+          replaceUrlParams(CARETAKER_URLS.REVIEW_VERIFICATION_DOCUMENT, { id: documentId }),
+          { reviewStatus }
+        ),
+      // Per-row CRUD, not a replace-all list (CaretakerAvailabilityController, Prompt 66) -
+      // unlike ElderSphere's own reference, which models a caretaker's weekly schedule as
+      // one flat "submit the whole list" PUT.
+      getAvailability: (caretakerId: number) =>
+        request<CaretakerAvailabilitySlotDTO[]>("GET", replaceUrlParams(CARETAKER_URLS.AVAILABILITY_FOR_CARETAKER, { id: caretakerId })),
+      addAvailabilitySlot: (payload: CaretakerAvailabilityRequestDTO) =>
+        request<CaretakerAvailabilitySlotDTO>("POST", CARETAKER_URLS.ADD_AVAILABILITY, payload),
+      updateAvailabilitySlot: (slotId: number, payload: CaretakerAvailabilityRequestDTO) =>
+        request<CaretakerAvailabilitySlotDTO>("PUT", replaceUrlParams(CARETAKER_URLS.AVAILABILITY_SLOT, { slotId }), payload),
+      removeAvailabilitySlot: (slotId: number) =>
+        request<string>("DELETE", replaceUrlParams(CARETAKER_URLS.AVAILABILITY_SLOT, { slotId })),
     }),
     []
   );

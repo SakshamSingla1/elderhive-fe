@@ -1,10 +1,12 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
+import { FiCheckCircle } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
 import { UserTypeEnum } from "../utils/enums";
+import type { SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
 
 const PlaceholderDashboardPage = lazy(() => import("../components/pages/Dashboard/PlaceholderDashboard.page"));
 const PlatformSettingsPage = lazy(() => import("../components/pages/Admin/PlatformSettings.page"));
@@ -14,6 +16,15 @@ const EditColorThemePage = lazy(() => import("../components/pages/ColorTheme/Edi
 const ViewColorThemePage = lazy(() => import("../components/pages/ColorTheme/ViewColorTheme.page"));
 const AccountSettingsPage = lazy(() => import("../components/pages/Shared/AccountSettings.page"));
 const NotificationsPage = lazy(() => import("../components/pages/Shared/Notifications.page"));
+const CaretakerVerificationPage = lazy(() => import("../components/pages/Admin/CaretakerVerification.page"));
+const CaretakerVerificationFormPage = lazy(() => import("../components/pages/Admin/CaretakerVerificationForm.page"));
+
+// NavLinkServiceImpl#getMine returns whatever's actually seeded for the admin portal
+// today, which doesn't include this page (Prompt 70's own addition) - appended
+// client-side the same way Prompt 69 did for the other three roles' real pages.
+const STATIC_NAV_ITEMS: SidebarNavItem[] = [
+  { label: "Caretaker Verification", path: "/admin/caretaker-verification", icon: <FiCheckCircle size={18} />, navIndex: 50 },
+];
 
 const LoadingFallback: React.FC = () => (
   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
@@ -35,7 +46,7 @@ const AdminRoutes: React.FC = () => {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
-        <Route element={<DashboardLayout navItems={navItems} roleLabel={roleLabel} />}>
+        <Route element={<DashboardLayout navItems={[...navItems, ...STATIC_NAV_ITEMS]} roleLabel={roleLabel} />}>
           {/* Absolute targets, not relative ("dashboard") — a relative Navigate rendered
               from inside the "*" splat route resolves against the splat's OWN matched
               segment rather than replacing it, which compounds into a runaway
@@ -71,6 +82,13 @@ const AdminRoutes: React.FC = () => {
             element={isSuperAdmin ? <EditColorThemePage /> : <Navigate to="/admin/color-themes" replace />}
           />
           <Route path="color-themes/:id" element={<ViewColorThemePage />} />
+          {/* Open to both ADMIN and SUPER_ADMIN at the route level - the real gate
+              (CARETAKER_VERIFY) is enforced server-side only (Prompt 65's
+              @adminPermissionGuard), same documented limitation as the rest of this file:
+              no FE-side fine-grained-permission check exists yet. An admin who lacks it
+              just gets a 403 from the review action itself. */}
+          <Route path="caretaker-verification" element={<CaretakerVerificationPage />} />
+          <Route path="caretaker-verification/:id" element={<CaretakerVerificationFormPage />} />
           {/* Every role's shared "pick your theme" entry point (Prompt 51) — reached via
               DashboardLayout's account menu, not the DB-driven sidebar. */}
           <Route path="account-settings" element={<AccountSettingsPage />} />

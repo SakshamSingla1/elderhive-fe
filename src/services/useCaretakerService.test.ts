@@ -69,4 +69,36 @@ describe("useCaretakerService", () => {
     await result.current.listVerificationDocuments(7);
     expect(mockedRequest).toHaveBeenCalledWith("GET", "/api/v1/caretaker-profiles/7/verification-documents");
   });
+
+  it("reviewVerificationDocument hits PUT /api/v1/caretaker-verification-documents/:id/review with the review status", async () => {
+    const { result } = renderHook(() => useCaretakerService());
+    await result.current.reviewVerificationDocument(9, "APPROVED");
+    expect(mockedRequest).toHaveBeenCalledWith("PUT", "/api/v1/caretaker-verification-documents/9/review", { reviewStatus: "APPROVED" });
+  });
+
+  it("getAvailability hits GET /api/v1/caretaker-profiles/:id/availability", async () => {
+    const { result } = renderHook(() => useCaretakerService());
+    await result.current.getAvailability(7);
+    expect(mockedRequest).toHaveBeenCalledWith("GET", "/api/v1/caretaker-profiles/7/availability");
+  });
+
+  it("addAvailabilitySlot hits POST /api/v1/caretaker-profiles/me/availability with the payload", async () => {
+    const { result } = renderHook(() => useCaretakerService());
+    const payload = { dayOfWeek: "MONDAY" as const, startTime: "09:00", endTime: "17:00" };
+    await result.current.addAvailabilitySlot(payload);
+    expect(mockedRequest).toHaveBeenCalledWith("POST", "/api/v1/caretaker-profiles/me/availability", payload);
+  });
+
+  it("updateAvailabilitySlot hits PUT /api/v1/caretaker-profiles/me/availability/:slotId with the payload", async () => {
+    const { result } = renderHook(() => useCaretakerService());
+    const payload = { dayOfWeek: "TUESDAY" as const, startTime: "10:00", endTime: "18:00" };
+    await result.current.updateAvailabilitySlot(3, payload);
+    expect(mockedRequest).toHaveBeenCalledWith("PUT", "/api/v1/caretaker-profiles/me/availability/3", payload);
+  });
+
+  it("removeAvailabilitySlot hits DELETE /api/v1/caretaker-profiles/me/availability/:slotId", async () => {
+    const { result } = renderHook(() => useCaretakerService());
+    await result.current.removeAvailabilitySlot(3);
+    expect(mockedRequest).toHaveBeenCalledWith("DELETE", "/api/v1/caretaker-profiles/me/availability/3");
+  });
 });
