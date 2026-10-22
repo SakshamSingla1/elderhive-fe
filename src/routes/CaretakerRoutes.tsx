@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiUser } from "react-icons/fi";
+import { FiCalendar, FiUser } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import type { SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
@@ -10,6 +10,7 @@ const PlaceholderDashboardPage = lazy(() => import("../components/pages/Dashboar
 const AccountSettingsPage = lazy(() => import("../components/pages/Shared/AccountSettings.page"));
 const NotificationsPage = lazy(() => import("../components/pages/Shared/Notifications.page"));
 const MyProfilePage = lazy(() => import("../components/pages/Caretaker/MyProfile.page"));
+const BookingsPage = lazy(() => import("../components/pages/Caretaker/Bookings.page"));
 
 const LoadingFallback: React.FC = () => (
   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
@@ -26,6 +27,7 @@ const ROLE_LABEL = "Caretaker";
 // yet, giving this role actual sidebar navigation.
 const STATIC_NAV_ITEMS: SidebarNavItem[] = [
   { label: "My Profile", path: "/caretaker/my-profile", icon: <FiUser size={18} />, navIndex: 1 },
+  { label: "My Bookings", path: "/caretaker/bookings", icon: <FiCalendar size={18} />, navIndex: 2 },
 ];
 
 const CaretakerRoutes: React.FC = () => {
@@ -46,6 +48,7 @@ const CaretakerRoutes: React.FC = () => {
               outside-the-sidebar pattern as account-settings above. */}
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="my-profile" element={<MyProfilePage />} />
+          <Route path="bookings" element={<BookingsPage />} />
           <Route path="*" element={<Navigate to="/caretaker/dashboard" replace />} />
         </Route>
       </Routes>

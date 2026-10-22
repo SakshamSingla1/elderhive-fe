@@ -86,4 +86,26 @@ describe("useBookingService", () => {
     await result.current.getRecurringGroup("group-1");
     expect(mockedRequest).toHaveBeenCalledWith("GET", "/api/v1/bookings/recurring-group/group-1");
   });
+
+  it("getAll hits GET /api/v1/bookings with page/size defaults and no filters", async () => {
+    const { result } = renderHook(() => useBookingService());
+    await result.current.getAll();
+    expect(mockedRequest).toHaveBeenCalledWith("GET", "/api/v1/bookings", null, {
+      params: { page: 0, size: 20, familyUserId: undefined, caretakerId: undefined, status: undefined, sort: "scheduledDate,desc" },
+    });
+  });
+
+  it("getAll passes every filter through as query params", async () => {
+    const { result } = renderHook(() => useBookingService());
+    await result.current.getAll({ familyUserId: 1, caretakerId: 20, status: "CONFIRMED", page: 2, size: 5 });
+    expect(mockedRequest).toHaveBeenCalledWith("GET", "/api/v1/bookings", null, {
+      params: { page: 2, size: 5, familyUserId: 1, caretakerId: 20, status: "CONFIRMED", sort: "scheduledDate,desc" },
+    });
+  });
+
+  it("adminOverrideStatus hits PUT /api/v1/bookings/:id/admin-override-status with the new status", async () => {
+    const { result } = renderHook(() => useBookingService());
+    await result.current.adminOverrideStatus(100, "COMPLETED");
+    expect(mockedRequest).toHaveBeenCalledWith("PUT", "/api/v1/bookings/100/admin-override-status", { status: "COMPLETED" });
+  });
 });

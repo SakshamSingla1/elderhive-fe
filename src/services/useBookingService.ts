@@ -14,6 +14,7 @@ const BOOKING_URLS = {
   MINE_AS_FAMILY: "/api/v1/bookings/me/as-family",
   MINE_AS_CARETAKER: "/api/v1/bookings/me/as-caretaker",
   RECURRING_GROUP: "/api/v1/bookings/recurring-group/:recurringGroupId",
+  ADMIN_OVERRIDE_STATUS: "/api/v1/bookings/:id/admin-override-status",
 };
 
 // Mirrors com.elderhive.dtos.Booking.BookingResponse field-for-field.
@@ -50,6 +51,14 @@ export interface BookingPayload {
   occurrences?: number;
 }
 
+export interface BookingFilterParams {
+  familyUserId?: number;
+  caretakerId?: number;
+  status?: BookingStatusEnum;
+  page?: number;
+  size?: number;
+}
+
 // Booking lifecycle CRUD (BookingController, Prompt 77) - confirm/start/complete are
 // caretaker-only server-side, cancel's family-vs-caretaker permission depends on the
 // booking's current status (see BookingServiceImpl#assertCanCancel's own javadoc) - this
@@ -79,6 +88,19 @@ export const useBookingService = () => {
         }),
       getRecurringGroup: (recurringGroupId: string) =>
         request<BookingResponse[]>("GET", replaceUrlParams(BOOKING_URLS.RECURRING_GROUP, { recurringGroupId })),
+      // Admin oversight (BOOKING_MANAGE-gated server-side, Prompt 80) - every booking on
+      // the platform, optionally filtered. Not scoped to the caller at all, unlike
+      // getMyBookingsAsFamily/AsCaretaker above.
+      getAll: (filters: BookingFilterParams = {}) => {
+        const { page = 0, size = 20, familyUserId, caretakerId, status } = filters;
+        return request<PageResponse<BookingResponse>>("GET", BOOKING_URLS.BASE, null, {
+          params: { page, size, familyUserId, caretakerId, status, sort: "scheduledDate,desc" },
+        });
+      },
+      // Admin-only (BOOKING_MANAGE-gated server-side) - sets a booking to ANY status
+      // directly, bypassing confirm/start/complete/cancel's own linear-lifecycle gate.
+      adminOverrideStatus: (id: number, status: BookingStatusEnum) =>
+        request<BookingResponse>("PUT", replaceUrlParams(BOOKING_URLS.ADMIN_OVERRIDE_STATUS, { id }), { status }),
     }),
     []
   );

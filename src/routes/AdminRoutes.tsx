@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiCheckCircle, FiShoppingBag, FiTag } from "react-icons/fi";
+import { FiCalendar, FiCheckCircle, FiShoppingBag, FiTag } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
@@ -22,6 +22,8 @@ const ServiceCategoriesPage = lazy(() => import("../components/pages/Admin/Servi
 const ServiceCategoriesFormPage = lazy(() => import("../components/pages/Admin/ServiceCategoriesForm.page"));
 const ServicesPage = lazy(() => import("../components/pages/Admin/Services.page"));
 const ServicesFormPage = lazy(() => import("../components/pages/Admin/ServicesForm.page"));
+const AdminBookingsPage = lazy(() => import("../components/pages/Admin/Bookings.page"));
+const AdminBookingsFormPage = lazy(() => import("../components/pages/Admin/BookingsForm.page"));
 
 // NavLinkServiceImpl#getMine returns whatever's actually seeded for the admin portal
 // today, which doesn't include these pages (Prompt 70's/74's own additions) - appended
@@ -30,6 +32,7 @@ const STATIC_NAV_ITEMS: SidebarNavItem[] = [
   { label: "Caretaker Verification", path: "/admin/caretaker-verification", icon: <FiCheckCircle size={18} />, navIndex: 50 },
   { label: "Service Categories", path: "/admin/service-categories", icon: <FiTag size={18} />, navIndex: 51 },
   { label: "Services", path: "/admin/services", icon: <FiShoppingBag size={18} />, navIndex: 52 },
+  { label: "Bookings", path: "/admin/bookings", icon: <FiCalendar size={18} />, navIndex: 53 },
 ];
 
 const LoadingFallback: React.FC = () => (
@@ -105,6 +108,10 @@ const AdminRoutes: React.FC = () => {
           <Route path="services" element={<ServicesPage />} />
           <Route path="services/new" element={<ServicesFormPage />} />
           <Route path="services/:id" element={<ServicesFormPage />} />
+          {/* BOOKING_MANAGE-gated server-side only (Prompt 80's backend addendum), same
+              documented no-FE-permission-check limitation as the routes above. */}
+          <Route path="bookings" element={<AdminBookingsPage />} />
+          <Route path="bookings/:id" element={<AdminBookingsFormPage />} />
           {/* Every role's shared "pick your theme" entry point (Prompt 51) — reached via
               DashboardLayout's account menu, not the DB-driven sidebar. */}
           <Route path="account-settings" element={<AccountSettingsPage />} />
