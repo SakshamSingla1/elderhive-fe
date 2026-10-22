@@ -230,7 +230,7 @@ describe('App', () => {
         </MemoryRouter>
       );
 
-      expect(await screen.findByText('Color Themes')).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: 'Color Themes' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Add Theme' })).toBeInTheDocument();
     });
 
@@ -253,7 +253,7 @@ describe('App', () => {
         </MemoryRouter>
       );
 
-      expect(await screen.findByText('Color Themes')).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: 'Color Themes' })).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Add Theme' })).not.toBeInTheDocument();
     });
 

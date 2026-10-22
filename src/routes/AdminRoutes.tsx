@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiCalendar, FiCheckCircle, FiShoppingBag, FiTag } from "react-icons/fi";
+import { FiCalendar, FiCheckCircle, FiDroplet, FiSettings, FiShoppingBag, FiTag } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
@@ -28,12 +28,26 @@ const AdminBookingsFormPage = lazy(() => import("../components/pages/Admin/Booki
 // NavLinkServiceImpl#getMine returns whatever's actually seeded for the admin portal
 // today, which doesn't include these pages (Prompt 70's/74's own additions) - appended
 // client-side the same way Prompt 69 did for the other three roles' real pages.
-const STATIC_NAV_ITEMS: SidebarNavItem[] = [
-  { label: "Caretaker Verification", path: "/admin/caretaker-verification", icon: <FiCheckCircle size={18} />, navIndex: 50 },
-  { label: "Service Categories", path: "/admin/service-categories", icon: <FiTag size={18} />, navIndex: 51 },
-  { label: "Services", path: "/admin/services", icon: <FiShoppingBag size={18} />, navIndex: 52 },
-  { label: "Bookings", path: "/admin/bookings", icon: <FiCalendar size={18} />, navIndex: 53 },
-];
+//
+// Color Themes and Platform Settings (Prompts 43/44/51) were previously missing from
+// here entirely - their routes existed and worked, but nothing in the UI ever linked to
+// them (not the sidebar, not the account menu), so they were only reachable by typing
+// the URL directly. Platform Settings is omitted for a plain ADMIN since its route
+// itself just redirects them straight back to /admin/dashboard (see the route element
+// below) - same redirect-not-render reasoning, applied to the link too.
+function buildStaticNavItems(isSuperAdmin: boolean): SidebarNavItem[] {
+  const items: SidebarNavItem[] = [
+    { label: "Caretaker Verification", path: "/admin/caretaker-verification", icon: <FiCheckCircle size={18} />, navIndex: 50 },
+    { label: "Service Categories", path: "/admin/service-categories", icon: <FiTag size={18} />, navIndex: 51 },
+    { label: "Services", path: "/admin/services", icon: <FiShoppingBag size={18} />, navIndex: 52 },
+    { label: "Bookings", path: "/admin/bookings", icon: <FiCalendar size={18} />, navIndex: 53 },
+    { label: "Color Themes", path: "/admin/color-themes", icon: <FiDroplet size={18} />, navIndex: 54 },
+  ];
+  if (isSuperAdmin) {
+    items.push({ label: "Platform Settings", path: "/admin/platform-settings", icon: <FiSettings size={18} />, navIndex: 55 });
+  }
+  return items;
+}
 
 const LoadingFallback: React.FC = () => (
   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
@@ -55,7 +69,7 @@ const AdminRoutes: React.FC = () => {
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
-        <Route element={<DashboardLayout navItems={[...navItems, ...STATIC_NAV_ITEMS]} roleLabel={roleLabel} />}>
+        <Route element={<DashboardLayout navItems={[...navItems, ...buildStaticNavItems(isSuperAdmin)]} roleLabel={roleLabel} />}>
           {/* Absolute targets, not relative ("dashboard") — a relative Navigate rendered
               from inside the "*" splat route resolves against the splat's OWN matched
               segment rather than replacing it, which compounds into a runaway
