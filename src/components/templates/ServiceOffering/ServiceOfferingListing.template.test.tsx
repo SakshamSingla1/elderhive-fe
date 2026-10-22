@@ -73,6 +73,7 @@ function renderListing(props: Partial<React.ComponentProps<typeof ServiceOfferin
         />
         <Route path="/admin/services/new" element={<div>add service page</div>} />
         <Route path="/admin/services/:id" element={<div>edit service page</div>} />
+        <Route path="/family/bookings/new" element={<div>booking form page</div>} />
       </Routes>
     </MemoryRouter>
   );
@@ -170,5 +171,35 @@ describe("ServiceOfferingListingTemplate", () => {
     renderListing({ allowMutations: false });
 
     expect(screen.getByLabelText("Category")).toBeInTheDocument();
+  });
+
+  it("shows a Book button for an ACTIVE offering when allowMutations is false, and it links to the booking form", async () => {
+    const user = userEvent.setup();
+    mockCategoryService();
+    mockOfferingService();
+    renderListing({ allowMutations: false, serviceOfferings: [offering(1, "Weekly Temple Visit")] });
+
+    const bookButtons = screen.getAllByRole("button", { name: "Book" });
+    expect(bookButtons).toHaveLength(1);
+    await user.click(bookButtons[0]);
+
+    expect(await screen.findByText("booking form page")).toBeInTheDocument();
+  });
+
+  it("hides the Book button for an INACTIVE offering when allowMutations is false", () => {
+    mockCategoryService();
+    mockOfferingService();
+    const inactive: ServiceOfferingResponse = { ...offering(1, "Retired Service"), status: "INACTIVE" };
+    renderListing({ allowMutations: false, serviceOfferings: [inactive] });
+
+    expect(screen.queryByRole("button", { name: "Book" })).not.toBeInTheDocument();
+  });
+
+  it("hides the Book button entirely in the admin (allowMutations=true) view", () => {
+    mockCategoryService();
+    mockOfferingService();
+    renderListing({ allowMutations: true });
+
+    expect(screen.queryByRole("button", { name: "Book" })).not.toBeInTheDocument();
   });
 });

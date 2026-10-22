@@ -39,6 +39,23 @@ export function formatDateTime(isoString: string | undefined | null): string {
   return parsed.isValid() ? parsed.format("MMM D, YYYY h:mm A") : "";
 }
 
+// Formats a backend LocalDate string (e.g. Booking.scheduledDate, "2026-03-02") for
+// display - date-only, no time component.
+export function formatDate(isoDate: string | undefined | null): string {
+  if (!isoDate) return "";
+  const parsed = dayjs(isoDate);
+  return parsed.isValid() ? parsed.format("MMM D, YYYY") : "";
+}
+
+// Formats a backend LocalTime string (e.g. Booking.scheduledTime, AvailableSlotsResponse's
+// own slots, "09:00:00" or "09:00") for display - parsed against a fixed reference date
+// since dayjs has no time-only type.
+export function formatTime(time: string | undefined | null): string {
+  if (!time) return "";
+  const parsed = dayjs(`2000-01-01T${time}`);
+  return parsed.isValid() ? parsed.format("h:mm A") : time;
+}
+
 /**
  * Returns a stable, debounced wrapper around `callback` — each call resets a `delay`ms
  * timer, so only the last call within any `delay`ms burst actually fires. Used by the

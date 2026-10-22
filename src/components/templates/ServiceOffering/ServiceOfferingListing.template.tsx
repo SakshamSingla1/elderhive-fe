@@ -191,7 +191,7 @@ const ServiceOfferingListingTemplate: React.FC<ServiceOfferingListingTemplatePro
                     )}
                   </Stack>
                 </CardContent>
-                {allowMutations && (
+                {allowMutations ? (
                   <CardActions sx={{ justifyContent: "flex-end" }}>
                     <Tooltip title="Edit">
                       <IconButton onClick={() => navigate(`/admin/services/${offering.id}`)} aria-label="Edit">
@@ -204,6 +204,14 @@ const ServiceOfferingListingTemplate: React.FC<ServiceOfferingListingTemplatePro
                       </IconButton>
                     </Tooltip>
                   </CardActions>
+                ) : (
+                  offering.status === "ACTIVE" && (
+                    <CardActions sx={{ justifyContent: "flex-end" }}>
+                      <Button size="small" variant="contained" onClick={() => navigate(`/family/bookings/new?serviceOfferingId=${offering.id}`)}>
+                        Book
+                      </Button>
+                    </CardActions>
+                  )
                 )}
               </Card>
             ))}

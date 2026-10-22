@@ -144,3 +144,16 @@ export const ServiceOfferingStatusEnum = {
   INACTIVE: "INACTIVE",
 } as const;
 export type ServiceOfferingStatusEnum = (typeof ServiceOfferingStatusEnum)[keyof typeof ServiceOfferingStatusEnum];
+
+// Must stay in sync with com.elderhive.enums.BookingStatusEnum (backend) — needed to type
+// useBookingService.ts's BookingResponse. Linear PENDING -> CONFIRMED -> IN_PROGRESS ->
+// COMPLETED, with CANCELLED reachable from any of the first three (BookingServiceImpl's
+// own documented lifecycle, Prompt 77).
+export const BookingStatusEnum = {
+  PENDING: "PENDING",
+  CONFIRMED: "CONFIRMED",
+  IN_PROGRESS: "IN_PROGRESS",
+  COMPLETED: "COMPLETED",
+  CANCELLED: "CANCELLED",
+} as const;
+export type BookingStatusEnum = (typeof BookingStatusEnum)[keyof typeof BookingStatusEnum];

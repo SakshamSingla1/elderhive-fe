@@ -101,4 +101,12 @@ describe("useCaretakerService", () => {
     await result.current.removeAvailabilitySlot(3);
     expect(mockedRequest).toHaveBeenCalledWith("DELETE", "/api/v1/caretaker-profiles/me/availability/3");
   });
+
+  it("getAvailableSlots hits GET /api/v1/caretaker-profiles/:id/available-slots with date/serviceOfferingId params", async () => {
+    const { result } = renderHook(() => useCaretakerService());
+    await result.current.getAvailableSlots(7, "2026-03-02", 30);
+    expect(mockedRequest).toHaveBeenCalledWith("GET", "/api/v1/caretaker-profiles/7/available-slots", null, {
+      params: { date: "2026-03-02", serviceOfferingId: 30 },
+    });
+  });
 });

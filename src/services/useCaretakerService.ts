@@ -14,6 +14,7 @@ const CARETAKER_URLS = {
   AVAILABILITY_FOR_CARETAKER: "/api/v1/caretaker-profiles/:id/availability",
   ADD_AVAILABILITY: "/api/v1/caretaker-profiles/me/availability",
   AVAILABILITY_SLOT: "/api/v1/caretaker-profiles/me/availability/:slotId",
+  AVAILABLE_SLOTS: "/api/v1/caretaker-profiles/:id/available-slots",
 };
 
 // Mirrors com.elderhive.dtos.CaretakerProfile.CaretakerProfileResponse field-for-field.
@@ -80,6 +81,22 @@ export interface CaretakerAvailabilityRequestDTO {
   endTime: string;
 }
 
+// Mirrors com.elderhive.dtos.AvailableSlot.AvailableSlotsResponse field-for-field
+// (Prompt 76) - availableSlots is only the FREE slots, each a LocalTime "HH:mm:ss" string;
+// there's no per-slot available/unavailable flag like ElderSphere's own reference returns,
+// so AvailableSlotPicker.tsx reconstructs the full candidate grid itself (from this
+// caretaker's own weekly schedule, or the documented 9am-6pm default) to know which
+// candidates to show as disabled.
+export interface AvailableSlotsResponseDTO {
+  caretakerId: number;
+  serviceOfferingId: number;
+  date: string;
+  dayOfWeek: DayOfWeekEnum;
+  slotDurationMinutes: number;
+  usingDefaultHours: boolean;
+  availableSlots: string[];
+}
+
 export const useCaretakerService = () => {
   return useMemo(
     () => ({
@@ -120,6 +137,10 @@ export const useCaretakerService = () => {
         request<CaretakerAvailabilitySlotDTO>("PUT", replaceUrlParams(CARETAKER_URLS.AVAILABILITY_SLOT, { slotId }), payload),
       removeAvailabilitySlot: (slotId: number) =>
         request<string>("DELETE", replaceUrlParams(CARETAKER_URLS.AVAILABILITY_SLOT, { slotId })),
+      getAvailableSlots: (caretakerId: number, date: string, serviceOfferingId: number) =>
+        request<AvailableSlotsResponseDTO>("GET", replaceUrlParams(CARETAKER_URLS.AVAILABLE_SLOTS, { id: caretakerId }), null, {
+          params: { date, serviceOfferingId },
+        }),
     }),
     []
   );
