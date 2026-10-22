@@ -4,6 +4,25 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  // sockjs-client (WebSocketContext.tsx's realtime notification transport) references
+  // Node's `global` at module-load time - Vite doesn't polyfill that for the browser on
+  // its own (unlike webpack), so without this every authenticated page load throws
+  // "ReferenceError: global is not defined" the moment WebSocketProvider's effect
+  // instantiates `new SockJS(...)`. globalThis is the standard browser-safe stand-in.
+  // Both entries are required: the top-level `define` only rewrites our own source during
+  // transform/build, while sockjs-client is pre-bundled by esbuild in dev (node_modules/.vite/deps)
+  // which reads `optimizeDeps.esbuildOptions.define` instead - without it the dev pre-bundle
+  // still ships the raw `global` reference even though app code looks fixed.
+  define: {
+    global: 'globalThis',
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis',
+      },
+    },
+  },
   server: {
     port: 5173,
   },

@@ -40,7 +40,7 @@ const offering: ServiceOfferingResponse = {
   status: "ACTIVE",
 };
 
-function mockServices(overrides: { create?: ReturnType<typeof vi.fn> } = {}) {
+function mockServices(overrides: { create?: ReturnType<typeof useBookingService>["create"] } = {}) {
   mockedUseServiceOfferingService.mockReturnValue({
     getServiceOfferings: vi.fn(),
     getServiceOfferingById: vi.fn().mockResolvedValue(offering),
@@ -58,6 +58,8 @@ function mockServices(overrides: { create?: ReturnType<typeof vi.fn> } = {}) {
     getMyBookingsAsFamily: vi.fn(),
     getMyBookingsAsCaretaker: vi.fn(),
     getRecurringGroup: vi.fn(),
+    getAll: vi.fn(),
+    adminOverrideStatus: vi.fn(),
   });
 }
 

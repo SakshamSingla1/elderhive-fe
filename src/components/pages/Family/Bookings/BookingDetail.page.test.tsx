@@ -43,6 +43,8 @@ function mockService(overrides: Partial<ReturnType<typeof useBookingService>> = 
     getMyBookingsAsFamily: vi.fn(),
     getMyBookingsAsCaretaker: vi.fn(),
     getRecurringGroup: vi.fn().mockResolvedValue([]),
+    getAll: vi.fn(),
+    adminOverrideStatus: vi.fn(),
     ...overrides,
   };
   mockedUseBookingService.mockReturnValue(service);
