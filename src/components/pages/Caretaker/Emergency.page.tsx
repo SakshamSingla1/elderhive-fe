@@ -105,6 +105,17 @@ const CaretakerEmergencyPage: React.FC = () => {
     return unsubscribe;
   }, [subscribe, user, fetchNearby]);
 
+  // The per-user notifications channel above only ever fires on trigger() - nothing
+  // pushes there when an alert someone's already watching gets claimed/resolved/
+  // dispatch-overridden (Prompt 84's endpoints don't notify anyone, they just update the
+  // row). /topic/emergency-alerts (Prompt 87's own addendum) is that missing live signal:
+  // every status change broadcasts there, so another matched caretaker's list updates
+  // the instant someone else claims it, not just on the next 30s poll.
+  useEffect(() => {
+    const unsubscribe = subscribe("/topic/emergency-alerts", () => fetchNearby());
+    return unsubscribe;
+  }, [subscribe, fetchNearby]);
+
   const runAction = async (alert: EmergencyAlertResponse, action: () => Promise<unknown>, successText: string) => {
     setActingId(alert.id);
     setActionError(null);

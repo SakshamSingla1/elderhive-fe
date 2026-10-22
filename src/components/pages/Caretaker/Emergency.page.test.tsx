@@ -53,7 +53,7 @@ describe("Caretaker Emergency.page", () => {
   let claim: ReturnType<typeof vi.fn>;
   let resolve: ReturnType<typeof vi.fn>;
   let getMyProfile: ReturnType<typeof vi.fn>;
-  let subscribeCallback: ((frame: { body: string }) => void) | null;
+  let subscribeCallbacks: Map<string, (frame: { body: string }) => void>;
 
   beforeEach(() => {
     getNearby = vi.fn().mockResolvedValue([]);
@@ -66,11 +66,15 @@ describe("Caretaker Emergency.page", () => {
     getMyProfile = vi.fn().mockResolvedValue({ id: 30 });
     mockedUseCaretakerService.mockReturnValue({ getMyProfile } as unknown as ReturnType<typeof useCaretakerService>);
 
-    subscribeCallback = null;
+    subscribeCallbacks = new Map();
     mockedUseWebSocket.mockReturnValue({
       connected: true,
-      subscribe: vi.fn((_, cb) => {
-        subscribeCallback = cb;
+      // Keyed by destination - this page subscribes to TWO topics (its own
+      // /topic/notifications/{userId} AND the shared /topic/emergency-alerts broadcast),
+      // so a single shared callback variable would silently only ever capture whichever
+      // one subscribed last.
+      subscribe: vi.fn((destination, cb) => {
+        subscribeCallbacks.set(destination, cb);
         return () => {};
       }),
     });
@@ -145,7 +149,9 @@ describe("Caretaker Emergency.page", () => {
     render(<CaretakerEmergencyPage />);
     await waitFor(() => expect(getNearby).toHaveBeenCalledTimes(1));
 
-    subscribeCallback!({ body: JSON.stringify({ id: 9, type: "EMERGENCY", title: "x", message: "y", isRead: false, createdAt: "2026-10-22T10:00:00" }) });
+    subscribeCallbacks.get("/topic/notifications/200")!({
+      body: JSON.stringify({ id: 9, type: "EMERGENCY", title: "x", message: "y", isRead: false, createdAt: "2026-10-22T10:00:00" }),
+    });
 
     await waitFor(() => expect(getNearby).toHaveBeenCalledTimes(2));
   });
@@ -154,11 +160,22 @@ describe("Caretaker Emergency.page", () => {
     render(<CaretakerEmergencyPage />);
     await waitFor(() => expect(getNearby).toHaveBeenCalledTimes(1));
 
-    subscribeCallback!({ body: JSON.stringify({ id: 9, type: "BOOKING", title: "x", message: "y", isRead: false, createdAt: "2026-10-22T10:00:00" }) });
+    subscribeCallbacks.get("/topic/notifications/200")!({
+      body: JSON.stringify({ id: 9, type: "BOOKING", title: "x", message: "y", isRead: false, createdAt: "2026-10-22T10:00:00" }),
+    });
 
     // Give any erroneous async refetch a chance to happen before asserting it didn't.
     await new Promise((r) => setTimeout(r, 10));
     expect(getNearby).toHaveBeenCalledTimes(1);
+  });
+
+  it("refetches when the live emergency-alerts broadcast fires, regardless of payload", async () => {
+    render(<CaretakerEmergencyPage />);
+    await waitFor(() => expect(getNearby).toHaveBeenCalledTimes(1));
+
+    subscribeCallbacks.get("/topic/emergency-alerts")!({ body: JSON.stringify({ id: 1, status: "ACKNOWLEDGED" }) });
+
+    await waitFor(() => expect(getNearby).toHaveBeenCalledTimes(2));
   });
 
   it("shows a clear error if loading nearby alerts fails", async () => {

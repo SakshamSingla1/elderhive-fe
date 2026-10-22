@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiCalendar, FiCheckCircle, FiDroplet, FiSettings, FiShoppingBag, FiTag } from "react-icons/fi";
+import { FiAlertTriangle, FiCalendar, FiCheckCircle, FiDroplet, FiSettings, FiShoppingBag, FiTag } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
@@ -24,6 +24,8 @@ const ServicesPage = lazy(() => import("../components/pages/Admin/Services.page"
 const ServicesFormPage = lazy(() => import("../components/pages/Admin/ServicesForm.page"));
 const AdminBookingsPage = lazy(() => import("../components/pages/Admin/Bookings.page"));
 const AdminBookingsFormPage = lazy(() => import("../components/pages/Admin/BookingsForm.page"));
+const AdminEmergencyAlertsPage = lazy(() => import("../components/pages/Admin/EmergencyAlerts.page"));
+const AdminEmergencyAlertsFormPage = lazy(() => import("../components/pages/Admin/EmergencyAlertsForm.page"));
 
 // NavLinkServiceImpl#getMine returns whatever's actually seeded for the admin portal
 // today, which doesn't include these pages (Prompt 70's/74's own additions) - appended
@@ -42,6 +44,7 @@ function buildStaticNavItems(isSuperAdmin: boolean): SidebarNavItem[] {
     { label: "Services", path: "/admin/services", icon: <FiShoppingBag size={18} />, navIndex: 52 },
     { label: "Bookings", path: "/admin/bookings", icon: <FiCalendar size={18} />, navIndex: 53 },
     { label: "Color Themes", path: "/admin/color-themes", icon: <FiDroplet size={18} />, navIndex: 54 },
+    { label: "Emergency Alerts", path: "/admin/emergency-alerts", icon: <FiAlertTriangle size={18} />, navIndex: 56 },
   ];
   if (isSuperAdmin) {
     items.push({ label: "Platform Settings", path: "/admin/platform-settings", icon: <FiSettings size={18} />, navIndex: 55 });
@@ -126,6 +129,11 @@ const AdminRoutes: React.FC = () => {
               documented no-FE-permission-check limitation as the routes above. */}
           <Route path="bookings" element={<AdminBookingsPage />} />
           <Route path="bookings/:id" element={<AdminBookingsFormPage />} />
+          {/* EMERGENCY_DISPATCH-gated server-side only (Prompt 87's own backend
+              addendum), same documented no-FE-permission-check limitation as the routes
+              above. */}
+          <Route path="emergency-alerts" element={<AdminEmergencyAlertsPage />} />
+          <Route path="emergency-alerts/:id" element={<AdminEmergencyAlertsFormPage />} />
           {/* Every role's shared "pick your theme" entry point (Prompt 51) — reached via
               DashboardLayout's account menu, not the DB-driven sidebar. */}
           <Route path="account-settings" element={<AccountSettingsPage />} />
