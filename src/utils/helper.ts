@@ -56,6 +56,39 @@ export function formatTime(time: string | undefined | null): string {
   return parsed.isValid() ? parsed.format("h:mm A") : time;
 }
 
+export interface Coordinates {
+  latitude: number;
+  longitude: number;
+}
+
+// Promise wrapper around navigator.geolocation.getCurrentPosition (callback-based,
+// no native Promise API) - used by the Emergency pages (Prompt 85) to get a real GPS fix
+// before calling useEmergencyAlertService's trigger(), whose latitude/longitude are
+// required server-side. Rejects with a short, human-readable message (never the raw
+// GeolocationPositionError) for three distinct failure modes - no API at all (older
+// browsers/non-HTTPS contexts), permission denied, and a position that just never
+// resolves in time - so the calling page can show it directly without its own
+// error-code-switching logic.
+export function getCurrentCoordinates(timeoutMs = 10000): Promise<Coordinates> {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject(new Error("Location services aren't available on this device."));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude }),
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          reject(new Error("Location access was denied. Please enable location services and try again."));
+        } else {
+          reject(new Error("Couldn't get your current location. Please try again."));
+        }
+      },
+      { enableHighAccuracy: true, timeout: timeoutMs, maximumAge: 0 }
+    );
+  });
+}
+
 /**
  * Returns a stable, debounced wrapper around `callback` — each call resets a `delay`ms
  * timer, so only the last call within any `delay`ms burst actually fires. Used by the

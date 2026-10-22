@@ -157,3 +157,14 @@ export const BookingStatusEnum = {
   CANCELLED: "CANCELLED",
 } as const;
 export type BookingStatusEnum = (typeof BookingStatusEnum)[keyof typeof BookingStatusEnum];
+
+// Must stay in sync with com.elderhive.enums.EmergencyAlertStatusEnum (backend) — needed
+// to type useEmergencyAlertService.ts's EmergencyAlertResponse. Linear TRIGGERED ->
+// ACKNOWLEDGED -> RESOLVED, no CANCELLED escape hatch (Prompt 81's own documented
+// lifecycle - a false alarm is still acknowledged/resolved through the normal flow).
+export const EmergencyAlertStatusEnum = {
+  TRIGGERED: "TRIGGERED",
+  ACKNOWLEDGED: "ACKNOWLEDGED",
+  RESOLVED: "RESOLVED",
+} as const;
+export type EmergencyAlertStatusEnum = (typeof EmergencyAlertStatusEnum)[keyof typeof EmergencyAlertStatusEnum];

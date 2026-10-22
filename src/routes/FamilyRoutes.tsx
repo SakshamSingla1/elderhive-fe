@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiCalendar, FiMail, FiShoppingBag, FiUsers } from "react-icons/fi";
+import { FiAlertTriangle, FiCalendar, FiMail, FiShoppingBag, FiUsers } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import type { SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
@@ -17,6 +17,7 @@ const BrowseServicesPage = lazy(() => import("../components/pages/Family/BrowseS
 const BookingsPage = lazy(() => import("../components/pages/Family/Bookings/Bookings.page"));
 const BookingFormPage = lazy(() => import("../components/pages/Family/Bookings/BookingForm.page"));
 const BookingDetailPage = lazy(() => import("../components/pages/Family/Bookings/BookingDetail.page"));
+const EmergencyPage = lazy(() => import("../components/pages/Family/Emergency.page"));
 
 const LoadingFallback: React.FC = () => (
   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
@@ -36,6 +37,7 @@ const STATIC_NAV_ITEMS: SidebarNavItem[] = [
   { label: "Invites", path: "/family/invites", icon: <FiMail size={18} />, navIndex: 2 },
   { label: "Browse Services", path: "/family/services", icon: <FiShoppingBag size={18} />, navIndex: 3 },
   { label: "My Bookings", path: "/family/bookings", icon: <FiCalendar size={18} />, navIndex: 4 },
+  { label: "Emergency", path: "/family/emergency", icon: <FiAlertTriangle size={18} />, navIndex: 5 },
 ];
 
 const FamilyRoutes: React.FC = () => {
@@ -64,6 +66,7 @@ const FamilyRoutes: React.FC = () => {
           <Route path="bookings" element={<BookingsPage />} />
           <Route path="bookings/new" element={<BookingFormPage />} />
           <Route path="bookings/:id" element={<BookingDetailPage />} />
+          <Route path="emergency" element={<EmergencyPage />} />
           <Route path="*" element={<Navigate to="/family/dashboard" replace />} />
         </Route>
       </Routes>
