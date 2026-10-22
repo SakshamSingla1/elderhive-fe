@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiCalendar, FiUser } from "react-icons/fi";
+import { FiAlertTriangle, FiCalendar, FiUser } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import type { SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
@@ -11,6 +11,7 @@ const AccountSettingsPage = lazy(() => import("../components/pages/Shared/Accoun
 const NotificationsPage = lazy(() => import("../components/pages/Shared/Notifications.page"));
 const MyProfilePage = lazy(() => import("../components/pages/Caretaker/MyProfile.page"));
 const BookingsPage = lazy(() => import("../components/pages/Caretaker/Bookings.page"));
+const EmergencyPage = lazy(() => import("../components/pages/Caretaker/Emergency.page"));
 
 const LoadingFallback: React.FC = () => (
   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
@@ -28,6 +29,7 @@ const ROLE_LABEL = "Caretaker";
 const STATIC_NAV_ITEMS: SidebarNavItem[] = [
   { label: "My Profile", path: "/caretaker/my-profile", icon: <FiUser size={18} />, navIndex: 1 },
   { label: "My Bookings", path: "/caretaker/bookings", icon: <FiCalendar size={18} />, navIndex: 2 },
+  { label: "Emergency Alerts", path: "/caretaker/emergency", icon: <FiAlertTriangle size={18} />, navIndex: 3 },
 ];
 
 const CaretakerRoutes: React.FC = () => {
@@ -49,6 +51,7 @@ const CaretakerRoutes: React.FC = () => {
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="my-profile" element={<MyProfilePage />} />
           <Route path="bookings" element={<BookingsPage />} />
+          <Route path="emergency" element={<EmergencyPage />} />
           <Route path="*" element={<Navigate to="/caretaker/dashboard" replace />} />
         </Route>
       </Routes>
