@@ -25,6 +25,11 @@ export interface BookingResponse extends AuditableResponse {
   elderName: string | null;
   caretakerId: number;
   caretakerName: string | null;
+  // Added Prompt 92 - the caretaker's own user id, distinct from `caretakerId` above
+  // (their CaretakerProfile's id) - lets a booking be matched against
+  // usePresenceService's status map and used to start a Messaging conversation (both
+  // keyed by user id, not CaretakerProfile id).
+  caretakerUserId: number | null;
   serviceOfferingId: number;
   serviceName: string | null;
   scheduledDate: string;

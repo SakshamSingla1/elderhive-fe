@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiAlertTriangle, FiMail, FiUser } from "react-icons/fi";
+import { FiAlertTriangle, FiMail, FiMessageCircle, FiUser } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import type { SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
@@ -12,6 +12,7 @@ const NotificationsPage = lazy(() => import("../components/pages/Shared/Notifica
 const MyProfilePage = lazy(() => import("../components/pages/Elder/MyProfile.page"));
 const InvitesPage = lazy(() => import("../components/pages/Elder/Invites.page"));
 const EmergencyPage = lazy(() => import("../components/pages/Elder/Emergency.page"));
+const MessagesPage = lazy(() => import("../components/pages/Shared/Messages.page"));
 
 const LoadingFallback: React.FC = () => (
   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
@@ -30,6 +31,7 @@ const STATIC_NAV_ITEMS: SidebarNavItem[] = [
   { label: "My Profile", path: "/elder/my-profile", icon: <FiUser size={18} />, navIndex: 1 },
   { label: "Invites", path: "/elder/invites", icon: <FiMail size={18} />, navIndex: 2 },
   { label: "Emergency", path: "/elder/emergency", icon: <FiAlertTriangle size={18} />, navIndex: 3 },
+  { label: "Messages", path: "/elder/messages", icon: <FiMessageCircle size={18} />, navIndex: 4 },
 ];
 
 const ElderRoutes: React.FC = () => {
@@ -52,6 +54,7 @@ const ElderRoutes: React.FC = () => {
           <Route path="my-profile" element={<MyProfilePage />} />
           <Route path="invites" element={<InvitesPage />} />
           <Route path="emergency" element={<EmergencyPage />} />
+          <Route path="messages" element={<MessagesPage />} />
           <Route path="*" element={<Navigate to="/elder/dashboard" replace />} />
         </Route>
       </Routes>

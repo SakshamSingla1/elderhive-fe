@@ -21,6 +21,8 @@ import { FiCalendar, FiRepeat } from "react-icons/fi";
 import Button from "../../../atoms/Button/Button";
 import { useBookingService } from "../../../../services/useBookingService";
 import type { BookingResponse } from "../../../../services/useBookingService";
+import { usePresenceService } from "../../../../services/usePresenceService";
+import { useWebSocket } from "../../../../contexts/WebSocketContext";
 import { BookingStatusEnum } from "../../../../utils/enums";
 import { formatDate, formatTime, getErrorMessage } from "../../../../utils/helper";
 
@@ -44,6 +46,8 @@ const STATUS_COLOR: Record<BookingStatusEnum, "default" | "warning" | "info" | "
 const BookingsPage: React.FC = () => {
   const navigate = useNavigate();
   const bookingService = useBookingService();
+  const presenceService = usePresenceService();
+  const { subscribe } = useWebSocket();
 
   const [bookings, setBookings] = useState<BookingResponse[]>([]);
   const [page, setPage] = useState(0);
@@ -53,6 +57,7 @@ const BookingsPage: React.FC = () => {
   const [actionError, setActionError] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [presence, setPresence] = useState<Record<number, boolean>>({});
 
   const fetchPage = useCallback(async () => {
     setIsLoading(true);
@@ -72,6 +77,38 @@ const BookingsPage: React.FC = () => {
   useEffect(() => {
     fetchPage();
   }, [fetchPage]);
+
+  // Initial presence snapshot for every distinct caretaker on this page (so the dot has
+  // something to show before the first live /topic/presence event arrives for them).
+  const caretakerUserIdsKey = bookings.map((b) => b.caretakerUserId).filter((id): id is number => id != null).join(",");
+  useEffect(() => {
+    const ids = Array.from(new Set(bookings.map((b) => b.caretakerUserId).filter((id): id is number => id != null)));
+    if (ids.length === 0) return;
+    presenceService
+      .getStatus(ids)
+      .then((status) => {
+        setPresence((prev) => {
+          const next = { ...prev };
+          Object.entries(status).forEach(([id, online]) => {
+            next[Number(id)] = online;
+          });
+          return next;
+        });
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [caretakerUserIdsKey]);
+
+  useEffect(() => {
+    return subscribe("/topic/presence", (frame) => {
+      try {
+        const payload: { userId: number; online: boolean } = JSON.parse(frame.body);
+        setPresence((prev) => ({ ...prev, [payload.userId]: payload.online }));
+      } catch {
+        // ignore malformed presence frames
+      }
+    });
+  }, [subscribe]);
 
   const handleCancel = async (booking: BookingResponse, cancelSeries: boolean) => {
     const confirmed = window.confirm(
@@ -154,7 +191,25 @@ const BookingsPage: React.FC = () => {
                 {bookings.map((booking) => (
                   <TableRow key={booking.id} hover sx={{ cursor: "pointer" }} onClick={() => navigate(`/family/bookings/${booking.id}`)}>
                     <TableCell sx={{ fontWeight: 600 }}>{booking.elderName ?? "—"}</TableCell>
-                    <TableCell>{booking.caretakerName ?? "—"}</TableCell>
+                    <TableCell>
+                      {booking.caretakerUserId ? (
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              flexShrink: 0,
+                              bgcolor: presence[booking.caretakerUserId] ? "success.main" : "grey.400",
+                            }}
+                            aria-label={presence[booking.caretakerUserId] ? "Online" : "Offline"}
+                          />
+                          <span>{booking.caretakerName ?? "—"}</span>
+                        </Stack>
+                      ) : (
+                        booking.caretakerName ?? "—"
+                      )}
+                    </TableCell>
                     <TableCell>{booking.serviceName ?? "—"}</TableCell>
                     <TableCell>
                       <Stack spacing={0.25}>

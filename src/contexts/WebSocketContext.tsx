@@ -11,15 +11,29 @@ const WS_BASE_URL = API_BASE_URL;
 
 type SubscribeCallback = (message: IMessage) => void;
 
+// presence.PresenceTracker (backend, Prompt 90) treats a connected session as stale — and
+// isOnline() false — once 45s pass with no heartbeat. This interval is comfortably under
+// that (more than 2x margin) so a steady connection never goes stale from the frontend's
+// own side; it's unrelated to the STOMP protocol's own heartbeatIncoming/Outgoing below,
+// which only keep the transport itself alive, not this application-level presence signal.
+const PRESENCE_HEARTBEAT_INTERVAL_MS = 20000;
+const PRESENCE_HEARTBEAT_DESTINATION = "/app/presence/heartbeat";
+
 interface WebSocketContextValue {
   connected: boolean;
   /** Subscribe to a STOMP topic; returns an unsubscribe function. No-ops (and returns a no-op) while disconnected. */
   subscribe: (destination: string, callback: SubscribeCallback) => () => void;
+  /** SEND a STOMP frame to an /app destination (e.g. ChatWebSocketController's own
+   *  realtime send). `body`, if given, is JSON-stringified. A no-op while disconnected -
+   *  there's no STOMP response frame to report that back on, so callers that need
+   *  confirmation should rely on the corresponding /topic broadcast instead. */
+  publish: (destination: string, body?: unknown) => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextValue>({
   connected: false,
   subscribe: () => () => {},
+  publish: () => {},
 });
 
 // App-wide STOMP-over-SockJS connection, live for the lifetime of an authenticated session
@@ -48,21 +62,47 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // double-cast through unknown since the two types share no properties at all, which
     // trips an extra "no overlap" TS check beyond the usual excess-property check.
     const sockJsOptions = { withCredentials: true } as unknown as SockJS.Options;
+    let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+    const stopHeartbeat = () => {
+      if (heartbeatTimer) {
+        clearInterval(heartbeatTimer);
+        heartbeatTimer = null;
+      }
+    };
+
     const client = new Client({
       webSocketFactory: () => new SockJS(`${WS_BASE_URL}/ws`, undefined, sockJsOptions),
       reconnectDelay: 4000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
-      onConnect: () => setConnected(true),
-      onDisconnect: () => setConnected(false),
-      onWebSocketClose: () => setConnected(false),
-      onStompError: () => setConnected(false),
+      onConnect: () => {
+        setConnected(true);
+        // Send one immediately (a reconnect after a drop may already be close to - or
+        // past - PresenceTracker's own staleness window) and then keep pinging on the
+        // interval for as long as this connection stays up.
+        client.publish({ destination: PRESENCE_HEARTBEAT_DESTINATION });
+        stopHeartbeat();
+        heartbeatTimer = setInterval(() => client.publish({ destination: PRESENCE_HEARTBEAT_DESTINATION }), PRESENCE_HEARTBEAT_INTERVAL_MS);
+      },
+      onDisconnect: () => {
+        setConnected(false);
+        stopHeartbeat();
+      },
+      onWebSocketClose: () => {
+        setConnected(false);
+        stopHeartbeat();
+      },
+      onStompError: () => {
+        setConnected(false);
+        stopHeartbeat();
+      },
     });
     clientRef.current = client;
     client.activate();
 
     return () => {
       setConnected(false);
+      stopHeartbeat();
       clientRef.current = null;
       client.deactivate();
     };
@@ -85,6 +125,11 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           }
           sub = null;
         };
+      },
+      publish: (destination, body) => {
+        const client = clientRef.current;
+        if (!client || !client.connected) return;
+        client.publish({ destination, body: body !== undefined ? JSON.stringify(body) : undefined });
       },
     }),
     [connected]

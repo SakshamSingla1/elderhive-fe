@@ -78,6 +78,7 @@ describe("Admin EmergencyAlerts.page", () => {
         subscribeCallback = cb;
         return () => {};
       }),
+      publish: vi.fn(),
     });
   });
 

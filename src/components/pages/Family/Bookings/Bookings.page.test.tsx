@@ -4,13 +4,23 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useBookingService } from "../../../../services/useBookingService";
 import type { BookingResponse } from "../../../../services/useBookingService";
+import { usePresenceService } from "../../../../services/usePresenceService";
+import { useWebSocket } from "../../../../contexts/WebSocketContext";
 import BookingsPage from "./Bookings.page";
 
 vi.mock("../../../../services/useBookingService", () => ({
   useBookingService: vi.fn(),
 }));
+vi.mock("../../../../services/usePresenceService", () => ({
+  usePresenceService: vi.fn(),
+}));
+vi.mock("../../../../contexts/WebSocketContext", () => ({
+  useWebSocket: vi.fn(),
+}));
 
 const mockedUseBookingService = vi.mocked(useBookingService);
+const mockedUsePresenceService = vi.mocked(usePresenceService);
+const mockedUseWebSocket = vi.mocked(useWebSocket);
 
 function booking(overrides: Partial<BookingResponse> = {}): BookingResponse {
   return {
@@ -20,6 +30,7 @@ function booking(overrides: Partial<BookingResponse> = {}): BookingResponse {
     elderName: "Robert",
     caretakerId: 20,
     caretakerName: "Jane Caretaker",
+    caretakerUserId: 200,
     serviceOfferingId: 30,
     serviceName: "Weekly Temple Visit",
     scheduledDate: "2026-03-02",
@@ -82,6 +93,8 @@ describe("Bookings.page", () => {
 
   beforeEach(() => {
     confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    mockedUsePresenceService.mockReturnValue({ getStatus: vi.fn().mockResolvedValue({ "200": false }) });
+    mockedUseWebSocket.mockReturnValue({ connected: true, subscribe: vi.fn(() => () => {}), publish: vi.fn() });
   });
 
   afterEach(() => {
@@ -178,5 +191,14 @@ describe("Bookings.page", () => {
 
     await screen.findByText("Robert");
     expect(screen.getByRole("button", { name: "Go to page 2" })).toBeInTheDocument();
+  });
+
+  it("shows the caretaker's online/offline presence next to their name", async () => {
+    mockedUsePresenceService.mockReturnValue({ getStatus: vi.fn().mockResolvedValue({ "200": true }) });
+    mockService();
+    renderPage();
+
+    await screen.findByText("Robert");
+    expect(await screen.findByLabelText("Online")).toBeInTheDocument();
   });
 });

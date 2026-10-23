@@ -15,6 +15,10 @@ const SEARCH_URLS = {
  */
 export interface CaretakerSearchResultDTO {
   id: number;
+  // Added Prompt 92 - the caretaker's own user id, distinct from `id` above (their
+  // CaretakerProfile's id) - lets a search result be matched against
+  // usePresenceService's status map, which is keyed by user id.
+  userId: number;
   name: string | null;
   specialtiesSummary: string | null;
   ratingAverage: number | null;

@@ -19,6 +19,7 @@ const existingBooking: BookingResponse = {
   elderName: "Robert",
   caretakerId: 20,
   caretakerName: "Jane Caretaker",
+  caretakerUserId: 200,
   serviceOfferingId: 30,
   serviceName: "Weekly Temple Visit",
   scheduledDate: "2026-03-02",

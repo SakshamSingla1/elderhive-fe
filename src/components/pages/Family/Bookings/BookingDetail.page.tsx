@@ -1,11 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Alert, Box, Card, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Skeleton, Stack, Typography } from "@mui/material";
-import { FiArrowLeft, FiCalendar, FiRepeat } from "react-icons/fi";
+import { FiArrowLeft, FiCalendar, FiMessageCircle, FiRepeat } from "react-icons/fi";
 import Button from "../../../atoms/Button/Button";
 import { useBookingService } from "../../../../services/useBookingService";
 import type { BookingResponse } from "../../../../services/useBookingService";
 import { useReviewService } from "../../../../services/useReviewService";
+import { useMessagingService } from "../../../../services/useMessagingService";
+import { usePresenceService } from "../../../../services/usePresenceService";
+import { useWebSocket } from "../../../../contexts/WebSocketContext";
 import { BookingStatusEnum } from "../../../../utils/enums";
 import { formatDate, formatTime, getErrorMessage } from "../../../../utils/helper";
 
@@ -32,6 +35,9 @@ const BookingDetailPage: React.FC = () => {
   const justCreated = Boolean((location.state as { justCreated?: boolean } | null)?.justCreated);
   const bookingService = useBookingService();
   const reviewService = useReviewService();
+  const messagingService = useMessagingService();
+  const presenceService = usePresenceService();
+  const { subscribe } = useWebSocket();
 
   const [booking, setBooking] = useState<BookingResponse | null>(null);
   const [series, setSeries] = useState<BookingResponse[]>([]);
@@ -41,6 +47,9 @@ const BookingDetailPage: React.FC = () => {
   const [cancelTarget, setCancelTarget] = useState<"single" | "series" | null>(null);
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const [caretakerOnline, setCaretakerOnline] = useState(false);
+  const [startingConversation, setStartingConversation] = useState(false);
+  const [messageError, setMessageError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -73,6 +82,43 @@ const BookingDetailPage: React.FC = () => {
   useEffect(() => {
     if (bookingId) load();
   }, [bookingId, load]);
+
+  const caretakerUserId = booking?.caretakerUserId ?? null;
+
+  useEffect(() => {
+    if (!caretakerUserId) return;
+    presenceService
+      .getStatus([caretakerUserId])
+      .then((status) => setCaretakerOnline(Boolean(status[caretakerUserId])))
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [caretakerUserId]);
+
+  useEffect(() => {
+    if (!caretakerUserId) return undefined;
+    return subscribe("/topic/presence", (frame) => {
+      try {
+        const payload: { userId: number; online: boolean } = JSON.parse(frame.body);
+        if (payload.userId === caretakerUserId) setCaretakerOnline(payload.online);
+      } catch {
+        // ignore malformed presence frames
+      }
+    });
+  }, [subscribe, caretakerUserId]);
+
+  const handleMessageCaretaker = async () => {
+    if (!caretakerUserId || startingConversation) return;
+    setMessageError(null);
+    setStartingConversation(true);
+    try {
+      const conversation = await messagingService.getOrCreateConversation({ otherUserId: caretakerUserId, bookingId: booking!.id });
+      navigate(`/family/messages?conversationId=${conversation.id}`);
+    } catch (err) {
+      setMessageError(getErrorMessage(err, "Could not start a conversation"));
+    } finally {
+      setStartingConversation(false);
+    }
+  };
 
   const confirmCancel = async () => {
     if (!booking || !cancelTarget) return;
@@ -121,6 +167,11 @@ const BookingDetailPage: React.FC = () => {
           {cancelError}
         </Alert>
       )}
+      {messageError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {messageError}
+        </Alert>
+      )}
 
       <Card variant="outlined">
         <CardContent>
@@ -146,7 +197,29 @@ const BookingDetailPage: React.FC = () => {
 
           <Stack spacing={1.25}>
             <Row label="Elder" value={booking.elderName ?? "—"} />
-            <Row label="Caretaker" value={booking.caretakerName ?? "—"} />
+            <Row
+              label="Caretaker"
+              value={
+                caretakerUserId ? (
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Box
+                      sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        bgcolor: caretakerOnline ? "success.main" : "grey.400",
+                      }}
+                    />
+                    <span>{booking.caretakerName ?? "—"}</span>
+                    <Typography variant="caption" color="text.secondary">
+                      {caretakerOnline ? "Online" : "Offline"}
+                    </Typography>
+                  </Stack>
+                ) : (
+                  booking.caretakerName ?? "—"
+                )
+              }
+            />
             <Row label="Service" value={booking.serviceName ?? "—"} />
             <Row label="Date" value={formatDate(booking.scheduledDate)} />
             <Row label="Time" value={formatTime(booking.scheduledTime)} />
@@ -201,6 +274,11 @@ const BookingDetailPage: React.FC = () => {
         {booking.status === BookingStatusEnum.COMPLETED && (
           <Button variant="outlined" onClick={() => navigate(`/family/reviews?bookingId=${booking.id}`)}>
             {hasReview ? "View Your Review" : "Leave a Review"}
+          </Button>
+        )}
+        {caretakerUserId && (
+          <Button variant="outlined" startIcon={<FiMessageCircle size={16} />} loading={startingConversation} onClick={handleMessageCaretaker}>
+            Message Caretaker
           </Button>
         )}
       </Stack>

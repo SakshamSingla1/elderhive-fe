@@ -65,6 +65,7 @@ describe("NotificationBell", () => {
         subscribeCallback = cb;
         return () => {};
       }),
+      publish: vi.fn(),
     });
     mockUser();
   });

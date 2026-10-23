@@ -77,6 +77,7 @@ describe("Caretaker Emergency.page", () => {
         subscribeCallbacks.set(destination, cb);
         return () => {};
       }),
+      publish: vi.fn(),
     });
     mockedUseAuthenticatedUser.mockReturnValue({
       user: { id: 200, email: "caretaker@example.com", userType: UserTypeEnum.CARETAKER, primaryRole: UserTypeEnum.CARETAKER, roles: [UserTypeEnum.CARETAKER] },

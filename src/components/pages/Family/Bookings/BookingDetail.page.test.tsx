@@ -5,6 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useBookingService } from "../../../../services/useBookingService";
 import type { BookingResponse } from "../../../../services/useBookingService";
 import { useReviewService } from "../../../../services/useReviewService";
+import { useMessagingService } from "../../../../services/useMessagingService";
+import { usePresenceService } from "../../../../services/usePresenceService";
+import { useWebSocket } from "../../../../contexts/WebSocketContext";
 import BookingDetailPage from "./BookingDetail.page";
 
 vi.mock("../../../../services/useBookingService", () => ({
@@ -13,9 +16,21 @@ vi.mock("../../../../services/useBookingService", () => ({
 vi.mock("../../../../services/useReviewService", () => ({
   useReviewService: vi.fn(),
 }));
+vi.mock("../../../../services/useMessagingService", () => ({
+  useMessagingService: vi.fn(),
+}));
+vi.mock("../../../../services/usePresenceService", () => ({
+  usePresenceService: vi.fn(),
+}));
+vi.mock("../../../../contexts/WebSocketContext", () => ({
+  useWebSocket: vi.fn(),
+}));
 
 const mockedUseBookingService = vi.mocked(useBookingService);
 const mockedUseReviewService = vi.mocked(useReviewService);
+const mockedUseMessagingService = vi.mocked(useMessagingService);
+const mockedUsePresenceService = vi.mocked(usePresenceService);
+const mockedUseWebSocket = vi.mocked(useWebSocket);
 
 function booking(overrides: Partial<BookingResponse> = {}): BookingResponse {
   return {
@@ -25,6 +40,7 @@ function booking(overrides: Partial<BookingResponse> = {}): BookingResponse {
     elderName: "Robert",
     caretakerId: 20,
     caretakerName: "Jane Caretaker",
+    caretakerUserId: 200,
     serviceOfferingId: 30,
     serviceName: "Weekly Temple Visit",
     scheduledDate: "2026-03-02",
@@ -70,6 +86,23 @@ function mockReviewService(overrides: Partial<ReturnType<typeof useReviewService
   return service;
 }
 
+function mockMessagingService(overrides: Partial<ReturnType<typeof useMessagingService>> = {}) {
+  const service = {
+    getOrCreateConversation: vi.fn().mockResolvedValue({ id: 50 }),
+    getMyConversations: vi.fn(),
+    getMessages: vi.fn(),
+    markRead: vi.fn(),
+    ...overrides,
+  };
+  mockedUseMessagingService.mockReturnValue(service);
+  return service;
+}
+
+function mockPresenceService(getStatus: ReturnType<typeof vi.fn> = vi.fn().mockResolvedValue({ "200": false })) {
+  mockedUsePresenceService.mockReturnValue({ getStatus } as unknown as ReturnType<typeof usePresenceService>);
+  return getStatus;
+}
+
 function renderPage(id = "1", state?: { justCreated?: boolean }) {
   return render(
     <MemoryRouter initialEntries={[{ pathname: `/family/bookings/${id}`, state }]}>
@@ -84,6 +117,9 @@ function renderPage(id = "1", state?: { justCreated?: boolean }) {
 describe("BookingDetail.page", () => {
   beforeEach(() => {
     mockReviewService();
+    mockMessagingService();
+    mockPresenceService();
+    mockedUseWebSocket.mockReturnValue({ connected: true, subscribe: vi.fn(() => () => {}), publish: vi.fn() });
   });
 
   afterEach(() => {
@@ -199,5 +235,62 @@ describe("BookingDetail.page", () => {
     await user.click(screen.getByRole("button", { name: /Back to bookings/ }));
 
     expect(await screen.findByText("bookings listing page")).toBeInTheDocument();
+  });
+
+  it("shows the caretaker's presence from the initial snapshot", async () => {
+    mockService();
+    mockPresenceService(vi.fn().mockResolvedValue({ "200": true }));
+    renderPage();
+
+    expect(await screen.findByText("Online")).toBeInTheDocument();
+  });
+
+  it("updates the caretaker's presence live from a /topic/presence event", async () => {
+    let presenceCallback: ((frame: { body: string }) => void) | null = null;
+    mockService();
+    mockedUseWebSocket.mockReturnValue({
+      connected: true,
+      subscribe: vi.fn((_, cb) => {
+        presenceCallback = cb;
+        return () => {};
+      }),
+      publish: vi.fn(),
+    });
+    renderPage();
+
+    expect(await screen.findByText("Offline")).toBeInTheDocument();
+    presenceCallback!({ body: JSON.stringify({ userId: 200, online: true }) });
+
+    expect(await screen.findByText("Online")).toBeInTheDocument();
+  });
+
+  it("starting a conversation from Message Caretaker navigates to the thread", async () => {
+    const user = userEvent.setup();
+    mockService();
+    const messaging = mockMessagingService({ getOrCreateConversation: vi.fn().mockResolvedValue({ id: 77 }) });
+    render(
+      <MemoryRouter initialEntries={["/family/bookings/1"]}>
+        <Routes>
+          <Route path="/family/bookings/:id" element={<BookingDetailPage />} />
+          <Route path="/family/messages" element={<div>messages page</div>} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    await user.click(await screen.findByRole("button", { name: "Message Caretaker" }));
+
+    expect(messaging.getOrCreateConversation).toHaveBeenCalledWith({ otherUserId: 200, bookingId: 1 });
+    expect(await screen.findByText("messages page")).toBeInTheDocument();
+  });
+
+  it("shows an error if starting a conversation fails", async () => {
+    const user = userEvent.setup();
+    mockService();
+    mockMessagingService({ getOrCreateConversation: vi.fn().mockRejectedValue(new Error("Could not reach that user")) });
+    renderPage();
+
+    await user.click(await screen.findByRole("button", { name: "Message Caretaker" }));
+
+    expect(await screen.findByText("Could not reach that user")).toBeInTheDocument();
   });
 });
