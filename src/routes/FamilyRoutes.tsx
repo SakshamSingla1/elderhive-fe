@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiAlertTriangle, FiCalendar, FiMail, FiShoppingBag, FiUsers } from "react-icons/fi";
+import { FiAlertTriangle, FiCalendar, FiMail, FiShoppingBag, FiStar, FiUsers } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import type { SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
@@ -18,6 +18,7 @@ const BookingsPage = lazy(() => import("../components/pages/Family/Bookings/Book
 const BookingFormPage = lazy(() => import("../components/pages/Family/Bookings/BookingForm.page"));
 const BookingDetailPage = lazy(() => import("../components/pages/Family/Bookings/BookingDetail.page"));
 const EmergencyPage = lazy(() => import("../components/pages/Family/Emergency.page"));
+const ReviewsPage = lazy(() => import("../components/pages/Family/Reviews.page"));
 
 const LoadingFallback: React.FC = () => (
   <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
@@ -67,6 +68,11 @@ const FamilyRoutes: React.FC = () => {
           <Route path="bookings/new" element={<BookingFormPage />} />
           <Route path="bookings/:id" element={<BookingDetailPage />} />
           <Route path="emergency" element={<EmergencyPage />} />
+          {/* Reached via BookingDetail.page.tsx's own "Leave a Review"/"View Your Review"
+              link with ?bookingId= (Prompt 91) — same "outside-the-sidebar, reached from
+              elsewhere" pattern as account-settings/notifications above, not a standalone
+              STATIC_NAV_ITEMS destination. */}
+          <Route path="reviews" element={<ReviewsPage />} />
           <Route path="*" element={<Navigate to="/family/dashboard" replace />} />
         </Route>
       </Routes>

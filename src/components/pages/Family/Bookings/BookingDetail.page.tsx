@@ -5,6 +5,7 @@ import { FiArrowLeft, FiCalendar, FiRepeat } from "react-icons/fi";
 import Button from "../../../atoms/Button/Button";
 import { useBookingService } from "../../../../services/useBookingService";
 import type { BookingResponse } from "../../../../services/useBookingService";
+import { useReviewService } from "../../../../services/useReviewService";
 import { BookingStatusEnum } from "../../../../utils/enums";
 import { formatDate, formatTime, getErrorMessage } from "../../../../utils/helper";
 
@@ -30,9 +31,11 @@ const BookingDetailPage: React.FC = () => {
   const location = useLocation();
   const justCreated = Boolean((location.state as { justCreated?: boolean } | null)?.justCreated);
   const bookingService = useBookingService();
+  const reviewService = useReviewService();
 
   const [booking, setBooking] = useState<BookingResponse | null>(null);
   const [series, setSeries] = useState<BookingResponse[]>([]);
+  const [hasReview, setHasReview] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [cancelTarget, setCancelTarget] = useState<"single" | "series" | null>(null);
@@ -49,6 +52,15 @@ const BookingDetailPage: React.FC = () => {
         setSeries(await bookingService.getRecurringGroup(result.recurringGroupId));
       } else {
         setSeries([]);
+      }
+      if (result.status === BookingStatusEnum.COMPLETED) {
+        try {
+          await reviewService.getByBooking(bookingId);
+          setHasReview(true);
+        } catch {
+          // 404 (REVIEW_NOT_FOUND) just means no review exists yet — not a real error.
+          setHasReview(false);
+        }
       }
     } catch (err) {
       setLoadError(getErrorMessage(err, "Could not load this booking"));
@@ -184,6 +196,11 @@ const BookingDetailPage: React.FC = () => {
         {booking.recurringGroupId && seriesHasCancellable && (
           <Button variant="outlined" color="error" onClick={() => setCancelTarget("series")}>
             Cancel Entire Series
+          </Button>
+        )}
+        {booking.status === BookingStatusEnum.COMPLETED && (
+          <Button variant="outlined" onClick={() => navigate(`/family/reviews?bookingId=${booking.id}`)}>
+            {hasReview ? "View Your Review" : "Leave a Review"}
           </Button>
         )}
       </Stack>

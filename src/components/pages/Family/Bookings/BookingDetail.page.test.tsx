@@ -1,16 +1,21 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useBookingService } from "../../../../services/useBookingService";
 import type { BookingResponse } from "../../../../services/useBookingService";
+import { useReviewService } from "../../../../services/useReviewService";
 import BookingDetailPage from "./BookingDetail.page";
 
 vi.mock("../../../../services/useBookingService", () => ({
   useBookingService: vi.fn(),
 }));
+vi.mock("../../../../services/useReviewService", () => ({
+  useReviewService: vi.fn(),
+}));
 
 const mockedUseBookingService = vi.mocked(useBookingService);
+const mockedUseReviewService = vi.mocked(useReviewService);
 
 function booking(overrides: Partial<BookingResponse> = {}): BookingResponse {
   return {
@@ -51,6 +56,20 @@ function mockService(overrides: Partial<ReturnType<typeof useBookingService>> = 
   return service;
 }
 
+// Defaults to "not reviewed yet" (a rejected promise, same as a real REVIEW_NOT_FOUND 404)
+// so a COMPLETED-status test that doesn't care about review state still resolves cleanly.
+function mockReviewService(overrides: Partial<ReturnType<typeof useReviewService>> = {}) {
+  const service = {
+    create: vi.fn(),
+    getByCaretaker: vi.fn(),
+    getByBooking: vi.fn().mockRejectedValue(new Error("not found")),
+    reply: vi.fn(),
+    ...overrides,
+  };
+  mockedUseReviewService.mockReturnValue(service);
+  return service;
+}
+
 function renderPage(id = "1", state?: { justCreated?: boolean }) {
   return render(
     <MemoryRouter initialEntries={[{ pathname: `/family/bookings/${id}`, state }]}>
@@ -63,6 +82,10 @@ function renderPage(id = "1", state?: { justCreated?: boolean }) {
 }
 
 describe("BookingDetail.page", () => {
+  beforeEach(() => {
+    mockReviewService();
+  });
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -123,6 +146,30 @@ describe("BookingDetail.page", () => {
 
     await screen.findByText("Booking Details");
     expect(screen.queryByRole("button", { name: "Cancel Booking" })).not.toBeInTheDocument();
+  });
+
+  it("offers Leave a Review for a COMPLETED booking with no review yet", async () => {
+    mockService({ getById: vi.fn().mockResolvedValue(booking({ status: "COMPLETED" })) });
+    renderPage();
+
+    expect(await screen.findByRole("button", { name: "Leave a Review" })).toBeInTheDocument();
+  });
+
+  it("offers View Your Review for a COMPLETED booking that's already been reviewed", async () => {
+    mockService({ getById: vi.fn().mockResolvedValue(booking({ status: "COMPLETED" })) });
+    mockReviewService({ getByBooking: vi.fn().mockResolvedValue({ id: 5 }) });
+    renderPage();
+
+    expect(await screen.findByRole("button", { name: "View Your Review" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Leave a Review" })).not.toBeInTheDocument();
+  });
+
+  it("never offers a review button for a non-COMPLETED booking", async () => {
+    mockService();
+    renderPage();
+
+    await screen.findByText("Booking Details");
+    expect(screen.queryByRole("button", { name: /Review/ })).not.toBeInTheDocument();
   });
 
   it("shows Cancel Entire Series for a recurring booking and cancels the whole series on confirmation", async () => {
