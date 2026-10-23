@@ -1,14 +1,15 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiAlertTriangle, FiCalendar, FiCheckCircle, FiDroplet, FiSettings, FiShoppingBag, FiTag } from "react-icons/fi";
+import { FiAlertTriangle, FiCalendar, FiCheckCircle, FiDroplet, FiSettings, FiShoppingBag, FiTag, FiUsers } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
 import { UserTypeEnum } from "../utils/enums";
 import type { SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
 
-const PlaceholderDashboardPage = lazy(() => import("../components/pages/Dashboard/PlaceholderDashboard.page"));
+const AdminDashboardPage = lazy(() => import("../components/pages/Admin/Dashboard.page"));
+const AdminUsersPage = lazy(() => import("../components/pages/Admin/Users.page"));
 const PlatformSettingsPage = lazy(() => import("../components/pages/Admin/PlatformSettings.page"));
 const ListingColorThemePage = lazy(() => import("../components/pages/ColorTheme/ListingColorTheme.page"));
 const AddColorThemePage = lazy(() => import("../components/pages/ColorTheme/AddColorTheme.page"));
@@ -39,6 +40,7 @@ const AdminEmergencyAlertsFormPage = lazy(() => import("../components/pages/Admi
 // below) - same redirect-not-render reasoning, applied to the link too.
 function buildStaticNavItems(isSuperAdmin: boolean): SidebarNavItem[] {
   const items: SidebarNavItem[] = [
+    { label: "Users", path: "/admin/users", icon: <FiUsers size={18} />, navIndex: 49 },
     { label: "Caretaker Verification", path: "/admin/caretaker-verification", icon: <FiCheckCircle size={18} />, navIndex: 50 },
     { label: "Service Categories", path: "/admin/service-categories", icon: <FiTag size={18} />, navIndex: 51 },
     { label: "Services", path: "/admin/services", icon: <FiShoppingBag size={18} />, navIndex: 52 },
@@ -81,7 +83,12 @@ const AdminRoutes: React.FC = () => {
               falls through to "*" again. Caught the hard way: a test for the ADMIN ->
               platform-settings redirect hung with exactly that accumulating pathname. */}
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
-          <Route path="dashboard" element={<PlaceholderDashboardPage roleLabel={roleLabel} />} />
+          <Route path="dashboard" element={<AdminDashboardPage />} />
+          {/* USER_MANAGE-gated server-side only (Prompt 93's AdminUserController), same
+              documented no-FE-permission-check limitation as the routes below - open to
+              both ADMIN and SUPER_ADMIN at the route level; the page itself further
+              restricts granting/revoking ADMIN/SUPER_ADMIN to Super-Admin viewers. */}
+          <Route path="users" element={<AdminUsersPage />} />
           {/*
             Super-Admin-only, gated the same way RolesPermissions will be: CONFIG_MANAGE
             (like ROLE_MANAGE) is Super-Admin-only in practice per the Phase 3 seeding, and

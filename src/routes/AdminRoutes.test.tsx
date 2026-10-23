@@ -6,6 +6,7 @@ import AdminRoutes from "./AdminRoutes";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import { useMetaConfigService } from "../services/useMetaConfigService";
+import { useAdminDashboardService } from "../services/useAdminDashboardService";
 import { UserTypeEnum } from "../utils/enums";
 
 vi.mock("../contexts/AuthenticatedUserContext", () => ({
@@ -17,10 +18,14 @@ vi.mock("../hooks/useSidebarNavItems", () => ({
 vi.mock("../services/useMetaConfigService", () => ({
   useMetaConfigService: vi.fn(),
 }));
+vi.mock("../services/useAdminDashboardService", () => ({
+  useAdminDashboardService: vi.fn(),
+}));
 
 const mockedUseAuthenticatedUser = vi.mocked(useAuthenticatedUser);
 const mockedUseSidebarNavItems = vi.mocked(useSidebarNavItems);
 const mockedUseMetaConfigService = vi.mocked(useMetaConfigService);
+const mockedUseAdminDashboardService = vi.mocked(useAdminDashboardService);
 
 function mockUser(userType: (typeof UserTypeEnum)[keyof typeof UserTypeEnum]) {
   mockedUseAuthenticatedUser.mockReturnValue({
@@ -47,6 +52,15 @@ describe("AdminRoutes — platform-settings gating", () => {
       upsert: vi.fn(),
       remove: vi.fn(),
     });
+    mockedUseAdminDashboardService.mockReturnValue({
+      getStats: vi.fn().mockResolvedValue({
+        activeUsersByRole: {},
+        bookingsThisWeek: 0,
+        openEmergencyAlerts: 0,
+        overdueEmergencyAlerts: 0,
+        pendingCaretakerVerifications: 0,
+      }),
+    });
   });
 
   function renderAt(initialPath: string) {
@@ -70,7 +84,7 @@ describe("AdminRoutes — platform-settings gating", () => {
     mockUser(UserTypeEnum.ADMIN);
     renderAt("/admin/platform-settings");
 
-    expect(await screen.findByText("Admin Dashboard")).toBeInTheDocument();
+    expect(await screen.findByText("Platform Overview")).toBeInTheDocument();
     expect(screen.queryByText("Platform Settings")).not.toBeInTheDocument();
   });
 });

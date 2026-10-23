@@ -106,6 +106,9 @@ describe('App', () => {
         if (method === 'GET' && url === '/nav-links/me') {
           return [{ id: 1, navGroup: null, navIndex: 0, name: 'Manage Users', path: '/admin/users', icon: 'users', requiredPermission: null, superAdminOnly: false, status: 'ACTIVE' }];
         }
+        if (method === 'GET' && url === '/api/v1/dashboard/stats') {
+          return { activeUsersByRole: {}, bookingsThisWeek: 0, openEmergencyAlerts: 0, overdueEmergencyAlerts: 0, pendingCaretakerVerifications: 0 };
+        }
         throw new Error(`Unexpected request: ${method} ${url}`);
       });
 
@@ -117,8 +120,9 @@ describe('App', () => {
         </MemoryRouter>
       );
 
-      expect(await screen.findByRole('heading', { name: 'Admin Dashboard' })).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: 'Platform Overview' })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Manage Users' })).toBeInTheDocument();
+      expect(screen.getByText('Admin')).toBeInTheDocument();
     });
 
     it('a SUPER_ADMIN lands on the same admin shell but with "Super Admin" as the roleLabel', async () => {
@@ -126,6 +130,9 @@ describe('App', () => {
       mockedRequest.mockImplementation(async (method: string, url: string) => {
         if (method === 'POST' && url === '/auth/refresh') return undefined;
         if (method === 'GET' && url === '/nav-links/me') return [];
+        if (method === 'GET' && url === '/api/v1/dashboard/stats') {
+          return { activeUsersByRole: {}, bookingsThisWeek: 0, openEmergencyAlerts: 0, overdueEmergencyAlerts: 0, pendingCaretakerVerifications: 0 };
+        }
         throw new Error(`Unexpected request: ${method} ${url}`);
       });
 
@@ -137,7 +144,8 @@ describe('App', () => {
         </MemoryRouter>
       );
 
-      expect(await screen.findByRole('heading', { name: 'Super Admin Dashboard' })).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: 'Platform Overview' })).toBeInTheDocument();
+      expect(screen.getByText('Super Admin')).toBeInTheDocument();
     });
 
     it('redirects an unauthenticated visitor hitting a protected shell to /login', async () => {
@@ -196,6 +204,9 @@ describe('App', () => {
       mockedRequest.mockImplementation(async (method: string, url: string) => {
         if (method === 'POST' && url === '/auth/refresh') return undefined;
         if (method === 'GET' && url === '/nav-links/me') return [];
+        if (method === 'GET' && url === '/api/v1/dashboard/stats') {
+          return { activeUsersByRole: {}, bookingsThisWeek: 0, openEmergencyAlerts: 0, overdueEmergencyAlerts: 0, pendingCaretakerVerifications: 0 };
+        }
         throw new Error(`Unexpected request: ${method} ${url}`);
       });
 
@@ -207,7 +218,7 @@ describe('App', () => {
         </MemoryRouter>
       );
 
-      expect(await screen.findByRole('heading', { name: 'Admin Dashboard' })).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: 'Platform Overview' })).toBeInTheDocument();
       expect(screen.queryByRole('heading', { name: 'Platform Settings' })).not.toBeInTheDocument();
     });
 
