@@ -17,6 +17,8 @@
     "@mui/material": "^7.3.7",
     "@mui/x-date-pickers": "^8.8.0",
     "@stomp/stompjs": "^7.5.0",
+    "@stripe/react-stripe-js": "^2.9.0",
+    "@stripe/stripe-js": "^4.10.0",
     "axios": "^1.10.0",
     "dayjs": "^1.11.13",
     "formik": "^2.4.6",

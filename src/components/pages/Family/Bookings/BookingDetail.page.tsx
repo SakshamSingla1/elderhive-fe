@@ -8,9 +8,23 @@ import type { BookingResponse } from "../../../../services/useBookingService";
 import { useReviewService } from "../../../../services/useReviewService";
 import { useMessagingService } from "../../../../services/useMessagingService";
 import { usePresenceService } from "../../../../services/usePresenceService";
+import { usePaymentService } from "../../../../services/usePaymentService";
+import type { CreatePaymentIntentResponse, PaymentResponse } from "../../../../services/usePaymentService";
+import CheckoutPaymentForm from "../../../molecules/Payment/CheckoutPaymentForm";
 import { useWebSocket } from "../../../../contexts/WebSocketContext";
-import { BookingStatusEnum } from "../../../../utils/enums";
+import { isStripeConfigured } from "../../../../utils/stripeClient";
+import { BookingStatusEnum, PaymentStatusEnum } from "../../../../utils/enums";
 import { formatDate, formatTime, getErrorMessage } from "../../../../utils/helper";
+
+const PAYMENT_STATUS_COLOR: Record<PaymentStatusEnum, "default" | "warning" | "success" | "error"> = {
+  PENDING: "warning",
+  SUCCEEDED: "success",
+  FAILED: "error",
+  REFUNDED: "default",
+};
+// Only these statuses let a family member start (or resume) a checkout - matches
+// PaymentServiceImpl#createIntent's own BOOKING_NOT_PAYABLE / reuse-the-PENDING-row rules.
+const PAYABLE_PAYMENT_STATUSES: PaymentStatusEnum[] = [PaymentStatusEnum.PENDING, PaymentStatusEnum.FAILED];
 
 const CANCELLABLE: BookingStatusEnum[] = [BookingStatusEnum.PENDING, BookingStatusEnum.CONFIRMED, BookingStatusEnum.IN_PROGRESS];
 const STATUS_COLOR: Record<BookingStatusEnum, "default" | "warning" | "info" | "success" | "error"> = {
@@ -37,6 +51,7 @@ const BookingDetailPage: React.FC = () => {
   const reviewService = useReviewService();
   const messagingService = useMessagingService();
   const presenceService = usePresenceService();
+  const paymentService = usePaymentService();
   const { subscribe } = useWebSocket();
 
   const [booking, setBooking] = useState<BookingResponse | null>(null);
@@ -51,6 +66,25 @@ const BookingDetailPage: React.FC = () => {
   const [startingConversation, setStartingConversation] = useState(false);
   const [messageError, setMessageError] = useState<string | null>(null);
 
+  // Payments are additive (Prompt 97) - `payment` stays null for the vast majority of
+  // bookings that never go through checkout at all, and nothing below ever blocks on it.
+  const [payment, setPayment] = useState<PaymentResponse | null>(null);
+  const [intent, setIntent] = useState<CreatePaymentIntentResponse | null>(null);
+  const [creatingIntent, setCreatingIntent] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [justSubmittedPayment, setJustSubmittedPayment] = useState(false);
+
+  const refreshPayment = useCallback(async () => {
+    try {
+      const payments = await paymentService.getByBooking(bookingId);
+      setPayment(payments[0] ?? null);
+    } catch {
+      // No payment exists yet for this booking - not a real error, just nothing to show.
+      setPayment(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bookingId]);
+
   const load = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
@@ -62,6 +96,7 @@ const BookingDetailPage: React.FC = () => {
       } else {
         setSeries([]);
       }
+      await refreshPayment();
       if (result.status === BookingStatusEnum.COMPLETED) {
         try {
           await reviewService.getByBooking(bookingId);
@@ -118,6 +153,29 @@ const BookingDetailPage: React.FC = () => {
     } finally {
       setStartingConversation(false);
     }
+  };
+
+  const handlePayNow = async () => {
+    if (!booking || creatingIntent) return;
+    setPaymentError(null);
+    setCreatingIntent(true);
+    try {
+      setIntent(await paymentService.createIntent(booking.id));
+    } catch (err) {
+      setPaymentError(getErrorMessage(err, "Could not start checkout for this booking"));
+    } finally {
+      setCreatingIntent(false);
+    }
+  };
+
+  const handlePaymentSuccess = () => {
+    // Stripe confirmed client-side, but this booking's Payment row only flips to
+    // SUCCEEDED once Stripe's webhook is delivered (PaymentServiceImpl#handleWebhook) -
+    // an optimistic "processing" message, not a guarantee, same caveat
+    // CheckoutPaymentForm's own doc comment makes.
+    setIntent(null);
+    setJustSubmittedPayment(true);
+    refreshPayment();
   };
 
   const confirmCancel = async () => {
@@ -224,6 +282,12 @@ const BookingDetailPage: React.FC = () => {
             <Row label="Date" value={formatDate(booking.scheduledDate)} />
             <Row label="Time" value={formatTime(booking.scheduledTime)} />
             <Row label="Cost" value={booking.cost != null ? `$${booking.cost}` : "—"} />
+            {payment && (
+              <Row
+                label="Payment"
+                value={<Chip size="small" label={payment.status} color={PAYMENT_STATUS_COLOR[payment.status]} />}
+              />
+            )}
           </Stack>
 
           {booking.notes && (
@@ -259,6 +323,35 @@ const BookingDetailPage: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {isStripeConfigured &&
+        booking.status === BookingStatusEnum.CONFIRMED &&
+        (!payment || PAYABLE_PAYMENT_STATUSES.includes(payment.status)) && (
+          <Card variant="outlined" sx={{ mt: 2.5 }}>
+            <CardContent>
+              <Typography variant="subtitle1" fontWeight={700} gutterBottom>
+                Payment
+              </Typography>
+              {paymentError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {paymentError}
+                </Alert>
+              )}
+              {justSubmittedPayment && !intent && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  Payment submitted — this page will reflect the final result once it's confirmed.
+                </Alert>
+              )}
+              {intent ? (
+                <CheckoutPaymentForm clientSecret={intent.clientSecret} onSuccess={handlePaymentSuccess} />
+              ) : (
+                <Button variant="contained" loading={creatingIntent} onClick={handlePayNow}>
+                  {payment?.status === PaymentStatusEnum.FAILED ? "Retry Payment" : "Pay Now"}
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
       <Stack direction="row" spacing={1.5} mt={2.5} flexWrap="wrap">
         {isCancellable && (

@@ -7,6 +7,7 @@ import type { BookingResponse } from "../../../../services/useBookingService";
 import { useReviewService } from "../../../../services/useReviewService";
 import { useMessagingService } from "../../../../services/useMessagingService";
 import { usePresenceService } from "../../../../services/usePresenceService";
+import { usePaymentService } from "../../../../services/usePaymentService";
 import { useWebSocket } from "../../../../contexts/WebSocketContext";
 import BookingDetailPage from "./BookingDetail.page";
 
@@ -22,14 +23,30 @@ vi.mock("../../../../services/useMessagingService", () => ({
 vi.mock("../../../../services/usePresenceService", () => ({
   usePresenceService: vi.fn(),
 }));
+vi.mock("../../../../services/usePaymentService", () => ({
+  usePaymentService: vi.fn(),
+}));
 vi.mock("../../../../contexts/WebSocketContext", () => ({
   useWebSocket: vi.fn(),
+}));
+// Avoids a real Stripe.js CDN fetch (getStripe) and real Stripe Elements rendering in
+// jsdom - the Pay Now flow's own tests below only care that the right props reach this
+// component, not Stripe's own checkout UI (that's CheckoutPaymentForm's own test's job).
+vi.mock("../../../../utils/stripeClient", () => ({
+  isStripeConfigured: true,
+  getStripe: vi.fn().mockResolvedValue(null),
+}));
+vi.mock("../../../molecules/Payment/CheckoutPaymentForm", () => ({
+  default: ({ onSuccess }: { clientSecret: string; onSuccess: () => void }) => (
+    <button onClick={onSuccess}>mock-checkout-success</button>
+  ),
 }));
 
 const mockedUseBookingService = vi.mocked(useBookingService);
 const mockedUseReviewService = vi.mocked(useReviewService);
 const mockedUseMessagingService = vi.mocked(useMessagingService);
 const mockedUsePresenceService = vi.mocked(usePresenceService);
+const mockedUsePaymentService = vi.mocked(usePaymentService);
 const mockedUseWebSocket = vi.mocked(useWebSocket);
 
 function booking(overrides: Partial<BookingResponse> = {}): BookingResponse {
@@ -103,6 +120,17 @@ function mockPresenceService(getStatus: ReturnType<typeof vi.fn> = vi.fn().mockR
   return getStatus;
 }
 
+function mockPaymentService(overrides: Partial<ReturnType<typeof usePaymentService>> = {}) {
+  const service = {
+    createIntent: vi.fn().mockResolvedValue({ paymentId: 500, clientSecret: "secret_123", amount: 40, currency: "usd" }),
+    getById: vi.fn(),
+    getByBooking: vi.fn().mockResolvedValue([]),
+    ...overrides,
+  };
+  mockedUsePaymentService.mockReturnValue(service);
+  return service;
+}
+
 function renderPage(id = "1", state?: { justCreated?: boolean }) {
   return render(
     <MemoryRouter initialEntries={[{ pathname: `/family/bookings/${id}`, state }]}>
@@ -119,6 +147,7 @@ describe("BookingDetail.page", () => {
     mockReviewService();
     mockMessagingService();
     mockPresenceService();
+    mockPaymentService();
     mockedUseWebSocket.mockReturnValue({ connected: true, subscribe: vi.fn(() => () => {}), publish: vi.fn() });
   });
 
@@ -292,5 +321,71 @@ describe("BookingDetail.page", () => {
     await user.click(await screen.findByRole("button", { name: "Message Caretaker" }));
 
     expect(await screen.findByText("Could not reach that user")).toBeInTheDocument();
+  });
+
+  it("offers Pay Now for a CONFIRMED booking with no payment yet", async () => {
+    mockService({ getById: vi.fn().mockResolvedValue(booking({ status: "CONFIRMED" })) });
+    renderPage();
+
+    expect(await screen.findByRole("button", { name: "Pay Now" })).toBeInTheDocument();
+  });
+
+  it("never offers Pay Now for a booking that isn't CONFIRMED", async () => {
+    mockService();
+    renderPage();
+
+    await screen.findByText("Booking Details");
+    expect(screen.queryByRole("button", { name: /Pay Now/ })).not.toBeInTheDocument();
+  });
+
+  it("shows a payment status chip and hides Pay Now once the payment has SUCCEEDED", async () => {
+    mockService({ getById: vi.fn().mockResolvedValue(booking({ status: "CONFIRMED" })) });
+    mockPaymentService({
+      getByBooking: vi.fn().mockResolvedValue([{ id: 5, bookingId: 1, amount: 40, currency: "usd", status: "SUCCEEDED" }]),
+    });
+    renderPage();
+
+    expect(await screen.findByText("SUCCEEDED")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Pay Now/ })).not.toBeInTheDocument();
+  });
+
+  it("offers Retry Payment (not Pay Now) once the latest attempt has FAILED", async () => {
+    mockService({ getById: vi.fn().mockResolvedValue(booking({ status: "CONFIRMED" })) });
+    mockPaymentService({
+      getByBooking: vi.fn().mockResolvedValue([{ id: 5, bookingId: 1, amount: 40, currency: "usd", status: "FAILED" }]),
+    });
+    renderPage();
+
+    expect(await screen.findByRole("button", { name: "Retry Payment" })).toBeInTheDocument();
+  });
+
+  it("starts a checkout on Pay Now and refreshes the payment status once Stripe confirms", async () => {
+    const user = userEvent.setup();
+    mockService({ getById: vi.fn().mockResolvedValue(booking({ status: "CONFIRMED" })) });
+    const getByBooking = vi.fn().mockResolvedValue([]);
+    const payments = mockPaymentService({ getByBooking });
+    renderPage();
+
+    await user.click(await screen.findByRole("button", { name: "Pay Now" }));
+
+    expect(payments.createIntent).toHaveBeenCalledWith(1);
+    const checkoutButton = await screen.findByRole("button", { name: "mock-checkout-success" });
+
+    getByBooking.mockClear();
+    await user.click(checkoutButton);
+
+    expect(await screen.findByText(/Payment submitted/)).toBeInTheDocument();
+    await waitFor(() => expect(getByBooking).toHaveBeenCalledWith(1));
+  });
+
+  it("shows an error when starting checkout fails", async () => {
+    const user = userEvent.setup();
+    mockService({ getById: vi.fn().mockResolvedValue(booking({ status: "CONFIRMED" })) });
+    mockPaymentService({ createIntent: vi.fn().mockRejectedValue(new Error("Only a CONFIRMED booking can be paid for")) });
+    renderPage();
+
+    await user.click(await screen.findByRole("button", { name: "Pay Now" }));
+
+    expect(await screen.findByText("Only a CONFIRMED booking can be paid for")).toBeInTheDocument();
   });
 });

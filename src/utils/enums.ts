@@ -189,3 +189,14 @@ export const ActionType = {
   NOTIFY: "NOTIFY",
 } as const;
 export type ActionType = (typeof ActionType)[keyof typeof ActionType];
+
+// Must stay in sync with com.elderhive.enums.PaymentStatusEnum (backend) — needed to type
+// usePaymentService.ts's PaymentResponse. Driven entirely by Stripe webhook events; this
+// app never sets any of these itself.
+export const PaymentStatusEnum = {
+  PENDING: "PENDING",
+  SUCCEEDED: "SUCCEEDED",
+  FAILED: "FAILED",
+  REFUNDED: "REFUNDED",
+} as const;
+export type PaymentStatusEnum = (typeof PaymentStatusEnum)[keyof typeof PaymentStatusEnum];

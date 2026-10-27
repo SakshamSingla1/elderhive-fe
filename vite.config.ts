@@ -51,6 +51,7 @@ export default defineConfig({
           'vendor-motion': ['framer-motion'],
           'vendor-forms': ['formik', 'yup'],
           'vendor-realtime': ['@stomp/stompjs', 'sockjs-client'],
+          'vendor-payments': ['@stripe/react-stripe-js', '@stripe/stripe-js'],
         },
       },
     },
