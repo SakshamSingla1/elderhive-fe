@@ -26,7 +26,14 @@ describe('App', () => {
     mockedRequest.mockReset();
   });
 
-  it('renders the ElderHive placeholder heading at /', () => {
+  it('renders the real Landing page at / (Prompt 99)', async () => {
+    mockedRequest.mockImplementation(async (method: string, url: string) => {
+      if (method === 'GET' && url === '/api/v1/landing/page') {
+        return { config: null, features: [], faqs: [], testimonials: [] };
+      }
+      throw new Error(`Unexpected request: ${method} ${url}`);
+    });
+
     render(
       <MemoryRouter initialEntries={['/']}>
         <AuthenticatedUserProvider>
@@ -34,7 +41,7 @@ describe('App', () => {
         </AuthenticatedUserProvider>
       </MemoryRouter>
     );
-    expect(screen.getByRole('heading', { name: 'ElderHive' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Compassionate Care, Coordinated Together' })).toBeInTheDocument();
   });
 
   it('renders the role-picker Login page at /login', () => {

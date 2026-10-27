@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiAlertTriangle, FiCalendar, FiCheckCircle, FiDroplet, FiFileText, FiSettings, FiShield, FiShoppingBag, FiTag, FiUsers } from "react-icons/fi";
+import { FiAlertTriangle, FiCalendar, FiCheckCircle, FiDroplet, FiFileText, FiGlobe, FiMail, FiSettings, FiShield, FiShoppingBag, FiTag, FiUsers } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
@@ -29,6 +29,8 @@ const AdminEmergencyAlertsPage = lazy(() => import("../components/pages/Admin/Em
 const AdminEmergencyAlertsFormPage = lazy(() => import("../components/pages/Admin/EmergencyAlertsForm.page"));
 const RolesPermissionsPage = lazy(() => import("../components/pages/Admin/RolesPermissions.page"));
 const AuditLogPage = lazy(() => import("../components/pages/Admin/AuditLog.page"));
+const LandingManagementPage = lazy(() => import("../components/pages/Admin/LandingManagement.page"));
+const ContactUsPage = lazy(() => import("../components/pages/Admin/ContactUs.page"));
 
 // NavLinkServiceImpl#getMine returns whatever's actually seeded for the admin portal
 // today, which doesn't include these pages (Prompt 70's/74's own additions) - appended
@@ -49,6 +51,8 @@ function buildStaticNavItems(isSuperAdmin: boolean): SidebarNavItem[] {
     { label: "Bookings", path: "/admin/bookings", icon: <FiCalendar size={18} />, navIndex: 53 },
     { label: "Color Themes", path: "/admin/color-themes", icon: <FiDroplet size={18} />, navIndex: 54 },
     { label: "Emergency Alerts", path: "/admin/emergency-alerts", icon: <FiAlertTriangle size={18} />, navIndex: 56 },
+    { label: "Landing Page", path: "/admin/landing-management", icon: <FiGlobe size={18} />, navIndex: 59 },
+    { label: "Contact Us", path: "/admin/contact-us", icon: <FiMail size={18} />, navIndex: 60 },
   ];
   if (isSuperAdmin) {
     items.push({ label: "Platform Settings", path: "/admin/platform-settings", icon: <FiSettings size={18} />, navIndex: 55 });
@@ -156,6 +160,12 @@ const AdminRoutes: React.FC = () => {
               above. */}
           <Route path="emergency-alerts" element={<AdminEmergencyAlertsPage />} />
           <Route path="emergency-alerts/:id" element={<AdminEmergencyAlertsFormPage />} />
+          {/* LANDING_MANAGE/CONTACT_US_MANAGE-gated server-side only (Prompt 99) - open
+              to both ADMIN and SUPER_ADMIN at the route level, same documented
+              no-FE-permission-check limitation as the routes above: unlike ROLE_MANAGE/
+              CONFIG_MANAGE, neither permission is Super-Admin-only in the seeder. */}
+          <Route path="landing-management" element={<LandingManagementPage />} />
+          <Route path="contact-us" element={<ContactUsPage />} />
           {/* Every role's shared "pick your theme" entry point (Prompt 51) — reached via
               DashboardLayout's account menu, not the DB-driven sidebar. */}
           <Route path="account-settings" element={<AccountSettingsPage />} />

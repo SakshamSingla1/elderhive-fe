@@ -3,6 +3,7 @@ import { Box, CircularProgress } from '@mui/material';
 import { Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import ThemeInjector from './components/atoms/ThemeInjector/ThemeInjector';
+import LandingPage from './components/pages/Landing/Landing.page';
 import LoginPage from './components/pages/Authentication/Login.page';
 import AdminLoginPage from './components/pages/Authentication/AdminLogin.page';
 import SuperAdminLoginPage from './components/pages/Authentication/SuperAdminLogin.page';
@@ -20,16 +21,6 @@ const CaretakerRoutes = lazy(() => import('./routes/CaretakerRoutes'));
 const ElderRoutes = lazy(() => import('./routes/ElderRoutes'));
 const FamilyRoutes = lazy(() => import('./routes/FamilyRoutes'));
 
-// "/" keeps this placeholder until Phase 4 builds a real Landing page — not this
-// prompt's concern (just wiring the Authentication pages into routing).
-function Placeholder() {
-  return (
-    <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-      <h1>ElderHive</h1>
-    </div>
-  );
-}
-
 function RouteLoadingFallback() {
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
@@ -46,7 +37,7 @@ function App() {
       <ThemeInjector />
       <Suspense fallback={<RouteLoadingFallback />}>
         <Routes>
-          <Route path="/" element={<Placeholder />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/login/super-admin" element={<SuperAdminLoginPage />} />
           <Route path="/login/elder" element={<ElderLoginPage />} />

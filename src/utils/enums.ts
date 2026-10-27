@@ -200,3 +200,12 @@ export const PaymentStatusEnum = {
   REFUNDED: "REFUNDED",
 } as const;
 export type PaymentStatusEnum = (typeof PaymentStatusEnum)[keyof typeof PaymentStatusEnum];
+
+// Must stay in sync with com.elderhive.enums.ContactUsStatusEnum (backend) — needed to
+// type useContactUsService.ts's ContactUsResponse.
+export const ContactUsStatusEnum = {
+  NEW: "NEW",
+  RESPONDED: "RESPONDED",
+  CLOSED: "CLOSED",
+} as const;
+export type ContactUsStatusEnum = (typeof ContactUsStatusEnum)[keyof typeof ContactUsStatusEnum];
