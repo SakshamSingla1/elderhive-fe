@@ -7,6 +7,9 @@ import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import { useMetaConfigService } from "../services/useMetaConfigService";
 import { useAdminDashboardService } from "../services/useAdminDashboardService";
+import { useRoleService } from "../services/useRoleService";
+import { usePermissionService } from "../services/usePermissionService";
+import { useAuditLogService } from "../services/useAuditLogService";
 import { UserTypeEnum } from "../utils/enums";
 
 vi.mock("../contexts/AuthenticatedUserContext", () => ({
@@ -21,11 +24,23 @@ vi.mock("../services/useMetaConfigService", () => ({
 vi.mock("../services/useAdminDashboardService", () => ({
   useAdminDashboardService: vi.fn(),
 }));
+vi.mock("../services/useRoleService", () => ({
+  useRoleService: vi.fn(),
+}));
+vi.mock("../services/usePermissionService", () => ({
+  usePermissionService: vi.fn(),
+}));
+vi.mock("../services/useAuditLogService", () => ({
+  useAuditLogService: vi.fn(),
+}));
 
 const mockedUseAuthenticatedUser = vi.mocked(useAuthenticatedUser);
 const mockedUseSidebarNavItems = vi.mocked(useSidebarNavItems);
 const mockedUseMetaConfigService = vi.mocked(useMetaConfigService);
 const mockedUseAdminDashboardService = vi.mocked(useAdminDashboardService);
+const mockedUseRoleService = vi.mocked(useRoleService);
+const mockedUsePermissionService = vi.mocked(usePermissionService);
+const mockedUseAuditLogService = vi.mocked(useAuditLogService);
 
 function mockUser(userType: (typeof UserTypeEnum)[keyof typeof UserTypeEnum]) {
   mockedUseAuthenticatedUser.mockReturnValue({
@@ -61,6 +76,41 @@ describe("AdminRoutes — platform-settings gating", () => {
         pendingCaretakerVerifications: 0,
       }),
     });
+    mockedUseRoleService.mockReturnValue({
+      getAll: vi.fn().mockResolvedValue({
+        content: [],
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+        size: 20,
+        first: true,
+        last: true,
+        numberOfElements: 0,
+        empty: true,
+      }),
+      getById: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      remove: vi.fn(),
+    });
+    mockedUsePermissionService.mockReturnValue({
+      getAll: vi.fn().mockResolvedValue([]),
+      assignToRole: vi.fn(),
+      unassignFromRole: vi.fn(),
+    });
+    mockedUseAuditLogService.mockReturnValue({
+      search: vi.fn().mockResolvedValue({
+        content: [],
+        totalElements: 0,
+        totalPages: 0,
+        number: 0,
+        size: 20,
+        first: true,
+        last: true,
+        numberOfElements: 0,
+        empty: true,
+      }),
+    });
   });
 
   function renderAt(initialPath: string) {
@@ -86,5 +136,35 @@ describe("AdminRoutes — platform-settings gating", () => {
 
     expect(await screen.findByText("Platform Overview")).toBeInTheDocument();
     expect(screen.queryByText("Platform Settings")).not.toBeInTheDocument();
+  });
+
+  it("lets a SUPER_ADMIN reach /admin/roles-permissions", async () => {
+    mockUser(UserTypeEnum.SUPER_ADMIN);
+    renderAt("/admin/roles-permissions");
+
+    expect(await screen.findByRole("heading", { name: "Roles & Permissions" })).toBeInTheDocument();
+  });
+
+  it("redirects a plain ADMIN away from /admin/roles-permissions to the dashboard", async () => {
+    mockUser(UserTypeEnum.ADMIN);
+    renderAt("/admin/roles-permissions");
+
+    expect(await screen.findByText("Platform Overview")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Roles & Permissions" })).not.toBeInTheDocument();
+  });
+
+  it("lets a SUPER_ADMIN reach /admin/audit-log", async () => {
+    mockUser(UserTypeEnum.SUPER_ADMIN);
+    renderAt("/admin/audit-log");
+
+    expect(await screen.findByRole("heading", { name: "Audit Log" })).toBeInTheDocument();
+  });
+
+  it("redirects a plain ADMIN away from /admin/audit-log to the dashboard", async () => {
+    mockUser(UserTypeEnum.ADMIN);
+    renderAt("/admin/audit-log");
+
+    expect(await screen.findByText("Platform Overview")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Audit Log" })).not.toBeInTheDocument();
   });
 });

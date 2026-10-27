@@ -168,3 +168,24 @@ export const EmergencyAlertStatusEnum = {
   RESOLVED: "RESOLVED",
 } as const;
 export type EmergencyAlertStatusEnum = (typeof EmergencyAlertStatusEnum)[keyof typeof EmergencyAlertStatusEnum];
+
+// Must stay in sync with com.elderhive.enums.EntityTypeEnum (backend) — needed to type
+// useAuditLogService.ts's filter and AuditLogResponse.
+export const EntityTypeEnum = {
+  USER: "USER",
+  ROLE: "ROLE",
+  EMERGENCY_ALERT: "EMERGENCY_ALERT",
+} as const;
+export type EntityTypeEnum = (typeof EntityTypeEnum)[keyof typeof EntityTypeEnum];
+
+// Must stay in sync with com.elderhive.enums.ActionType (backend) — needed to type
+// useAuditLogService.ts's filter and AuditLogResponse.
+export const ActionType = {
+  CREATE: "CREATE",
+  UPDATE: "UPDATE",
+  DELETE: "DELETE",
+  GRANT: "GRANT",
+  REVOKE: "REVOKE",
+  NOTIFY: "NOTIFY",
+} as const;
+export type ActionType = (typeof ActionType)[keyof typeof ActionType];

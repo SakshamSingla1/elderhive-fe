@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiAlertTriangle, FiCalendar, FiCheckCircle, FiDroplet, FiSettings, FiShoppingBag, FiTag, FiUsers } from "react-icons/fi";
+import { FiAlertTriangle, FiCalendar, FiCheckCircle, FiDroplet, FiFileText, FiSettings, FiShield, FiShoppingBag, FiTag, FiUsers } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
@@ -27,6 +27,8 @@ const AdminBookingsPage = lazy(() => import("../components/pages/Admin/Bookings.
 const AdminBookingsFormPage = lazy(() => import("../components/pages/Admin/BookingsForm.page"));
 const AdminEmergencyAlertsPage = lazy(() => import("../components/pages/Admin/EmergencyAlerts.page"));
 const AdminEmergencyAlertsFormPage = lazy(() => import("../components/pages/Admin/EmergencyAlertsForm.page"));
+const RolesPermissionsPage = lazy(() => import("../components/pages/Admin/RolesPermissions.page"));
+const AuditLogPage = lazy(() => import("../components/pages/Admin/AuditLog.page"));
 
 // NavLinkServiceImpl#getMine returns whatever's actually seeded for the admin portal
 // today, which doesn't include these pages (Prompt 70's/74's own additions) - appended
@@ -50,6 +52,8 @@ function buildStaticNavItems(isSuperAdmin: boolean): SidebarNavItem[] {
   ];
   if (isSuperAdmin) {
     items.push({ label: "Platform Settings", path: "/admin/platform-settings", icon: <FiSettings size={18} />, navIndex: 55 });
+    items.push({ label: "Roles & Permissions", path: "/admin/roles-permissions", icon: <FiShield size={18} />, navIndex: 57 });
+    items.push({ label: "Audit Log", path: "/admin/audit-log", icon: <FiFileText size={18} />, navIndex: 58 });
   }
   return items;
 }
@@ -100,6 +104,17 @@ const AdminRoutes: React.FC = () => {
           <Route
             path="platform-settings"
             element={isSuperAdmin ? <PlatformSettingsPage /> : <Navigate to="/admin/dashboard" replace />}
+          />
+          {/* ROLE_MANAGE-gated server-side (RoleController/PermissionController,
+              AuditLogController), Super-Admin-only in practice per the Phase 3 seeding -
+              same redirect-not-render pattern as platform-settings above. */}
+          <Route
+            path="roles-permissions"
+            element={isSuperAdmin ? <RolesPermissionsPage /> : <Navigate to="/admin/dashboard" replace />}
+          />
+          <Route
+            path="audit-log"
+            element={isSuperAdmin ? <AuditLogPage /> : <Navigate to="/admin/dashboard" replace />}
           />
           {/* Listing/View are open to both roles (ColorThemeController's GETs are just
               isAuthenticated()); Add/Edit are SUPER_ADMIN-only, same reasoning and same
