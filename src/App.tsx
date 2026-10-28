@@ -3,6 +3,7 @@ import { Box, CircularProgress } from '@mui/material';
 import { Route, Routes } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import ThemeInjector from './components/atoms/ThemeInjector/ThemeInjector';
+import AppThemeProvider from './theme/AppThemeProvider';
 import LandingPage from './components/pages/Landing/Landing.page';
 import LoginPage from './components/pages/Authentication/Login.page';
 import AdminLoginPage from './components/pages/Authentication/AdminLogin.page';
@@ -33,59 +34,65 @@ function App() {
   return (
     <ThemeProvider>
       {/* Render-less - sets every useColors() shade as a CSS custom property on
-          documentElement, the mechanism that actually drives the whole app's styling. */}
+          documentElement, for any component that wants a raw var() rather than going
+          through MUI's theme prop (e.g. ColorPicker's live swatches). */}
       <ThemeInjector />
-      <Suspense fallback={<RouteLoadingFallback />}>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/login/super-admin" element={<SuperAdminLoginPage />} />
-          <Route path="/login/elder" element={<ElderLoginPage />} />
-          <Route path="/login/caretaker" element={<CaretakerLoginPage />} />
-          <Route path="/login/family" element={<FamilyLoginPage />} />
-          <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+      {/* The mechanism that actually drives every MUI component's look - palette,
+          typography, shape, and component overrides, recomputed whenever the active
+          ColorTheme changes. */}
+      <AppThemeProvider>
+        <Suspense fallback={<RouteLoadingFallback />}>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/login/super-admin" element={<SuperAdminLoginPage />} />
+            <Route path="/login/elder" element={<ElderLoginPage />} />
+            <Route path="/login/caretaker" element={<CaretakerLoginPage />} />
+            <Route path="/login/family" element={<FamilyLoginPage />} />
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
-          {/* Authenticated shells — one route group per role, each behind ProtectedRoute.
-              /admin/* serves both ADMIN and SUPER_ADMIN (AdminRoutes itself varies the
-              displayed roleLabel); react-router ranks the literal "/admin/login" segment
-              above this wildcard regardless of declaration order, so the two don't conflict. */}
-          <Route
-            path="/admin/*"
-            element={
-              <ProtectedRoute allowedUserTypes={[UserTypeEnum.ADMIN, UserTypeEnum.SUPER_ADMIN]}>
-                <AdminRoutes />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/caretaker/*"
-            element={
-              <ProtectedRoute allowedUserTypes={[UserTypeEnum.CARETAKER]}>
-                <CaretakerRoutes />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/elder/*"
-            element={
-              <ProtectedRoute allowedUserTypes={[UserTypeEnum.ELDER]}>
-                <ElderRoutes />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/family/*"
-            element={
-              <ProtectedRoute allowedUserTypes={[UserTypeEnum.FAMILY_MEMBER]}>
-                <FamilyRoutes />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Suspense>
+            {/* Authenticated shells — one route group per role, each behind ProtectedRoute.
+                /admin/* serves both ADMIN and SUPER_ADMIN (AdminRoutes itself varies the
+                displayed roleLabel); react-router ranks the literal "/admin/login" segment
+                above this wildcard regardless of declaration order, so the two don't conflict. */}
+            <Route
+              path="/admin/*"
+              element={
+                <ProtectedRoute allowedUserTypes={[UserTypeEnum.ADMIN, UserTypeEnum.SUPER_ADMIN]}>
+                  <AdminRoutes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/caretaker/*"
+              element={
+                <ProtectedRoute allowedUserTypes={[UserTypeEnum.CARETAKER]}>
+                  <CaretakerRoutes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/elder/*"
+              element={
+                <ProtectedRoute allowedUserTypes={[UserTypeEnum.ELDER]}>
+                  <ElderRoutes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/family/*"
+              element={
+                <ProtectedRoute allowedUserTypes={[UserTypeEnum.FAMILY_MEMBER]}>
+                  <FamilyRoutes />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Suspense>
+      </AppThemeProvider>
     </ThemeProvider>
   );
 }
