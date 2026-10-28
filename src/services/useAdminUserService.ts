@@ -10,6 +10,7 @@ const ADMIN_USER_URLS = {
   SUSPEND: "/api/v1/admin/users/:id/suspend",
   ROLES: "/api/v1/admin/users/:id/roles",
   ROLE_BY_TYPE: "/api/v1/admin/users/:id/roles/:roleType",
+  FINE_GRAINED_ROLE: "/api/v1/admin/users/:id/role",
 };
 
 // Mirrors com.elderhive.dtos.User.AdminUserResponse field-for-field (Prompt 93).
@@ -21,6 +22,9 @@ export interface AdminUserResponse extends AuditableResponse {
   primaryRole: UserTypeEnum;
   status: UserStatusEnum;
   roles: UserTypeEnum[];
+  // The fine-grained Role id (only ever consulted for primaryRole === ADMIN) - null means
+  // no fine-grained role assigned yet, which AdminPermissionGuard treats as fail-closed.
+  roleId: number | null;
 }
 
 export interface AdminUserFilterParams {
@@ -50,6 +54,9 @@ export const useAdminUserService = () => {
         request<AdminUserResponse>("POST", replaceUrlParams(ADMIN_USER_URLS.ROLES, { id }), { roleType }),
       revokeRole: (id: number, roleType: UserTypeEnum) =>
         request<AdminUserResponse>("DELETE", replaceUrlParams(ADMIN_USER_URLS.ROLE_BY_TYPE, { id, roleType })),
+      // ROLE_MANAGE-gated (Super-Admin only in practice) - roleId: null clears it.
+      assignFineGrainedRole: (id: number, roleId: number | null) =>
+        request<AdminUserResponse>("PUT", replaceUrlParams(ADMIN_USER_URLS.FINE_GRAINED_ROLE, { id }), { roleId }),
     }),
     []
   );

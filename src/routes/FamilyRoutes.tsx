@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
-import { FiAlertTriangle, FiCalendar, FiMail, FiMessageCircle, FiShoppingBag, FiStar, FiUsers } from "react-icons/fi";
+import { FiAlertTriangle, FiCalendar, FiMail, FiMessageCircle, FiShoppingBag, FiUsers } from "react-icons/fi";
 import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import type { SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";

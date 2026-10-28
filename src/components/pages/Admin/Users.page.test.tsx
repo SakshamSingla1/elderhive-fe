@@ -5,17 +5,22 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import AdminUsersPage from "./Users.page";
 import { useAdminUserService } from "../../../services/useAdminUserService";
 import type { AdminUserResponse } from "../../../services/useAdminUserService";
+import { useRoleService } from "../../../services/useRoleService";
 import { useAuthenticatedUser } from "../../../contexts/AuthenticatedUserContext";
 import { UserStatusEnum, UserTypeEnum } from "../../../utils/enums";
 
 vi.mock("../../../services/useAdminUserService", () => ({
   useAdminUserService: vi.fn(),
 }));
+vi.mock("../../../services/useRoleService", () => ({
+  useRoleService: vi.fn(),
+}));
 vi.mock("../../../contexts/AuthenticatedUserContext", () => ({
   useAuthenticatedUser: vi.fn(),
 }));
 
 const mockedUseAdminUserService = vi.mocked(useAdminUserService);
+const mockedUseRoleService = vi.mocked(useRoleService);
 const mockedUseAuthenticatedUser = vi.mocked(useAuthenticatedUser);
 
 function adminUser(overrides: Partial<AdminUserResponse> = {}): AdminUserResponse {
@@ -27,6 +32,7 @@ function adminUser(overrides: Partial<AdminUserResponse> = {}): AdminUserRespons
     primaryRole: UserTypeEnum.FAMILY_MEMBER,
     status: UserStatusEnum.ACTIVE,
     roles: [UserTypeEnum.FAMILY_MEMBER],
+    roleId: null,
     createdAt: "2026-10-23T10:00:00",
     ...overrides,
   };
@@ -74,7 +80,15 @@ describe("Admin Users.page", () => {
       suspend,
       grantRole,
       revokeRole,
+      assignFineGrainedRole: vi.fn(),
     } as unknown as ReturnType<typeof useAdminUserService>);
+    mockedUseRoleService.mockReturnValue({
+      getAll: vi.fn().mockResolvedValue(pageOf([])),
+      getById: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      remove: vi.fn(),
+    } as unknown as ReturnType<typeof useRoleService>);
     mockCaller(UserTypeEnum.ADMIN);
   });
 

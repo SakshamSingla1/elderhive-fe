@@ -27,6 +27,8 @@ import ManageUserRolesDialog from "../../molecules/ManageUserRolesDialog/ManageU
 import type { ManageUserRolesTarget } from "../../molecules/ManageUserRolesDialog/ManageUserRolesDialog";
 import { useAdminUserService } from "../../../services/useAdminUserService";
 import type { AdminUserResponse } from "../../../services/useAdminUserService";
+import { useRoleService } from "../../../services/useRoleService";
+import type { RoleResponse } from "../../../services/useRoleService";
 import { useAuthenticatedUser } from "../../../contexts/AuthenticatedUserContext";
 import { UserStatusEnum, UserTypeEnum } from "../../../utils/enums";
 import { useDebounce, getErrorMessage } from "../../../utils/helper";
@@ -54,8 +56,15 @@ const STATUS_COLOR: Record<UserStatusEnum, "success" | "default" | "error"> = {
  */
 const AdminUsersPage: React.FC = () => {
   const adminUserService = useAdminUserService();
+  const roleService = useRoleService();
   const { user } = useAuthenticatedUser();
   const callerIsSuperAdmin = user?.primaryRole === UserTypeEnum.SUPER_ADMIN;
+
+  // The fine-grained Role catalog, only fetchable by a Super Admin (ROLE_MANAGE is kept
+  // out of the curated "Admin" role, AdminBootstrapSeeder) - a plain ADMIN viewer never
+  // needs this list since they can't edit the assignment either.
+  const [roleOptions, setRoleOptions] = useState<RoleResponse[]>([]);
+  const [assigningRoleUserId, setAssigningRoleUserId] = useState<number | null>(null);
 
   const [users, setUsers] = useState<AdminUserResponse[]>([]);
   const [page, setPage] = useState(0);
@@ -101,8 +110,26 @@ const AdminUsersPage: React.FC = () => {
     fetchPage();
   }, [fetchPage]);
 
+  useEffect(() => {
+    if (!callerIsSuperAdmin) return;
+    roleService.getAll(0, 100).then((result) => setRoleOptions(result.content));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [callerIsSuperAdmin]);
+
   const replaceInList = (updated: AdminUserResponse) => {
     setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
+  };
+
+  const handleAssignFineGrainedRole = async (targetId: number, roleId: number | null) => {
+    setAssigningRoleUserId(targetId);
+    try {
+      const updated = await adminUserService.assignFineGrainedRole(targetId, roleId);
+      replaceInList(updated);
+    } catch (err) {
+      setLoadError(getErrorMessage(err, "Could not assign role"));
+    } finally {
+      setAssigningRoleUserId(null);
+    }
   };
 
   const handleSuspend = async () => {
@@ -203,6 +230,7 @@ const AdminUsersPage: React.FC = () => {
                   <TableCell>Name</TableCell>
                   <TableCell>Email</TableCell>
                   <TableCell>Roles</TableCell>
+                  {callerIsSuperAdmin && <TableCell>Fine-grained role</TableCell>}
                   <TableCell>Status</TableCell>
                   <TableCell align="right">Actions</TableCell>
                 </TableRow>
@@ -226,6 +254,24 @@ const AdminUsersPage: React.FC = () => {
                         ))}
                       </Stack>
                     </TableCell>
+                    {callerIsSuperAdmin && (
+                      <TableCell>
+                        {u.primaryRole === UserTypeEnum.ADMIN ? (
+                          <Select
+                            label="Role"
+                            value={u.roleId != null ? String(u.roleId) : ""}
+                            options={[{ value: "", label: "No role (fail-closed)" }, ...roleOptions.map((r) => ({ value: String(r.id), label: r.name }))]}
+                            onChange={(value) => handleAssignFineGrainedRole(u.id, value ? Number(value) : null)}
+                            disabled={assigningRoleUserId === u.id}
+                            sx={{ minWidth: 180 }}
+                          />
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">
+                            —
+                          </Typography>
+                        )}
+                      </TableCell>
+                    )}
                     <TableCell>
                       <Chip size="small" label={u.status} color={STATUS_COLOR[u.status]} />
                     </TableCell>
