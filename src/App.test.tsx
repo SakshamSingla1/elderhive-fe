@@ -84,9 +84,8 @@ describe('App', () => {
     it.each([
       ['/elder/dashboard', 'Elder Dashboard', 'My Profile'],
       ['/caretaker/dashboard', 'Caretaker Dashboard', 'My Profile'],
-      ['/family/dashboard', 'Family Dashboard', 'Elder Profiles'],
     ])('a logged-in matching-role user lands on %s with its placeholder dashboard', async (path, expectedHeading, expectedNavItem) => {
-      const role = path.includes('elder') ? UserTypeEnum.ELDER : path.includes('caretaker') ? UserTypeEnum.CARETAKER : UserTypeEnum.FAMILY_MEMBER;
+      const role = path.includes('elder') ? UserTypeEnum.ELDER : UserTypeEnum.CARETAKER;
       seedCachedUser(role);
       mockedRequest.mockImplementation(async (method: string, url: string) => {
         if (method === 'POST' && url === '/auth/refresh') return undefined;
@@ -104,6 +103,36 @@ describe('App', () => {
 
       expect(await screen.findByRole('heading', { name: expectedHeading })).toBeInTheDocument();
       expect(screen.getAllByText(expectedNavItem).length).toBeGreaterThan(0);
+    });
+
+    // Family's dashboard is a real page (components/pages/Family/Dashboard.page.tsx), not
+    // the shared placeholder the other two roles above still use - its own greeting
+    // heading and its two data-fetching calls (elder profiles + "my bookings as family")
+    // need their own mocks rather than fitting the shared placeholder-dashboard case above.
+    it('a logged-in FAMILY_MEMBER lands on /family/dashboard with its real dashboard', async () => {
+      seedCachedUser(UserTypeEnum.FAMILY_MEMBER);
+      mockedRequest.mockImplementation(async (method: string, url: string) => {
+        if (method === 'POST' && url === '/auth/refresh') return undefined;
+        if (method === 'GET' && url === '/nav-links/me') return [];
+        if (method === 'GET' && url === '/api/v1/elder-profiles') {
+          return { content: [], totalElements: 0, totalPages: 0, number: 0, size: 50, first: true, last: true, numberOfElements: 0, empty: true };
+        }
+        if (method === 'GET' && url === '/api/v1/bookings/me/as-family') {
+          return { content: [], totalElements: 0, totalPages: 0, number: 0, size: 50, first: true, last: true, numberOfElements: 0, empty: true };
+        }
+        throw new Error(`Unexpected request: ${method} ${url}`);
+      });
+
+      render(
+        <MemoryRouter initialEntries={['/family/dashboard']}>
+          <AuthenticatedUserProvider>
+            <App />
+          </AuthenticatedUserProvider>
+        </MemoryRouter>
+      );
+
+      expect(await screen.findByRole('heading', { name: /Good (morning|afternoon|evening)/ })).toBeInTheDocument();
+      expect(screen.getAllByText('Elder Profiles').length).toBeGreaterThan(0);
     });
 
     it('an ADMIN lands on the shared admin shell showing "Admin" as the roleLabel', async () => {
