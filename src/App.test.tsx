@@ -196,6 +196,12 @@ describe('App', () => {
         if (method === 'GET' && url === '/api/v1/dashboard/stats') {
           return { activeUsersByRole: {}, bookingsThisWeek: 0, openEmergencyAlerts: 0, overdueEmergencyAlerts: 0, pendingCaretakerVerifications: 0 };
         }
+        // AdminDashboardPage's "Recent Activity" widget only fetches this for a
+        // SUPER_ADMIN viewer (ROLE_MANAGE-gated server-side, a plain ADMIN's call would
+        // 403) - the ADMIN case above never hits this branch.
+        if (method === 'GET' && url === '/audit-logs') {
+          return { content: [], totalElements: 0, totalPages: 0, number: 0, size: 5, first: true, last: true, numberOfElements: 0, empty: true };
+        }
         throw new Error(`Unexpected request: ${method} ${url}`);
       });
 
@@ -209,6 +215,7 @@ describe('App', () => {
 
       expect(await screen.findByRole('heading', { name: 'Platform Overview' })).toBeInTheDocument();
       expect(screen.getByText('Super Admin')).toBeInTheDocument();
+      expect(await screen.findByText('Platform Control')).toBeInTheDocument();
     });
 
     it('redirects an unauthenticated visitor hitting a protected shell to /login', async () => {

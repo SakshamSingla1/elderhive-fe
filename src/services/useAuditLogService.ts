@@ -28,6 +28,12 @@ export interface AuditLogFilter {
   // inclusively, same as AuditLogController's own `from`/`to` query params.
   from?: string;
   to?: string;
+  // Spring Data Web's standard "field,direction" convention - AuditLogController takes a
+  // plain `Pageable` parameter, so this is supported for free server-side even though
+  // AuditLog.page.tsx (the only caller before Admin/Dashboard.page.tsx's own "Recent
+  // Activity" widget) never needed to pass one. Omit for the unsorted default that page
+  // already relies on - findByCriteria's own JPQL has no ORDER BY of its own.
+  sort?: string;
 }
 
 // Read-only (see AuditLogController) - ROLE_MANAGE-gated, same as useRoleService/
@@ -35,9 +41,9 @@ export interface AuditLogFilter {
 export const useAuditLogService = () => {
   return useMemo(
     () => ({
-      search: ({ page = 0, size = 20, entityType, actionType, from, to }: AuditLogFilter = {}) =>
+      search: ({ page = 0, size = 20, entityType, actionType, from, to, sort }: AuditLogFilter = {}) =>
         request<PageResponse<AuditLogResponse>>("GET", AUDIT_LOG_URLS.BASE, null, {
-          params: { page, size, entityType, actionType, from, to },
+          params: { page, size, entityType, actionType, from, to, sort },
         }),
     }),
     []
