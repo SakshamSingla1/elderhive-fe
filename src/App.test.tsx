@@ -81,34 +81,61 @@ describe('App', () => {
     // static client-side nav items per role (its own route shell file) pointing at the
     // real pages it now mounts - so the sidebar is no longer literally empty the way it
     // was before those pages existed.
-    it.each([
-      ['/elder/dashboard', 'Elder Dashboard', 'My Profile'],
-      ['/caretaker/dashboard', 'Caretaker Dashboard', 'My Profile'],
-    ])('a logged-in matching-role user lands on %s with its placeholder dashboard', async (path, expectedHeading, expectedNavItem) => {
-      const role = path.includes('elder') ? UserTypeEnum.ELDER : UserTypeEnum.CARETAKER;
-      seedCachedUser(role);
+    // Every one of the 4 non-admin roles now has its own real dashboard (Admin's own
+    // AdminDashboardPage is covered separately below) - each needs its own mocks for
+    // whichever endpoints that role's dashboard calls, rather than one shared
+    // placeholder-dashboard case.
+    it('a logged-in ELDER lands on /elder/dashboard with its real dashboard', async () => {
+      seedCachedUser(UserTypeEnum.ELDER);
       mockedRequest.mockImplementation(async (method: string, url: string) => {
         if (method === 'POST' && url === '/auth/refresh') return undefined;
-        if (method === 'GET' && url === '/nav-links/me') return []; // near-empty DB-driven sidebar for non-admin roles
+        if (method === 'GET' && url === '/nav-links/me') return [];
+        if (method === 'GET' && url === '/api/v1/elder-profiles/me') {
+          return { id: 1, familyUserId: 10, elderUserId: 1, fullName: 'Grandma Rosa', dateOfBirth: '1945-04-12', address: '221B Lotus Street' };
+        }
+        if (method === 'GET' && url === '/api/v1/elder-profiles/1/family-members') return [];
         throw new Error(`Unexpected request: ${method} ${url}`);
       });
 
       render(
-        <MemoryRouter initialEntries={[path]}>
+        <MemoryRouter initialEntries={['/elder/dashboard']}>
           <AuthenticatedUserProvider>
             <App />
           </AuthenticatedUserProvider>
         </MemoryRouter>
       );
 
-      expect(await screen.findByRole('heading', { name: expectedHeading })).toBeInTheDocument();
-      expect(screen.getAllByText(expectedNavItem).length).toBeGreaterThan(0);
+      expect(await screen.findByRole('heading', { name: /Good (morning|afternoon|evening)/ })).toBeInTheDocument();
+      expect(screen.getAllByText('My Profile').length).toBeGreaterThan(0);
     });
 
-    // Family's dashboard is a real page (components/pages/Family/Dashboard.page.tsx), not
-    // the shared placeholder the other two roles above still use - its own greeting
-    // heading and its two data-fetching calls (elder profiles + "my bookings as family")
-    // need their own mocks rather than fitting the shared placeholder-dashboard case above.
+    it('a logged-in CARETAKER lands on /caretaker/dashboard with its real dashboard', async () => {
+      seedCachedUser(UserTypeEnum.CARETAKER);
+      mockedRequest.mockImplementation(async (method: string, url: string) => {
+        if (method === 'POST' && url === '/auth/refresh') return undefined;
+        if (method === 'GET' && url === '/nav-links/me') return [];
+        if (method === 'GET' && url === '/api/v1/caretaker-profiles/me') {
+          return { id: 1, userId: 1, verificationStatus: 'VERIFIED', ratingAverage: 4.5 };
+        }
+        if (method === 'GET' && url === '/api/v1/bookings/me/as-caretaker') {
+          return { content: [], totalElements: 0, totalPages: 0, number: 0, size: 50, first: true, last: true, numberOfElements: 0, empty: true };
+        }
+        if (method === 'GET' && url === '/api/v1/emergency-alerts/nearby') return [];
+        throw new Error(`Unexpected request: ${method} ${url}`);
+      });
+
+      render(
+        <MemoryRouter initialEntries={['/caretaker/dashboard']}>
+          <AuthenticatedUserProvider>
+            <App />
+          </AuthenticatedUserProvider>
+        </MemoryRouter>
+      );
+
+      expect(await screen.findByRole('heading', { name: /Good (morning|afternoon|evening)/ })).toBeInTheDocument();
+      expect(screen.getAllByText('My Profile').length).toBeGreaterThan(0);
+    });
+
     it('a logged-in FAMILY_MEMBER lands on /family/dashboard with its real dashboard', async () => {
       seedCachedUser(UserTypeEnum.FAMILY_MEMBER);
       mockedRequest.mockImplementation(async (method: string, url: string) => {
@@ -201,6 +228,10 @@ describe('App', () => {
       mockedRequest.mockImplementation(async (method: string, url: string) => {
         if (method === 'POST' && url === '/auth/refresh') return undefined;
         if (method === 'GET' && url === '/nav-links/me') return [];
+        if (method === 'GET' && url === '/api/v1/elder-profiles/me') {
+          return { id: 1, familyUserId: 10, elderUserId: 1, fullName: 'Grandma Rosa', dateOfBirth: '1945-04-12', address: '221B Lotus Street' };
+        }
+        if (method === 'GET' && url === '/api/v1/elder-profiles/1/family-members') return [];
         throw new Error(`Unexpected request: ${method} ${url}`);
       });
 
@@ -212,7 +243,7 @@ describe('App', () => {
         </MemoryRouter>
       );
 
-      expect(await screen.findByRole('heading', { name: 'Elder Dashboard' })).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: /Good (morning|afternoon|evening)/ })).toBeInTheDocument();
     });
 
     it('a SUPER_ADMIN can reach /admin/platform-settings', async () => {

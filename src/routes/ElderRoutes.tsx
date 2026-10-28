@@ -6,7 +6,7 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import { useSidebarNavItems } from "../hooks/useSidebarNavItems";
 import type { SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
 
-const PlaceholderDashboardPage = lazy(() => import("../components/pages/Dashboard/PlaceholderDashboard.page"));
+const ElderDashboardPage = lazy(() => import("../components/pages/Elder/Dashboard.page"));
 const AccountSettingsPage = lazy(() => import("../components/pages/Shared/AccountSettings.page"));
 const NotificationsPage = lazy(() => import("../components/pages/Shared/Notifications.page"));
 const MyProfilePage = lazy(() => import("../components/pages/Elder/MyProfile.page"));
@@ -44,7 +44,7 @@ const ElderRoutes: React.FC = () => {
       <Routes>
         <Route element={<DashboardLayout navItems={[...navItems, ...STATIC_NAV_ITEMS]} roleLabel={ROLE_LABEL} />}>
           <Route index element={<Navigate to="/elder/dashboard" replace />} />
-          <Route path="dashboard" element={<PlaceholderDashboardPage roleLabel={ROLE_LABEL} />} />
+          <Route path="dashboard" element={<ElderDashboardPage />} />
           {/* Every role's shared "pick your theme" entry point (Prompt 51) — reached via
               DashboardLayout's account menu, not the (currently empty) DB-driven sidebar. */}
           <Route path="account-settings" element={<AccountSettingsPage />} />
