@@ -21,10 +21,12 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { useTheme, alpha } from "@mui/material/styles";
 import { FiEdit3, FiTag, FiTrash2 } from "react-icons/fi";
 import { useServiceCategoryService } from "../../../services/useServiceCategoryService";
 import type { ServiceCategoryResponse } from "../../../services/useServiceCategoryService";
 import { getErrorMessage, formatEnumLabel} from "../../../utils/helper";
+import { resolveCategoryIcon } from "../../../utils/categoryIcons";
 
 const SKELETON_COUNT = 6;
 const GRID_COLUMNS = { xs: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" };
@@ -60,6 +62,7 @@ const ServiceCategoryListingTemplate: React.FC<ServiceCategoryListingTemplatePro
   isLoading = false,
 }) => {
   const navigate = useNavigate();
+  const theme = useTheme();
   const { deleteServiceCategory } = useServiceCategoryService();
 
   const [idPendingDelete, setIdPendingDelete] = useState<number | null>(null);
@@ -113,39 +116,66 @@ const ServiceCategoryListingTemplate: React.FC<ServiceCategoryListingTemplatePro
       {!isLoading && serviceCategories.length > 0 && (
         <>
           <Box sx={{ display: "grid", gridTemplateColumns: GRID_COLUMNS, gap: 3, mb: 4 }}>
-            {serviceCategories.map((category) => (
-              <Card key={category.id} variant="outlined" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                    <Typography variant="h6" fontWeight={700}>
-                      {category.name}
-                    </Typography>
-                    <Chip
-                      size="small"
-                      label={formatEnumLabel(category.status)}
-                      color={category.status === "ACTIVE" ? "success" : "default"}
-                    />
-                  </Stack>
-                  {category.description && (
-                    <Typography variant="body2" color="text.secondary" mt={1}>
-                      {category.description}
-                    </Typography>
-                  )}
-                </CardContent>
-                <CardActions sx={{ justifyContent: "flex-end" }}>
-                  <Tooltip title="Edit">
-                    <IconButton onClick={() => navigate(`/admin/service-categories/${category.id}`)} aria-label="Edit">
-                      <FiEdit3 size={16} />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <IconButton onClick={() => setIdPendingDelete(category.id)} aria-label="Delete">
-                      <FiTrash2 size={16} />
-                    </IconButton>
-                  </Tooltip>
-                </CardActions>
-              </Card>
-            ))}
+            {serviceCategories.map((category) => {
+              const CategoryIcon = resolveCategoryIcon(category.icon);
+              const isActive = category.status === "ACTIVE";
+              return (
+                <Card
+                  key={category.id}
+                  variant="outlined"
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    transition: "transform 150ms ease, box-shadow 150ms ease",
+                    "&:hover": { transform: "translateY(-3px)", boxShadow: 4 },
+                  }}
+                >
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+                      <Stack direction="row" spacing={1.5} alignItems="center" minWidth={0}>
+                        <Box
+                          sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: "10px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            bgcolor: alpha(theme.palette.primary.main, 0.12),
+                            color: "primary.main",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <CategoryIcon size={18} />
+                        </Box>
+                        <Typography variant="h6" fontWeight={700} sx={{ wordBreak: "break-word" }}>
+                          {category.name}
+                        </Typography>
+                      </Stack>
+                      <Chip size="small" label={formatEnumLabel(category.status)} color={isActive ? "success" : "default"} sx={{ flexShrink: 0 }} />
+                    </Stack>
+                    {category.description && (
+                      <Typography variant="body2" color="text.secondary" mt={1.5}>
+                        {category.description}
+                      </Typography>
+                    )}
+                  </CardContent>
+                  <CardActions sx={{ justifyContent: "flex-end" }}>
+                    <Tooltip title="Edit">
+                      <IconButton onClick={() => navigate(`/admin/service-categories/${category.id}`)} aria-label="Edit">
+                        <FiEdit3 size={16} />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                      <IconButton onClick={() => setIdPendingDelete(category.id)} aria-label="Delete">
+                        <FiTrash2 size={16} />
+                      </IconButton>
+                    </Tooltip>
+                  </CardActions>
+                </Card>
+              );
+            })}
           </Box>
 
           {totalPages > 1 && (

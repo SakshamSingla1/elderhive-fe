@@ -15,6 +15,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { useTheme as useMuiTheme, alpha } from "@mui/material/styles";
 import { FaPalette } from "react-icons/fa";
 import { FiX } from "react-icons/fi";
 import { TbPalette } from "react-icons/tb";
@@ -70,6 +71,7 @@ const ColorThemeListingTemplate: React.FC<ColorThemeListingTemplateProps> = ({
   allowMutations = true,
 }) => {
   const navigate = useNavigate();
+  const muiTheme = useMuiTheme();
   const { activeThemeName, isPreviewActive, resetTheme } = useTheme();
   const { deleteColorTheme } = useColorThemeService();
   const { user } = useAuthenticatedUser();
@@ -114,7 +116,20 @@ const ColorThemeListingTemplate: React.FC<ColorThemeListingTemplateProps> = ({
 
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" rowGap={1.5}>
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <FaPalette size={22} />
+          <Box
+            sx={{
+              width: 44,
+              height: 44,
+              borderRadius: "12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: alpha(muiTheme.palette.primary.main, 0.12),
+              color: "primary.main",
+            }}
+          >
+            <FaPalette size={20} />
+          </Box>
           <Box>
             <Typography variant="h5" fontWeight={800}>
               Color Themes

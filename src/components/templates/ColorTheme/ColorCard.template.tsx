@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, Box, Button, Card, CardActions, CardContent, Chip, CircularProgress, IconButton, Stack, Tooltip, Typography } from "@mui/material";
-import { FiCheck, FiEdit3, FiEye, FiStar, FiTrash2 } from "react-icons/fi";
+import { FiCheck, FiCheckCircle, FiEdit3, FiEye, FiStar, FiTrash2 } from "react-icons/fi";
 import { useAuthenticatedUser } from "../../../contexts/AuthenticatedUserContext";
 import { useTheme, type ThemeColors } from "../../../contexts/ThemeContext";
 import { useUserThemeService } from "../../../services/useUserThemeService";
@@ -77,6 +77,12 @@ const ColorCard: React.FC<ColorCardProps> = ({ colorTheme, onDelete, allowMutati
 
   const isActive = activeColorTheme?.id === colorTheme.id || (isPreviewActive && activeThemeName === colorTheme.themeName);
 
+  // A quick-glance gradient banner blending this theme's own primary/accent shades -
+  // purely decorative (no text/semantics), so it's safe alongside the swatch strips below
+  // without touching anything the tests above assert on.
+  const bannerFrom = findShadeColor(colorTheme, "primary500") ?? findShadeColor(colorTheme, "primary") ?? "#3B82F6";
+  const bannerTo = findShadeColor(colorTheme, "accent500") ?? findShadeColor(colorTheme, "accent") ?? "#8B5CF6";
+
   const handleApply = async () => {
     if (isActive) {
       resetTheme();
@@ -105,7 +111,20 @@ const ColorCard: React.FC<ColorCardProps> = ({ colorTheme, onDelete, allowMutati
   };
 
   return (
-    <Card variant="outlined" sx={{ height: "100%", display: "flex", flexDirection: "column", borderColor: isActive ? "success.main" : undefined, borderWidth: isActive ? 2 : 1 }}>
+    <Card
+      variant="outlined"
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        borderColor: isActive ? "success.main" : undefined,
+        borderWidth: isActive ? 2 : 1,
+        transition: "transform 150ms ease, box-shadow 150ms ease",
+        "&:hover": { transform: "translateY(-3px)", boxShadow: 4 },
+      }}
+    >
+      <Box sx={{ height: 8, background: `linear-gradient(90deg, ${bannerFrom}, ${bannerTo})` }} aria-hidden />
       <CardContent sx={{ flexGrow: 1 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1} mb={1.5}>
           <Box sx={{ minWidth: 0 }}>
@@ -116,7 +135,7 @@ const ColorCard: React.FC<ColorCardProps> = ({ colorTheme, onDelete, allowMutati
               <Typography variant="caption" color="text.secondary">
                 {colorTheme.palette.colorGroups.length} groups · {colorTheme.palette.colorGroups[0]?.colorShades.length ?? 0} shades each
               </Typography>
-              {isActive && <Chip label="Active" size="small" color="success" />}
+              {isActive && <Chip label="Active" size="small" color="success" icon={<FiCheckCircle size={13} />} />}
             </Stack>
           </Box>
           <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0 }}>
@@ -168,7 +187,7 @@ const ColorCard: React.FC<ColorCardProps> = ({ colorTheme, onDelete, allowMutati
                         flex: 1,
                         height: 32,
                         minWidth: 0,
-                        borderRadius: 0.5,
+                        borderRadius: 1,
                         backgroundColor: shade.colorCode,
                         cursor: "pointer",
                         display: "flex",
@@ -176,6 +195,8 @@ const ColorCard: React.FC<ColorCardProps> = ({ colorTheme, onDelete, allowMutati
                         justifyContent: "center",
                         border: "1px solid",
                         borderColor: "divider",
+                        transition: "transform 120ms ease",
+                        "&:hover": { transform: "scale(1.08)", zIndex: 1 },
                       }}
                     >
                       {copiedColor === shade.colorCode && <FiCheck size={14} color={isColorLight(shade.colorCode) ? "#000000" : "#FFFFFF"} />}

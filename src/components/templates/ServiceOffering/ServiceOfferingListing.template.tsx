@@ -25,13 +25,15 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { FiEdit3, FiShoppingBag, FiTrash2 } from "react-icons/fi";
+import { useTheme, alpha } from "@mui/material/styles";
+import { FiClock, FiDollarSign, FiEdit3, FiShoppingBag, FiTrash2 } from "react-icons/fi";
 import { useServiceCategoryService } from "../../../services/useServiceCategoryService";
 import type { ServiceCategoryResponse } from "../../../services/useServiceCategoryService";
 import { useServiceOfferingService } from "../../../services/useServiceOfferingService";
 import type { ServiceOfferingResponse } from "../../../services/useServiceOfferingService";
 import { ServiceCategoryStatusEnum } from "../../../utils/enums";
 import { getErrorMessage, formatEnumLabel} from "../../../utils/helper";
+import { resolveCategoryIcon } from "../../../utils/categoryIcons";
 
 const SKELETON_COUNT = 6;
 const GRID_COLUMNS = { xs: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" };
@@ -77,6 +79,7 @@ const ServiceOfferingListingTemplate: React.FC<ServiceOfferingListingTemplatePro
   allowMutations = true,
 }) => {
   const navigate = useNavigate();
+  const theme = useTheme();
   const { deleteServiceOffering } = useServiceOfferingService();
   const { getServiceCategories } = useServiceCategoryService();
 
@@ -161,33 +164,69 @@ const ServiceOfferingListingTemplate: React.FC<ServiceOfferingListingTemplatePro
       {!isLoading && serviceOfferings.length > 0 && (
         <>
           <Box sx={{ display: "grid", gridTemplateColumns: GRID_COLUMNS, gap: 3, mb: 4 }}>
-            {serviceOfferings.map((offering) => (
-              <Card key={offering.id} variant="outlined" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+            {serviceOfferings.map((offering) => {
+              const offeringCategory = categories.find((c) => c.id === offering.categoryId);
+              const OfferingIcon = resolveCategoryIcon(offeringCategory?.icon);
+              return (
+              <Card
+                key={offering.id}
+                variant="outlined"
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  transition: "transform 150ms ease, box-shadow 150ms ease",
+                  "&:hover": { transform: "translateY(-3px)", boxShadow: 4 },
+                }}
+              >
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                    <Typography variant="h6" fontWeight={700}>
+                    <Typography variant="h6" fontWeight={700} sx={{ wordBreak: "break-word" }}>
                       {offering.name}
                     </Typography>
-                    <Chip size="small" label={formatEnumLabel(offering.status)} color={offering.status === "ACTIVE" ? "success" : "default"} />
+                    <Chip size="small" label={formatEnumLabel(offering.status)} color={offering.status === "ACTIVE" ? "success" : "default"} sx={{ flexShrink: 0 }} />
                   </Stack>
                   {offering.categoryName && (
-                    <Chip size="small" variant="outlined" label={offering.categoryName} sx={{ mt: 1 }} />
+                    <Stack direction="row" spacing={0.75} alignItems="center" mt={1}>
+                      <Box
+                        sx={{
+                          width: 22,
+                          height: 22,
+                          borderRadius: "6px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          bgcolor: alpha(theme.palette.primary.main, 0.12),
+                          color: "primary.main",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <OfferingIcon size={12} />
+                      </Box>
+                      <Chip size="small" variant="outlined" label={offering.categoryName} />
+                    </Stack>
                   )}
                   {offering.description && (
-                    <Typography variant="body2" color="text.secondary" mt={1}>
+                    <Typography variant="body2" color="text.secondary" mt={1.5}>
                       {offering.description}
                     </Typography>
                   )}
-                  <Stack direction="row" spacing={2} mt={1.5}>
+                  <Stack direction="row" spacing={2.5} mt={1.5}>
                     {offering.basePrice != null && (
-                      <Typography variant="body2" fontWeight={600}>
-                        ${offering.basePrice}
-                      </Typography>
+                      <Stack direction="row" spacing={0.5} alignItems="center">
+                        <FiDollarSign size={13} style={{ opacity: 0.6 }} />
+                        <Typography variant="body2" fontWeight={700}>
+                          {offering.basePrice}
+                        </Typography>
+                      </Stack>
                     )}
                     {offering.durationMinutes != null && (
-                      <Typography variant="body2" color="text.secondary">
-                        {offering.durationMinutes} min
-                      </Typography>
+                      <Stack direction="row" spacing={0.5} alignItems="center">
+                        <FiClock size={13} style={{ opacity: 0.6 }} />
+                        <Typography variant="body2" color="text.secondary">
+                          {offering.durationMinutes} min
+                        </Typography>
+                      </Stack>
                     )}
                   </Stack>
                 </CardContent>
@@ -214,7 +253,8 @@ const ServiceOfferingListingTemplate: React.FC<ServiceOfferingListingTemplatePro
                   )
                 )}
               </Card>
-            ))}
+              );
+            })}
           </Box>
 
           {totalPages > 1 && (
