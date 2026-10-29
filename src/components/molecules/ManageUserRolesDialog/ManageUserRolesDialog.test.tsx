@@ -31,9 +31,9 @@ describe("ManageUserRolesDialog", () => {
     );
 
     await userEvent.click(screen.getByLabelText("Role"));
-    expect(screen.queryByRole("option", { name: "ADMIN" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("option", { name: "SUPER_ADMIN" })).not.toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "CARETAKER" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "Admin" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "Super Admin" })).not.toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Caretaker" })).toBeInTheDocument();
   });
 
   it("offers ADMIN/SUPER_ADMIN as grantable roles to a super-admin caller", async () => {
@@ -42,8 +42,8 @@ describe("ManageUserRolesDialog", () => {
     );
 
     await userEvent.click(screen.getByLabelText("Role"));
-    expect(screen.getByRole("option", { name: "ADMIN" })).toBeInTheDocument();
-    expect(screen.getByRole("option", { name: "SUPER_ADMIN" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Admin" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Super Admin" })).toBeInTheDocument();
   });
 
   it("grants the selected role and reflects the returned roles/primary", async () => {
@@ -53,11 +53,11 @@ describe("ManageUserRolesDialog", () => {
     );
 
     await userEvent.click(screen.getByLabelText("Role"));
-    await userEvent.click(screen.getByRole("option", { name: "CARETAKER" }));
+    await userEvent.click(screen.getByRole("option", { name: "Caretaker" }));
     await userEvent.click(screen.getByRole("button", { name: "Grant" }));
 
     expect(onGrant).toHaveBeenCalledWith(UserTypeEnum.CARETAKER);
-    await waitFor(() => expect(screen.getByText("CARETAKER")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Caretaker")).toBeInTheDocument());
   });
 
   it("does not offer a remove action on the primary role chip", () => {
@@ -73,8 +73,8 @@ describe("ManageUserRolesDialog", () => {
     );
 
     // The primary role's chip has no delete icon; the non-primary CARETAKER chip does.
-    const primaryChip = screen.getByText("FAMILY_MEMBER · primary").closest(".MuiChip-root");
-    const otherChip = screen.getByText("CARETAKER").closest(".MuiChip-root");
+    const primaryChip = screen.getByText("Family Member · primary").closest(".MuiChip-root");
+    const otherChip = screen.getByText("Caretaker").closest(".MuiChip-root");
     expect(primaryChip?.querySelector(".MuiChip-deleteIcon")).not.toBeInTheDocument();
     expect(otherChip?.querySelector(".MuiChip-deleteIcon")).toBeInTheDocument();
   });
@@ -92,13 +92,13 @@ describe("ManageUserRolesDialog", () => {
       />
     );
 
-    const otherChip = screen.getByText("CARETAKER").closest(".MuiChip-root");
+    const otherChip = screen.getByText("Caretaker").closest(".MuiChip-root");
     const deleteIcon = otherChip?.querySelector(".MuiChip-deleteIcon");
     expect(deleteIcon).toBeInTheDocument();
     await userEvent.click(deleteIcon as Element);
 
     expect(onRevoke).toHaveBeenCalledWith(UserTypeEnum.CARETAKER);
-    await waitFor(() => expect(screen.queryByText("CARETAKER")).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByText("Caretaker")).not.toBeInTheDocument());
   });
 
   it("surfaces the backend's error message when a grant fails", async () => {
@@ -108,7 +108,7 @@ describe("ManageUserRolesDialog", () => {
     );
 
     await userEvent.click(screen.getByLabelText("Role"));
-    await userEvent.click(screen.getByRole("option", { name: "CARETAKER" }));
+    await userEvent.click(screen.getByRole("option", { name: "Caretaker" }));
     await userEvent.click(screen.getByRole("button", { name: "Grant" }));
 
     expect(await screen.findByText("User already holds the CARETAKER role")).toBeInTheDocument();

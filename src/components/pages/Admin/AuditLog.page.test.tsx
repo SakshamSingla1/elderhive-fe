@@ -53,8 +53,8 @@ describe("Admin AuditLog.page", () => {
     render(<AuditLogPage />);
 
     expect(await screen.findByText("admin@example.com")).toBeInTheDocument();
-    expect(screen.getByText("ROLE #7")).toBeInTheDocument();
-    expect(screen.getByText("GRANT")).toBeInTheDocument();
+    expect(screen.getByText("Role #7")).toBeInTheDocument();
+    expect(screen.getByText("Grant")).toBeInTheDocument();
   });
 
   it("shows an empty state when there are no entries", async () => {
@@ -70,7 +70,7 @@ describe("Admin AuditLog.page", () => {
     search.mockClear();
 
     await userEvent.click(screen.getByLabelText("Entity type"));
-    await userEvent.click(screen.getByRole("option", { name: "ROLE" }));
+    await userEvent.click(screen.getByRole("option", { name: "Role" }));
 
     await waitFor(() => expect(search).toHaveBeenCalledWith(expect.objectContaining({ entityType: EntityTypeEnum.ROLE })));
   });
@@ -81,7 +81,7 @@ describe("Admin AuditLog.page", () => {
     search.mockClear();
 
     await userEvent.click(screen.getByLabelText("Action"));
-    await userEvent.click(screen.getByRole("option", { name: "GRANT" }));
+    await userEvent.click(screen.getByRole("option", { name: "Grant" }));
 
     await waitFor(() => expect(search).toHaveBeenCalledWith(expect.objectContaining({ actionType: ActionType.GRANT })));
   });

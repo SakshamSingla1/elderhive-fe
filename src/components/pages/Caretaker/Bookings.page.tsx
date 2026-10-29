@@ -27,7 +27,7 @@ import type { BookingResponse } from "../../../services/useBookingService";
 import { useCaretakerService } from "../../../services/useCaretakerService";
 import type { CaretakerAvailabilitySlotDTO } from "../../../services/useCaretakerService";
 import { BookingStatusEnum } from "../../../utils/enums";
-import { formatDate, formatTime, getErrorMessage } from "../../../utils/helper";
+import { formatDate, formatTime, getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const PAGE_SIZE = 10;
 const STATUS_COLOR: Record<BookingStatusEnum, "default" | "warning" | "info" | "success" | "error"> = {
@@ -198,7 +198,7 @@ const CaretakerBookingsPage: React.FC = () => {
                     </TableCell>
                     <TableCell>{booking.notes || "—"}</TableCell>
                     <TableCell>
-                      <Chip size="small" label={booking.status} color={STATUS_COLOR[booking.status]} />
+                      <Chip size="small" label={formatEnumLabel(booking.status)} color={STATUS_COLOR[booking.status]} />
                     </TableCell>
                     <TableCell align="right">
                       {booking.status === BookingStatusEnum.PENDING && (

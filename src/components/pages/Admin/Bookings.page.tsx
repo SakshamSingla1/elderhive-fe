@@ -6,13 +6,13 @@ import Select from "../../atoms/Select/Select";
 import { useBookingService } from "../../../services/useBookingService";
 import type { BookingResponse } from "../../../services/useBookingService";
 import { BookingStatusEnum } from "../../../utils/enums";
-import { formatDate, formatTime, getErrorMessage } from "../../../utils/helper";
+import { formatDate, formatTime, getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const PAGE_SIZE = 10;
 const ALL_STATUSES = "ALL";
 const STATUS_FILTER_OPTIONS = [
   { value: ALL_STATUSES, label: "All statuses" },
-  ...Object.values(BookingStatusEnum).map((status) => ({ value: status, label: status })),
+  ...Object.values(BookingStatusEnum).map((status) => ({ value: status, label: formatEnumLabel(status) })),
 ];
 const STATUS_COLOR: Record<BookingStatusEnum, "default" | "warning" | "info" | "success" | "error"> = {
   PENDING: "warning",
@@ -132,7 +132,7 @@ const AdminBookingsPage: React.FC = () => {
                     </TableCell>
                     <TableCell>{booking.cost != null ? `$${booking.cost}` : "—"}</TableCell>
                     <TableCell>
-                      <Chip size="small" label={booking.status} color={STATUS_COLOR[booking.status]} />
+                      <Chip size="small" label={formatEnumLabel(booking.status)} color={STATUS_COLOR[booking.status]} />
                     </TableCell>
                   </TableRow>
                 ))}

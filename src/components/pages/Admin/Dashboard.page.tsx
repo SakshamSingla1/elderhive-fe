@@ -20,7 +20,7 @@ import type { AdminDashboardStatsResponse } from "../../../services/useAdminDash
 import { useAuditLogService, type AuditLogResponse } from "../../../services/useAuditLogService";
 import { useAuthenticatedUser } from "../../../contexts/AuthenticatedUserContext";
 import { UserTypeEnum } from "../../../utils/enums";
-import { formatDateTime, getErrorMessage } from "../../../utils/helper";
+import { formatDateTime, getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const STAT_CARD_COUNT = 4;
 
@@ -158,7 +158,7 @@ const AdminDashboardPage: React.FC = () => {
                       <Box key={role} sx={{ cursor: "pointer" }} onClick={() => navigate(`/admin/users?userType=${role}`)}>
                         <Stack direction="row" justifyContent="space-between" mb={0.5}>
                           <Typography variant="body2" fontWeight={600}>
-                            {role}
+                            {formatEnumLabel(role)}
                           </Typography>
                           <Typography variant="body2" fontWeight={700}>
                             {count.toLocaleString()}
@@ -212,9 +212,9 @@ const AdminDashboardPage: React.FC = () => {
                             <ListItemText
                               primary={
                                 <Stack direction="row" spacing={1} alignItems="center">
-                                  <Chip size="small" label={entry.actionType} color="primary" variant="outlined" />
+                                  <Chip size="small" label={formatEnumLabel(entry.actionType)} color="primary" variant="outlined" />
                                   <Typography variant="body2" component="span">
-                                    {entry.entityType} #{entry.entityId}
+                                    {formatEnumLabel(entry.entityType)} #{entry.entityId}
                                   </Typography>
                                 </Stack>
                               }

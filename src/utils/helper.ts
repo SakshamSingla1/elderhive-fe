@@ -6,6 +6,21 @@ import dayjs from "dayjs";
 // response, so that's checked first; falls back to the raw Error's own message, then to
 // the caller-supplied default for anything unrecognizable (a network failure with no
 // response at all, for instance).
+// Every enum on the wire (UserTypeEnum, BookingStatusEnum, ...) is SCREAMING_SNAKE_CASE to
+// match its Java source (com.elderhive.enums.*) - fine for code, but rendered verbatim in
+// the UI it reads as shouting ("IN_PROGRESS", "SUPER_ADMIN"). This is the single place that
+// turns any such value into a normal-cased label ("In Progress", "Super Admin") - every
+// Chip/MenuItem/filter-option that displays a raw enum value to a user should route through
+// it rather than rendering the enum constant directly.
+export function formatEnumLabel(value: string | null | undefined): string {
+  if (!value) return "";
+  return value
+    .split("_")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
 export function getErrorMessage(error: unknown, fallback = "Something went wrong. Please try again."): string {
   if (error && typeof error === "object" && "response" in error) {
     const response = (error as { response?: { data?: { message?: string } } }).response;

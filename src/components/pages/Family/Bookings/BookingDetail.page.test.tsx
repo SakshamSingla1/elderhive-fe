@@ -345,7 +345,7 @@ describe("BookingDetail.page", () => {
     });
     renderPage();
 
-    expect(await screen.findByText("SUCCEEDED")).toBeInTheDocument();
+    expect(await screen.findByText("Succeeded")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Pay Now/ })).not.toBeInTheDocument();
   });
 

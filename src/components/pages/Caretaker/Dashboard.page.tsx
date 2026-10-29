@@ -9,7 +9,7 @@ import { useCaretakerService, type CaretakerProfileResponseDTO } from "../../../
 import { useBookingService, type BookingResponse } from "../../../services/useBookingService";
 import { useEmergencyAlertService, type EmergencyAlertResponse } from "../../../services/useEmergencyAlertService";
 import { BookingStatusEnum, CaretakerVerificationStatusEnum } from "../../../utils/enums";
-import { formatDate, formatTime, getErrorMessage } from "../../../utils/helper";
+import { formatDate, formatTime, getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const UPCOMING_STATUSES: BookingStatusEnum[] = [BookingStatusEnum.PENDING, BookingStatusEnum.CONFIRMED, BookingStatusEnum.IN_PROGRESS];
 const BOOKING_STATUS_COLOR: Record<BookingStatusEnum, "default" | "warning" | "info" | "success" | "error"> = {
@@ -218,7 +218,7 @@ const CaretakerDashboardPage: React.FC = () => {
                     }
                     secondary={`${formatDate(booking.scheduledDate)} · ${formatTime(booking.scheduledTime)}`}
                   />
-                  <Chip size="small" label={booking.status} color={BOOKING_STATUS_COLOR[booking.status]} />
+                  <Chip size="small" label={formatEnumLabel(booking.status)} color={BOOKING_STATUS_COLOR[booking.status]} />
                 </ListItemButton>
               ))}
             </List>

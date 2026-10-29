@@ -3,7 +3,7 @@ import { Alert, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Divider
 import Button from "../../atoms/Button/Button";
 import Select from "../../atoms/Select/Select";
 import { UserTypeEnum } from "../../../utils/enums";
-import { getErrorMessage } from "../../../utils/helper";
+import { getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 export interface ManageUserRolesTarget {
   id: number;
@@ -62,7 +62,7 @@ const ManageUserRolesDialog: React.FC<ManageUserRolesDialogProps> = ({ open, tar
   // A leading blank option so the MUI Select has something to match its initial ""
   // value against (avoids an "out-of-range value" console warning) without needing a
   // real role pre-selected.
-  const grantSelectOptions = [{ value: "", label: "Choose a role" }, ...grantableRoles.map((r) => ({ value: r, label: r }))];
+  const grantSelectOptions = [{ value: "", label: "Choose a role" }, ...grantableRoles.map((r) => ({ value: r, label: formatEnumLabel(r) }))];
 
   const handleGrant = async () => {
     if (!grantSelection || busy) return;
@@ -116,7 +116,7 @@ const ManageUserRolesDialog: React.FC<ManageUserRolesDialogProps> = ({ open, tar
             return (
               <Chip
                 key={role}
-                label={isPrimary ? `${role} · primary` : role}
+                label={isPrimary ? `${formatEnumLabel(role)} · primary` : formatEnumLabel(role)}
                 color={isPrimary ? "primary" : "default"}
                 variant={isPrimary ? "filled" : "outlined"}
                 onDelete={isPrimary || isRestricted || busy ? undefined : () => handleRevoke(role)}

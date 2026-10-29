@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import CaretakerEmergencyPage from "./Emergency.page";
@@ -101,7 +101,10 @@ describe("Caretaker Emergency.page", () => {
     expect(await screen.findByText("Robert")).toBeInTheDocument();
     expect(screen.getByText("MG Road, Bengaluru")).toBeInTheDocument();
     expect(screen.getByText("1.1 km")).toBeInTheDocument();
-    expect(screen.getByText("TRIGGERED")).toBeInTheDocument();
+    // "Triggered" also appears as the table's own column header (when the alert fired,
+    // distinct from this status chip) - scope to the alert's row to avoid ambiguity.
+    const row = screen.getByText("Robert").closest("tr") as HTMLElement;
+    expect(within(row).getByText("Triggered")).toBeInTheDocument();
   });
 
   it("shows an Overdue chip only when the alert is flagged overdue", async () => {

@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 import { FiBell, FiCheck, FiCheckCircle } from "react-icons/fi";
 import { useNotificationService, type NotificationResponseDTO } from "../../../services/useNotificationService";
-import { getErrorMessage, formatDateTime } from "../../../utils/helper";
+import { getErrorMessage, formatDateTime, formatEnumLabel} from "../../../utils/helper";
 
 const PAGE_SIZE = 10;
 
@@ -151,7 +151,7 @@ const NotificationsPage: React.FC = () => {
                   <TableRow key={n.id} hover>
                     <TableCell sx={{ fontWeight: n.isRead ? 400 : 700 }}>{n.title}</TableCell>
                     <TableCell>{n.message}</TableCell>
-                    <TableCell>{n.type}</TableCell>
+                    <TableCell>{formatEnumLabel(n.type)}</TableCell>
                     <TableCell>
                       {n.isRead ? (
                         <Chip label="Read" size="small" />

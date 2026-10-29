@@ -91,11 +91,11 @@ describe("Admin Dashboard.page", () => {
     getStats.mockResolvedValue(stats({ activeUsersByRole: { SUPER_ADMIN: 0, ADMIN: 0, ELDER: 0, CARETAKER: 0, FAMILY_MEMBER: 0 } }));
     renderPage();
 
-    expect(await screen.findByText("SUPER_ADMIN")).toBeInTheDocument();
-    expect(screen.getByText("ADMIN")).toBeInTheDocument();
-    expect(screen.getByText("ELDER")).toBeInTheDocument();
-    expect(screen.getByText("CARETAKER")).toBeInTheDocument();
-    expect(screen.getByText("FAMILY_MEMBER")).toBeInTheDocument();
+    expect(await screen.findByText("Super Admin")).toBeInTheDocument();
+    expect(screen.getByText("Admin")).toBeInTheDocument();
+    expect(screen.getByText("Elder")).toBeInTheDocument();
+    expect(screen.getByText("Caretaker")).toBeInTheDocument();
+    expect(screen.getByText("Family Member")).toBeInTheDocument();
   });
 
   it("shows an error alert when the stats call fails", async () => {

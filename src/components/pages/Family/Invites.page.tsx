@@ -4,7 +4,7 @@ import { FiCheckCircle, FiKey, FiMail, FiUserPlus } from "react-icons/fi";
 import TextField from "../../atoms/TextField/TextField";
 import Button from "../../atoms/Button/Button";
 import { useInviteService, type InviteResponseDTO } from "../../../services/useInviteService";
-import { getErrorMessage, formatDateTime } from "../../../utils/helper";
+import { getErrorMessage, formatDateTime, formatEnumLabel} from "../../../utils/helper";
 import { LinkInviteStatusEnum } from "../../../utils/enums";
 
 const STATUS_COLOR: Record<LinkInviteStatusEnum, "default" | "success" | "error"> = {
@@ -128,7 +128,7 @@ const FamilyInvitesPage: React.FC = () => {
                     primary={invite.relationshipLabel ? `As ${invite.relationshipLabel}` : `Invite #${invite.id}`}
                     secondary={formatDateTime(invite.updatedAt ?? invite.createdAt)}
                   />
-                  <Chip label={invite.status} size="small" color={STATUS_COLOR[invite.status]} />
+                  <Chip label={formatEnumLabel(invite.status)} size="small" color={STATUS_COLOR[invite.status]} />
                 </ListItem>
               ))}
             </List>

@@ -24,7 +24,7 @@ import {
 import { FiEdit3, FiTag, FiTrash2 } from "react-icons/fi";
 import { useServiceCategoryService } from "../../../services/useServiceCategoryService";
 import type { ServiceCategoryResponse } from "../../../services/useServiceCategoryService";
-import { getErrorMessage } from "../../../utils/helper";
+import { getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const SKELETON_COUNT = 6;
 const GRID_COLUMNS = { xs: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" };
@@ -122,7 +122,7 @@ const ServiceCategoryListingTemplate: React.FC<ServiceCategoryListingTemplatePro
                     </Typography>
                     <Chip
                       size="small"
-                      label={category.status}
+                      label={formatEnumLabel(category.status)}
                       color={category.status === "ACTIVE" ? "success" : "default"}
                     />
                   </Stack>

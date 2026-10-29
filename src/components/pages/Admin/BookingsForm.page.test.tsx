@@ -90,7 +90,7 @@ describe("Admin BookingsForm.page", () => {
 
     await screen.findByText("Booking #7");
     await user.click(screen.getByLabelText("Status"));
-    await user.click(await screen.findByRole("option", { name: "COMPLETED" }));
+    await user.click(await screen.findByRole("option", { name: "Completed" }));
     await user.click(screen.getByRole("button", { name: "Override Status" }));
 
     await waitFor(() => expect(service.adminOverrideStatus).toHaveBeenCalledWith(7, "COMPLETED"));

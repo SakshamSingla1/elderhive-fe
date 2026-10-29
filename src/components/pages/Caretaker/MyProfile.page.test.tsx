@@ -75,7 +75,7 @@ describe("Caretaker MyProfile.page", () => {
 
     expect(await screen.findByDisplayValue("Experienced caregiver")).toBeInTheDocument();
     // Appears twice: the profile's own verificationStatus chip and this document's reviewStatus chip.
-    expect(screen.getAllByText("PENDING").length).toBe(2);
+    expect(screen.getAllByText("Pending").length).toBe(2);
     expect(await screen.findByText("id.pdf")).toBeInTheDocument();
   });
 

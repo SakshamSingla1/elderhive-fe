@@ -5,7 +5,7 @@ import Button from "../../atoms/Button/Button";
 import { useCaretakerService, type CaretakerVerificationDocumentDTO } from "../../../services/useCaretakerService";
 import { useFileService } from "../../../services/useFileService";
 import { DocumentReviewStatusEnum } from "../../../utils/enums";
-import { formatDateTime, getErrorMessage } from "../../../utils/helper";
+import { formatDateTime, getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 export interface CaretakerVerificationDocumentsPanelProps {
   caretakerId: number;
@@ -121,7 +121,7 @@ const CaretakerVerificationDocumentsPanel: React.FC<CaretakerVerificationDocumen
                     >
                       Reject
                     </Button>
-                    <Chip label={doc.reviewStatus} size="small" color={REVIEW_STATUS_COLOR[doc.reviewStatus]} />
+                    <Chip label={formatEnumLabel(doc.reviewStatus)} size="small" color={REVIEW_STATUS_COLOR[doc.reviewStatus]} />
                   </Stack>
                 }
               >

@@ -22,7 +22,7 @@ import { useCaretakerService } from "../../../services/useCaretakerService";
 import { useWebSocket } from "../../../contexts/WebSocketContext";
 import { useAuthenticatedUser } from "../../../contexts/AuthenticatedUserContext";
 import { EmergencyAlertStatusEnum, NotificationTypeEnum } from "../../../utils/enums";
-import { formatDateTime, getErrorMessage } from "../../../utils/helper";
+import { formatDateTime, getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 // A fallback source of truth, same 30s-poll-plus-live-push split NotificationBell.tsx
 // already established - also covers the window before the socket connects.
@@ -199,7 +199,7 @@ const CaretakerEmergencyPage: React.FC = () => {
                   <TableCell>{formatDateTime(alert.createdAt)}</TableCell>
                   <TableCell>
                     <Stack direction="row" spacing={0.5}>
-                      <Chip size="small" label={alert.status} color={STATUS_COLOR[alert.status]} />
+                      <Chip size="small" label={formatEnumLabel(alert.status)} color={STATUS_COLOR[alert.status]} />
                       {alert.isOverdue && <Chip size="small" label="Overdue" color="error" variant="outlined" />}
                     </Stack>
                   </TableCell>

@@ -7,6 +7,7 @@ import { useServiceCategoryService } from "../../../services/useServiceCategoryS
 import type { ServiceCategoryResponse } from "../../../services/useServiceCategoryService";
 import type { ServiceOfferingPayload, ServiceOfferingResponse } from "../../../services/useServiceOfferingService";
 import { ServiceCategoryStatusEnum, ServiceOfferingStatusEnum } from "../../../utils/enums";
+import { formatEnumLabel } from "../../../utils/helper";
 
 const SERVICES_LISTING_PATH = "/admin/services";
 
@@ -175,7 +176,7 @@ const ServiceOfferingForm: React.FC<ServiceOfferingFormProps> = ({ mode, service
               <TextField select label="Status" name="status" fullWidth value={formik.values.status} onChange={formik.handleChange}>
                 {Object.values(ServiceOfferingStatusEnum).map((status) => (
                   <MenuItem key={status} value={status}>
-                    {status}
+                    {formatEnumLabel(status)}
                   </MenuItem>
                 ))}
               </TextField>

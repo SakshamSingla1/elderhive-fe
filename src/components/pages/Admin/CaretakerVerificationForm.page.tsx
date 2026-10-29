@@ -7,7 +7,7 @@ import WeeklyAvailabilityView from "../../molecules/WeeklyAvailability/WeeklyAva
 import CaretakerVerificationDocumentsPanel from "./CaretakerVerificationDocumentsPanel";
 import { useCaretakerService, type CaretakerProfileResponseDTO, type CaretakerAvailabilitySlotDTO } from "../../../services/useCaretakerService";
 import { CaretakerVerificationStatusEnum } from "../../../utils/enums";
-import { getErrorMessage } from "../../../utils/helper";
+import { getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const BACK_PATH = "/admin/caretaker-verification";
 
@@ -74,7 +74,7 @@ const AdminCaretakerVerificationFormPage: React.FC = () => {
             <Typography variant="h5" fontWeight={800}>
               {profile.fullName ?? "Caretaker"}
             </Typography>
-            <Chip label={profile.verificationStatus} size="small" color={STATUS_COLOR[profile.verificationStatus]} />
+            <Chip label={formatEnumLabel(profile.verificationStatus)} size="small" color={STATUS_COLOR[profile.verificationStatus]} />
           </Stack>
 
           <Card variant="outlined">

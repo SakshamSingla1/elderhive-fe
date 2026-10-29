@@ -19,7 +19,7 @@ import StatCard from "../../molecules/StatCard/StatCard";
 import { useElderProfileService, type ElderProfileResponseDTO } from "../../../services/useElderProfileService";
 import { useBookingService, type BookingResponse } from "../../../services/useBookingService";
 import { BookingStatusEnum } from "../../../utils/enums";
-import { formatDate, formatTime, getErrorMessage } from "../../../utils/helper";
+import { formatDate, formatTime, getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const UPCOMING_STATUSES: BookingStatusEnum[] = [BookingStatusEnum.PENDING, BookingStatusEnum.CONFIRMED, BookingStatusEnum.IN_PROGRESS];
 const STATUS_COLOR: Record<BookingStatusEnum, "default" | "warning" | "info" | "success" | "error"> = {
@@ -247,7 +247,7 @@ const FamilyDashboardPage: React.FC = () => {
                         }
                         secondary={`${formatDate(booking.scheduledDate)} · ${formatTime(booking.scheduledTime)} · ${booking.caretakerName ?? "Unassigned"}`}
                       />
-                      <Chip size="small" label={booking.status} color={STATUS_COLOR[booking.status]} />
+                      <Chip size="small" label={formatEnumLabel(booking.status)} color={STATUS_COLOR[booking.status]} />
                     </ListItemButton>
                   ))}
                 </List>

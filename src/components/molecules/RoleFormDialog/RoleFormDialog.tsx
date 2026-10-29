@@ -5,7 +5,7 @@ import { Alert, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Sta
 import Button from "../../atoms/Button/Button";
 import type { RolePayload, RoleResponse } from "../../../services/useRoleService";
 import { RoleStatusEnum } from "../../../utils/enums";
-import { getErrorMessage } from "../../../utils/helper";
+import { getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 export interface RoleFormDialogProps {
   open: boolean;
@@ -89,7 +89,7 @@ const RoleFormDialog: React.FC<RoleFormDialogProps> = ({ open, role, onClose, on
             <TextField select label="Status" name="status" fullWidth value={formik.values.status} onChange={formik.handleChange}>
               {Object.values(RoleStatusEnum).map((status) => (
                 <MenuItem key={status} value={status}>
-                  {status}
+                  {formatEnumLabel(status)}
                 </MenuItem>
               ))}
             </TextField>

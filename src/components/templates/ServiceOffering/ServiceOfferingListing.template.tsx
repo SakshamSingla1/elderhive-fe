@@ -31,7 +31,7 @@ import type { ServiceCategoryResponse } from "../../../services/useServiceCatego
 import { useServiceOfferingService } from "../../../services/useServiceOfferingService";
 import type { ServiceOfferingResponse } from "../../../services/useServiceOfferingService";
 import { ServiceCategoryStatusEnum } from "../../../utils/enums";
-import { getErrorMessage } from "../../../utils/helper";
+import { getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const SKELETON_COUNT = 6;
 const GRID_COLUMNS = { xs: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" };
@@ -168,7 +168,7 @@ const ServiceOfferingListingTemplate: React.FC<ServiceOfferingListingTemplatePro
                     <Typography variant="h6" fontWeight={700}>
                       {offering.name}
                     </Typography>
-                    <Chip size="small" label={offering.status} color={offering.status === "ACTIVE" ? "success" : "default"} />
+                    <Chip size="small" label={formatEnumLabel(offering.status)} color={offering.status === "ACTIVE" ? "success" : "default"} />
                   </Stack>
                   {offering.categoryName && (
                     <Chip size="small" variant="outlined" label={offering.categoryName} sx={{ mt: 1 }} />

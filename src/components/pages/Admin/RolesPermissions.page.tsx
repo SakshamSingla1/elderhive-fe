@@ -28,7 +28,7 @@ import type { RolePayload, RoleResponse } from "../../../services/useRoleService
 import { usePermissionService } from "../../../services/usePermissionService";
 import type { PermissionResponse } from "../../../services/usePermissionService";
 import { RoleStatusEnum } from "../../../utils/enums";
-import { getErrorMessage } from "../../../utils/helper";
+import { getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const PAGE_SIZE = 20;
 
@@ -169,7 +169,7 @@ const RolesPermissionsPage: React.FC = () => {
                     <TableCell>{role.description ?? "—"}</TableCell>
                     <TableCell>{role.permissionCodes.length}</TableCell>
                     <TableCell>
-                      <Chip size="small" label={role.status} color={STATUS_COLOR[role.status]} />
+                      <Chip size="small" label={formatEnumLabel(role.status)} color={STATUS_COLOR[role.status]} />
                     </TableCell>
                     <TableCell align="right">
                       <Stack direction="row" spacing={1} justifyContent="flex-end">

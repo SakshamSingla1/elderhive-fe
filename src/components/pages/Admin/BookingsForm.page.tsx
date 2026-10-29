@@ -7,10 +7,10 @@ import Button from "../../atoms/Button/Button";
 import { useBookingService } from "../../../services/useBookingService";
 import type { BookingResponse } from "../../../services/useBookingService";
 import { BookingStatusEnum } from "../../../utils/enums";
-import { formatDate, formatTime, getErrorMessage } from "../../../utils/helper";
+import { formatDate, formatTime, getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const BOOKINGS_LISTING_PATH = "/admin/bookings";
-const STATUS_OPTIONS = Object.values(BookingStatusEnum).map((status) => ({ value: status, label: status }));
+const STATUS_OPTIONS = Object.values(BookingStatusEnum).map((status) => ({ value: status, label: formatEnumLabel(status) }));
 const STATUS_COLOR: Record<BookingStatusEnum, "default" | "warning" | "info" | "success" | "error"> = {
   PENDING: "warning",
   CONFIRMED: "info",
@@ -96,7 +96,7 @@ const AdminBookingsFormPage: React.FC = () => {
         <Typography variant="h5" fontWeight={800}>
           Booking #{booking.id}
         </Typography>
-        <Chip size="small" label={booking.status} color={STATUS_COLOR[booking.status]} />
+        <Chip size="small" label={formatEnumLabel(booking.status)} color={STATUS_COLOR[booking.status]} />
       </Stack>
 
       <Card variant="outlined" sx={{ mb: 3 }}>

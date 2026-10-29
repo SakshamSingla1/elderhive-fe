@@ -5,6 +5,7 @@ import * as Yup from "yup";
 import { Box, Button, Card, CardContent, MenuItem, Stack, TextField, Typography } from "@mui/material";
 import type { ServiceCategoryPayload, ServiceCategoryResponse } from "../../../services/useServiceCategoryService";
 import { ServiceCategoryStatusEnum } from "../../../utils/enums";
+import { formatEnumLabel } from "../../../utils/helper";
 
 const SERVICE_CATEGORIES_LISTING_PATH = "/admin/service-categories";
 
@@ -103,7 +104,7 @@ const ServiceCategoryForm: React.FC<ServiceCategoryFormProps> = ({ mode, service
               <TextField select label="Status" name="status" fullWidth value={formik.values.status} onChange={formik.handleChange}>
                 {Object.values(ServiceCategoryStatusEnum).map((status) => (
                   <MenuItem key={status} value={status}>
-                    {status}
+                    {formatEnumLabel(status)}
                   </MenuItem>
                 ))}
               </TextField>

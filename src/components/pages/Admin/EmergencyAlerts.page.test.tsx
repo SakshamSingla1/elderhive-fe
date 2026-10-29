@@ -119,7 +119,7 @@ describe("Admin EmergencyAlerts.page", () => {
     await screen.findByText("Robert");
     getAll.mockClear();
     await user.click(screen.getByLabelText("Status"));
-    await user.click(await screen.findByRole("option", { name: "ACKNOWLEDGED" }));
+    await user.click(await screen.findByRole("option", { name: "Acknowledged" }));
 
     await waitFor(() => expect(getAll).toHaveBeenCalledWith(expect.objectContaining({ status: "ACKNOWLEDGED", page: 0 })));
   });

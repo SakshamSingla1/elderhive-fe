@@ -4,7 +4,7 @@ import TextField from "../../atoms/TextField/TextField";
 import { useSearchService, type CaretakerSearchResultDTO } from "../../../services/useSearchService";
 import { usePresenceService } from "../../../services/usePresenceService";
 import { useWebSocket } from "../../../contexts/WebSocketContext";
-import { useDebounce, getErrorMessage } from "../../../utils/helper";
+import { useDebounce, getErrorMessage, formatEnumLabel } from "../../../utils/helper";
 
 const MIN_QUERY_LENGTH = 2;
 const DEBOUNCE_MS = 400;
@@ -149,7 +149,7 @@ const CaretakerSearchAutocomplete: React.FC<CaretakerSearchAutocompleteProps> = 
                 )}
               </Stack>
             </Stack>
-            <Chip label={option.verificationStatus} size="small" />
+            <Chip label={formatEnumLabel(option.verificationStatus)} size="small" />
           </Stack>
         </li>
       )}

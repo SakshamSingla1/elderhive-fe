@@ -10,7 +10,7 @@ import Select from "../../atoms/Select/Select";
 import Button from "../../atoms/Button/Button";
 import { useElderProfileService, type ElderProfileRequestDTO } from "../../../services/useElderProfileService";
 import { GenderEnum } from "../../../utils/enums";
-import { getErrorMessage, formatDate } from "../../../utils/helper";
+import { getErrorMessage, formatDate, formatEnumLabel} from "../../../utils/helper";
 
 const GENDER_OPTIONS = [
   { value: GenderEnum.MALE, label: "Male" },
@@ -187,7 +187,7 @@ const ElderMyProfilePage: React.FC = () => {
               </Typography>
               <Stack direction="row" spacing={1} flexWrap="wrap" rowGap={0.5} mt={0.5}>
                 {age != null && <Chip size="small" variant="outlined" label={`${age} years old`} />}
-                {formik.values.gender && <Chip size="small" variant="outlined" label={formik.values.gender} />}
+                {formik.values.gender && <Chip size="small" variant="outlined" label={formatEnumLabel(formik.values.gender)} />}
                 {memberSince && <Chip size="small" variant="outlined" label={`Member since ${formatDate(memberSince)}`} />}
                 {!profileId && <Chip size="small" color="warning" variant="outlined" label="Not yet created" />}
               </Stack>

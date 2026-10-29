@@ -119,7 +119,7 @@ describe("Admin Users.page", () => {
     await userEvent.click(within(confirmDialog).getByRole("button", { name: "Suspend" }));
 
     await waitFor(() => expect(suspend).toHaveBeenCalledWith(1));
-    await waitFor(() => expect(screen.getByText("SUSPENDED")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Suspended")).toBeInTheDocument());
   });
 
   it("opens the roles dialog for the clicked row and restricts ADMIN/SUPER_ADMIN grants for a plain admin caller", async () => {
@@ -148,7 +148,7 @@ describe("Admin Users.page", () => {
     within(dialog).getByText("Manage roles");
 
     await userEvent.click(within(dialog).getByLabelText("Role"));
-    await userEvent.click(screen.getByRole("option", { name: "ADMIN" }));
+    await userEvent.click(screen.getByRole("option", { name: "Admin" }));
     await userEvent.click(within(dialog).getByRole("button", { name: "Grant" }));
 
     await waitFor(() => expect(grantRole).toHaveBeenCalledWith(1, UserTypeEnum.ADMIN));

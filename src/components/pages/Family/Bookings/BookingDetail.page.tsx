@@ -14,7 +14,7 @@ import CheckoutPaymentForm from "../../../molecules/Payment/CheckoutPaymentForm"
 import { useWebSocket } from "../../../../contexts/WebSocketContext";
 import { isStripeConfigured } from "../../../../utils/stripeClient";
 import { BookingStatusEnum, PaymentStatusEnum } from "../../../../utils/enums";
-import { formatDate, formatTime, getErrorMessage } from "../../../../utils/helper";
+import { formatDate, formatTime, getErrorMessage, formatEnumLabel} from "../../../../utils/helper";
 
 const PAYMENT_STATUS_COLOR: Record<PaymentStatusEnum, "default" | "warning" | "success" | "error"> = {
   PENDING: "warning",
@@ -246,7 +246,7 @@ const BookingDetailPage: React.FC = () => {
               </Box>
             </Stack>
             <Stack direction="row" spacing={1}>
-              <Chip label={booking.status} color={STATUS_COLOR[booking.status]} />
+              <Chip label={formatEnumLabel(booking.status)} color={STATUS_COLOR[booking.status]} />
               {booking.recurringGroupId && <Chip icon={<FiRepeat size={14} />} label="Recurring series" variant="outlined" />}
             </Stack>
           </Stack>
@@ -285,7 +285,7 @@ const BookingDetailPage: React.FC = () => {
             {payment && (
               <Row
                 label="Payment"
-                value={<Chip size="small" label={payment.status} color={PAYMENT_STATUS_COLOR[payment.status]} />}
+                value={<Chip size="small" label={formatEnumLabel(payment.status)} color={PAYMENT_STATUS_COLOR[payment.status]} />}
               />
             )}
           </Stack>
@@ -315,7 +315,7 @@ const BookingDetailPage: React.FC = () => {
                     <Typography variant="body2" color="text.secondary" sx={{ minWidth: 80 }}>
                       {formatTime(s.scheduledTime)}
                     </Typography>
-                    <Chip size="small" label={s.status} color={STATUS_COLOR[s.status]} />
+                    <Chip size="small" label={formatEnumLabel(s.status)} color={STATUS_COLOR[s.status]} />
                   </Stack>
                 ))}
               </Stack>

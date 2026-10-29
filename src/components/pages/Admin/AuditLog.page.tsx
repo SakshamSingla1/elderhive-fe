@@ -20,13 +20,13 @@ import Select from "../../atoms/Select/Select";
 import { useAuditLogService } from "../../../services/useAuditLogService";
 import type { AuditLogResponse } from "../../../services/useAuditLogService";
 import { ActionType, EntityTypeEnum } from "../../../utils/enums";
-import { getErrorMessage } from "../../../utils/helper";
+import { getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const PAGE_SIZE = 20;
 const ALL = "ALL";
 
-const ENTITY_TYPE_OPTIONS = [{ value: ALL, label: "All entity types" }, ...Object.values(EntityTypeEnum).map((t) => ({ value: t, label: t }))];
-const ACTION_TYPE_OPTIONS = [{ value: ALL, label: "All actions" }, ...Object.values(ActionType).map((a) => ({ value: a, label: a }))];
+const ENTITY_TYPE_OPTIONS = [{ value: ALL, label: "All entity types" }, ...Object.values(EntityTypeEnum).map((t) => ({ value: t, label: formatEnumLabel(t) }))];
+const ACTION_TYPE_OPTIONS = [{ value: ALL, label: "All actions" }, ...Object.values(ActionType).map((a) => ({ value: a, label: formatEnumLabel(a) }))];
 
 // A date-only <input type="date"> value (yyyy-mm-dd, or "") converted to the inclusive
 // start/end-of-day ISO instant AuditLogController's `from`/`to` query params expect.
@@ -178,10 +178,10 @@ const AuditLogPage: React.FC = () => {
                   <TableRow key={log.id} hover>
                     <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
                     <TableCell>
-                      <Chip size="small" label={`${log.entityType} #${log.entityId}`} variant="outlined" />
+                      <Chip size="small" label={`${formatEnumLabel(log.entityType)} #${log.entityId}`} variant="outlined" />
                     </TableCell>
                     <TableCell>
-                      <Chip size="small" label={log.actionType} color="primary" variant="outlined" />
+                      <Chip size="small" label={formatEnumLabel(log.actionType)} color="primary" variant="outlined" />
                     </TableCell>
                     <TableCell>{log.actorEmail ?? (log.actorUserId ? `User #${log.actorUserId}` : "—")}</TableCell>
                     <TableCell sx={{ maxWidth: 360, fontFamily: "monospace", fontSize: 12, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>

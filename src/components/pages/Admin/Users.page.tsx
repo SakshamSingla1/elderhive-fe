@@ -31,14 +31,14 @@ import { useRoleService } from "../../../services/useRoleService";
 import type { RoleResponse } from "../../../services/useRoleService";
 import { useAuthenticatedUser } from "../../../contexts/AuthenticatedUserContext";
 import { UserStatusEnum, UserTypeEnum } from "../../../utils/enums";
-import { useDebounce, getErrorMessage } from "../../../utils/helper";
+import { useDebounce, getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const PAGE_SIZE = 20;
 const SEARCH_DEBOUNCE_MS = 400;
 const ALL = "ALL";
 
-const USER_TYPE_FILTER_OPTIONS = [{ value: ALL, label: "All roles" }, ...Object.values(UserTypeEnum).map((t) => ({ value: t, label: t }))];
-const STATUS_FILTER_OPTIONS = [{ value: ALL, label: "All statuses" }, ...Object.values(UserStatusEnum).map((s) => ({ value: s, label: s }))];
+const USER_TYPE_FILTER_OPTIONS = [{ value: ALL, label: "All roles" }, ...Object.values(UserTypeEnum).map((t) => ({ value: t, label: formatEnumLabel(t) }))];
+const STATUS_FILTER_OPTIONS = [{ value: ALL, label: "All statuses" }, ...Object.values(UserStatusEnum).map((s) => ({ value: s, label: formatEnumLabel(s) }))];
 
 const STATUS_COLOR: Record<UserStatusEnum, "success" | "default" | "error"> = {
   ACTIVE: "success",
@@ -247,7 +247,7 @@ const AdminUsersPage: React.FC = () => {
                           <Chip
                             key={role}
                             size="small"
-                            label={role}
+                            label={formatEnumLabel(role)}
                             color={role === u.primaryRole ? "primary" : "default"}
                             variant={role === u.primaryRole ? "filled" : "outlined"}
                           />
@@ -273,7 +273,7 @@ const AdminUsersPage: React.FC = () => {
                       </TableCell>
                     )}
                     <TableCell>
-                      <Chip size="small" label={u.status} color={STATUS_COLOR[u.status]} />
+                      <Chip size="small" label={formatEnumLabel(u.status)} color={STATUS_COLOR[u.status]} />
                     </TableCell>
                     <TableCell align="right">
                       <Stack direction="row" spacing={1} justifyContent="flex-end">

@@ -52,7 +52,7 @@ describe("CaretakerVerificationDocumentsPanel", () => {
     await user.click(screen.getByRole("button", { name: "Approve" }));
 
     await waitFor(() => expect(reviewVerificationDocument).toHaveBeenCalledWith(1, DocumentReviewStatusEnum.APPROVED));
-    expect(await screen.findByText("APPROVED")).toBeInTheDocument();
+    expect(await screen.findByText("Approved")).toBeInTheDocument();
   });
 
   it("rejecting a document calls reviewVerificationDocument with REJECTED", async () => {

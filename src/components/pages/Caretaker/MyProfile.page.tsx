@@ -26,7 +26,7 @@ import WeeklyAvailabilityEditor from "../../molecules/WeeklyAvailability/WeeklyA
 import { useCaretakerService, type CaretakerProfileRequestDTO, type CaretakerVerificationDocumentDTO } from "../../../services/useCaretakerService";
 import { useFileService } from "../../../services/useFileService";
 import { CaretakerVerificationStatusEnum, DocumentReviewStatusEnum } from "../../../utils/enums";
-import { getErrorMessage, formatDateTime } from "../../../utils/helper";
+import { getErrorMessage, formatDateTime, formatEnumLabel} from "../../../utils/helper";
 
 interface FormValues {
   bio: string;
@@ -247,7 +247,7 @@ const CaretakerMyProfilePage: React.FC = () => {
                   {fullName || "Your Profile"}
                 </Typography>
                 <Chip
-                  label={verificationStatus}
+                  label={formatEnumLabel(verificationStatus)}
                   size="small"
                   color={VERIFICATION_STATUS_COLOR[verificationStatus]}
                   variant={verificationStatus === CaretakerVerificationStatusEnum.PENDING ? "outlined" : "filled"}
@@ -439,7 +439,7 @@ const CaretakerMyProfilePage: React.FC = () => {
                         <Button size="small" variant="text" onClick={() => window.open(fileService.getDownloadUrl(doc.fileAssetId), "_blank")}>
                           View
                         </Button>
-                        <Chip label={doc.reviewStatus} size="small" color={REVIEW_STATUS_COLOR[doc.reviewStatus]} />
+                        <Chip label={formatEnumLabel(doc.reviewStatus)} size="small" color={REVIEW_STATUS_COLOR[doc.reviewStatus]} />
                       </Stack>
                     }
                   >

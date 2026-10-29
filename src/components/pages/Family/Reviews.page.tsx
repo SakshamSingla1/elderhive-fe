@@ -9,7 +9,7 @@ import type { ReviewResponse } from "../../../services/useReviewService";
 import { useBookingService } from "../../../services/useBookingService";
 import type { BookingResponse } from "../../../services/useBookingService";
 import { BookingStatusEnum } from "../../../utils/enums";
-import { getErrorMessage } from "../../../utils/helper";
+import { getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const SubRatingRow: React.FC<{ label: string; value: number; onChange?: (value: number) => void }> = ({ label, value, onChange }) => (
   <Stack direction="row" spacing={1.5} alignItems="center">
@@ -134,7 +134,7 @@ const FamilyReviewsPage: React.FC = () => {
       ) : loadError || !booking ? (
         <Alert severity="error">{loadError ?? "Booking not found"}</Alert>
       ) : booking.status !== BookingStatusEnum.COMPLETED ? (
-        <Alert severity="info">Only a completed booking can be reviewed. This booking is currently {booking.status}.</Alert>
+        <Alert severity="info">Only a completed booking can be reviewed. This booking is currently {formatEnumLabel(booking.status)}.</Alert>
       ) : existingReview ? (
         <Card variant="outlined">
           <CardContent>

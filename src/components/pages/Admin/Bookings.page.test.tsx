@@ -112,7 +112,7 @@ describe("Admin Bookings.page", () => {
     await screen.findByText("Robert");
     getAll.mockClear();
     await user.click(screen.getByLabelText("Status"));
-    await user.click(await screen.findByRole("option", { name: "CONFIRMED" }));
+    await user.click(await screen.findByRole("option", { name: "Confirmed" }));
 
     await waitFor(() => expect(getAll).toHaveBeenCalledWith(expect.objectContaining({ status: "CONFIRMED", page: 0 })));
   });

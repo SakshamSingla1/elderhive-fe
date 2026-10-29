@@ -7,13 +7,13 @@ import { useEmergencyAlertService } from "../../../services/useEmergencyAlertSer
 import type { EmergencyAlertResponse } from "../../../services/useEmergencyAlertService";
 import { useWebSocket } from "../../../contexts/WebSocketContext";
 import { EmergencyAlertStatusEnum } from "../../../utils/enums";
-import { formatDateTime, getErrorMessage } from "../../../utils/helper";
+import { formatDateTime, getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const PAGE_SIZE = 10;
 const ALL_STATUSES = "ALL";
 const STATUS_FILTER_OPTIONS = [
   { value: ALL_STATUSES, label: "All statuses" },
-  ...Object.values(EmergencyAlertStatusEnum).map((status) => ({ value: status, label: status })),
+  ...Object.values(EmergencyAlertStatusEnum).map((status) => ({ value: status, label: formatEnumLabel(status) })),
 ];
 const STATUS_COLOR: Record<EmergencyAlertStatusEnum, "error" | "warning" | "success"> = {
   TRIGGERED: "error",
@@ -139,7 +139,7 @@ const AdminEmergencyAlertsPage: React.FC = () => {
                     <TableCell>{alert.responseTimeSeconds != null ? `${alert.responseTimeSeconds}s` : "—"}</TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={0.5}>
-                        <Chip size="small" label={alert.status} color={STATUS_COLOR[alert.status]} />
+                        <Chip size="small" label={formatEnumLabel(alert.status)} color={STATUS_COLOR[alert.status]} />
                         {alert.isOverdue && <Chip size="small" label="Overdue" color="error" variant="outlined" />}
                       </Stack>
                     </TableCell>

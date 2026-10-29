@@ -26,14 +26,14 @@ import TextField from "../../atoms/TextField/TextField";
 import { useContactUsService } from "../../../services/useContactUsService";
 import type { ContactUsResponse } from "../../../services/useContactUsService";
 import { ContactUsStatusEnum } from "../../../utils/enums";
-import { formatDateTime, getErrorMessage, useDebounce } from "../../../utils/helper";
+import { formatDateTime, getErrorMessage, useDebounce, formatEnumLabel} from "../../../utils/helper";
 
 const PAGE_SIZE = 20;
 const ALL = "ALL";
 const SEARCH_DEBOUNCE_MS = 400;
 
-const STATUS_FILTER_OPTIONS = [{ value: ALL, label: "All statuses" }, ...Object.values(ContactUsStatusEnum).map((s) => ({ value: s, label: s }))];
-const STATUS_UPDATE_OPTIONS = Object.values(ContactUsStatusEnum).map((s) => ({ value: s, label: s }));
+const STATUS_FILTER_OPTIONS = [{ value: ALL, label: "All statuses" }, ...Object.values(ContactUsStatusEnum).map((s) => ({ value: s, label: formatEnumLabel(s) }))];
+const STATUS_UPDATE_OPTIONS = Object.values(ContactUsStatusEnum).map((s) => ({ value: s, label: formatEnumLabel(s) }));
 
 const STATUS_COLOR: Record<ContactUsStatusEnum, "warning" | "info" | "default"> = {
   NEW: "warning",
@@ -194,7 +194,7 @@ const ContactUsPage: React.FC = () => {
                     <TableCell>{formatDateTime(s.createdAt)}</TableCell>
                     <TableCell>
                       <Stack spacing={0.5} alignItems="flex-start">
-                        <Chip size="small" label={s.status} color={STATUS_COLOR[s.status]} />
+                        <Chip size="small" label={formatEnumLabel(s.status)} color={STATUS_COLOR[s.status]} />
                         <Select
                           label="Change status"
                           value={s.status}

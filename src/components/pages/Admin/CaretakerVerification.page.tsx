@@ -7,7 +7,7 @@ import Button from "../../atoms/Button/Button";
 import CaretakerSearchAutocomplete from "../../molecules/CaretakerSearchAutocomplete/CaretakerSearchAutocomplete";
 import { useCaretakerService, type CaretakerProfileResponseDTO } from "../../../services/useCaretakerService";
 import { CaretakerVerificationStatusEnum } from "../../../utils/enums";
-import { getErrorMessage } from "../../../utils/helper";
+import { getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const STATUS_FILTER_OPTIONS = [
   { value: "ALL", label: "All statuses" },
@@ -132,7 +132,7 @@ const AdminCaretakerVerificationPage: React.FC = () => {
                   <TableCell>{profile.hourlyRate != null ? `$${profile.hourlyRate}` : "—"}</TableCell>
                   <TableCell>{profile.ratingAverage != null ? profile.ratingAverage.toFixed(1) : "—"}</TableCell>
                   <TableCell>
-                    <Chip label={profile.verificationStatus} size="small" color={STATUS_COLOR[profile.verificationStatus]} />
+                    <Chip label={formatEnumLabel(profile.verificationStatus)} size="small" color={STATUS_COLOR[profile.verificationStatus]} />
                   </TableCell>
                   <TableCell align="right">
                     <Button size="small" variant="outlined" onClick={() => navigate(`/admin/caretaker-verification/${profile.id}`)}>

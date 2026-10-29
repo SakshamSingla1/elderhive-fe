@@ -8,7 +8,7 @@ import CaretakerSearchAutocomplete from "../../molecules/CaretakerSearchAutocomp
 import { useEmergencyAlertService } from "../../../services/useEmergencyAlertService";
 import type { EmergencyAlertResponse } from "../../../services/useEmergencyAlertService";
 import { EmergencyAlertStatusEnum } from "../../../utils/enums";
-import { formatDateTime, getErrorMessage } from "../../../utils/helper";
+import { formatDateTime, getErrorMessage, formatEnumLabel} from "../../../utils/helper";
 
 const EMERGENCY_ALERTS_LISTING_PATH = "/admin/emergency-alerts";
 const STATUS_COLOR: Record<EmergencyAlertStatusEnum, "error" | "warning" | "success"> = {
@@ -109,7 +109,7 @@ const AdminEmergencyAlertsFormPage: React.FC = () => {
         <Typography variant="h5" fontWeight={800}>
           Alert #{alert.id}
         </Typography>
-        <Chip size="small" label={alert.status} color={STATUS_COLOR[alert.status]} />
+        <Chip size="small" label={formatEnumLabel(alert.status)} color={STATUS_COLOR[alert.status]} />
         {alert.isOverdue && <Chip size="small" label="Overdue" color="error" variant="outlined" />}
       </Stack>
 

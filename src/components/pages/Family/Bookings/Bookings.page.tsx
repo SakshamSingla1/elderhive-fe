@@ -25,7 +25,7 @@ import type { BookingResponse } from "../../../../services/useBookingService";
 import { usePresenceService } from "../../../../services/usePresenceService";
 import { useWebSocket } from "../../../../contexts/WebSocketContext";
 import { BookingStatusEnum } from "../../../../utils/enums";
-import { formatDate, formatTime, getErrorMessage } from "../../../../utils/helper";
+import { formatDate, formatTime, getErrorMessage, formatEnumLabel} from "../../../../utils/helper";
 
 const PAGE_SIZE = 10;
 const CANCELLABLE: BookingStatusEnum[] = [BookingStatusEnum.PENDING, BookingStatusEnum.CONFIRMED, BookingStatusEnum.IN_PROGRESS];
@@ -224,7 +224,7 @@ const BookingsPage: React.FC = () => {
                     </TableCell>
                     <TableCell>{booking.cost != null ? `$${booking.cost}` : "—"}</TableCell>
                     <TableCell>
-                      <Chip size="small" label={booking.status} color={STATUS_COLOR[booking.status]} />
+                      <Chip size="small" label={formatEnumLabel(booking.status)} color={STATUS_COLOR[booking.status]} />
                     </TableCell>
                     <TableCell align="right" onClick={(e) => e.stopPropagation()}>
                       {CANCELLABLE.includes(booking.status) && (
