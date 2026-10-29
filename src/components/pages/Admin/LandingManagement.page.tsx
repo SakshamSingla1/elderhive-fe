@@ -23,6 +23,7 @@ import {
   Typography,
 } from "@mui/material";
 import { FiGlobe, FiPlus, FiTrash2 } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import Button from "../../atoms/Button/Button";
 import TextField from "../../atoms/TextField/TextField";
 import Checkbox from "../../atoms/Checkbox/Checkbox";
@@ -782,17 +783,11 @@ const LandingManagementPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiGlobe size={22} color="#2F6F5E" />
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Landing Page Management
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Edit the public marketing homepage's hero copy, features, FAQs, and testimonials.
-          </Typography>
-        </Box>
-      </Stack>
+      <PageHeader
+        icon={<FiGlobe size={20} />}
+        title="Landing Page Management"
+        subtitle="Edit the public marketing homepage's hero copy, features, FAQs, and testimonials."
+      />
       <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
         <Tab label="Hero & CTA" />
         <Tab label="Features" />
