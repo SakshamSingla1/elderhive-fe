@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Alert, Box, Card, CardContent, Chip, Divider, Skeleton, Stack, Typography } from "@mui/material";
 import { FiAlertTriangle, FiArrowLeft } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import Button from "../../atoms/Button/Button";
 import ConfirmDialog from "../../atoms/ConfirmDialog/ConfirmDialog";
 import CaretakerSearchAutocomplete from "../../molecules/CaretakerSearchAutocomplete/CaretakerSearchAutocomplete";
@@ -104,14 +105,16 @@ const AdminEmergencyAlertsFormPage: React.FC = () => {
           Back to emergency alerts
         </Button>
       </Stack>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiAlertTriangle size={22} color="#C0392B" />
-        <Typography variant="h5" fontWeight={800}>
-          Alert #{alert.id}
-        </Typography>
-        <Chip size="small" label={formatEnumLabel(alert.status)} color={STATUS_COLOR[alert.status]} />
-        {alert.isOverdue && <Chip size="small" label="Overdue" color="error" variant="outlined" />}
-      </Stack>
+      <PageHeader
+        icon={<FiAlertTriangle size={20} />}
+        title={`Alert #${alert.id}`}
+        titleAdornment={
+          <>
+            <Chip size="small" label={formatEnumLabel(alert.status)} color={STATUS_COLOR[alert.status]} />
+            {alert.isOverdue && <Chip size="small" label="Overdue" color="error" variant="outlined" />}
+          </>
+        }
+      />
 
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>

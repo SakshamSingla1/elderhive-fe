@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Box, Button, Card, CardContent, Chip, CircularProgress, Stack, TextField, Typography } from "@mui/material";
+import { FiSettings } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import { useMetaConfigService, type MetaConfigResponse } from "../../../services/useMetaConfigService";
 import { getErrorMessage } from "../../../utils/helper";
 
@@ -105,14 +107,11 @@ const PlatformSettingsPage: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h4" component="h1" fontWeight={800} gutterBottom>
-        Platform Settings
-      </Typography>
-      <Typography variant="body1" color="text.secondary" mb={3}>
-        Edit the raw JSON for each configuration context below. These values are read by
-        name elsewhere in the app (e.g. the emergency flow's search radius) — never
-        hardcoded — so a change here takes effect without a redeploy.
-      </Typography>
+      <PageHeader
+        icon={<FiSettings size={20} />}
+        title="Platform Settings"
+        subtitle="Edit the raw JSON for each configuration context below. These values are read by name elsewhere in the app (e.g. the emergency flow's search radius) — never hardcoded — so a change here takes effect without a redeploy."
+      />
 
       {loadError && (
         <Alert severity="error" sx={{ mb: 3 }}>

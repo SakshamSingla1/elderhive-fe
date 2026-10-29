@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Alert, Box, Card, CardContent, Grid, Skeleton, Stack, Typography } from "@mui/material";
+import { Alert, Box, Card, CardContent, Grid, Skeleton, Stack } from "@mui/material";
 import { FiArrowLeft, FiUser } from "react-icons/fi";
+import PageHeader from "../../../molecules/PageHeader/PageHeader";
 import TextField from "../../../atoms/TextField/TextField";
 import Select from "../../../atoms/Select/Select";
 import Button from "../../../atoms/Button/Button";
@@ -123,12 +124,7 @@ const ElderProfilesFormPage: React.FC = () => {
           Back
         </Button>
       </Stack>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiUser size={22} />
-        <Typography variant="h5" fontWeight={800}>
-          {isEdit ? "Edit Elder Profile" : "Add Elder Profile"}
-        </Typography>
-      </Stack>
+      <PageHeader icon={<FiUser size={20} />} title={isEdit ? "Edit Elder Profile" : "Add Elder Profile"} />
 
       {loadError && (
         <Alert severity="error" sx={{ mb: 2 }}>

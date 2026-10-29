@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Alert, Box, Card, CardContent, Chip, Grid, List, ListItem, ListItemText, Stack, Typography } from "@mui/material";
 import { FiCheckCircle, FiKey, FiMail, FiUserPlus } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import TextField from "../../atoms/TextField/TextField";
 import Button from "../../atoms/Button/Button";
 import { useInviteService, type InviteResponseDTO } from "../../../services/useInviteService";
@@ -55,17 +56,7 @@ const FamilyInvitesPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiMail size={22} />
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Family Link Invites
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Accept or decline an invite to co-manage someone's elder profile.
-          </Typography>
-        </Box>
-      </Stack>
+      <PageHeader icon={<FiMail size={20} />} title="Family Link Invites" subtitle="Accept or decline an invite to co-manage someone's elder profile." />
 
       <Grid container spacing={2} mb={3}>
         {HOW_IT_WORKS.map((step) => (

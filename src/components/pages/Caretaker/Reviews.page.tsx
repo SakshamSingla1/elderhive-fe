@@ -20,6 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import { FiStar } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import Button from "../../atoms/Button/Button";
 import TextField from "../../atoms/TextField/TextField";
 import { useReviewService } from "../../../services/useReviewService";
@@ -146,17 +147,11 @@ const CaretakerReviewsPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiStar size={22} />
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Reviews Received
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            See what families are saying, and reply once to each review.
-          </Typography>
-        </Box>
-      </Stack>
+      <PageHeader
+        icon={<FiStar size={20} />}
+        title="Reviews Received"
+        subtitle="See what families are saying, and reply once to each review."
+      />
 
       {loadError && (
         <Alert severity="error" sx={{ mb: 2 }}>

@@ -5,6 +5,7 @@ import { useTheme, alpha } from "@mui/material/styles";
 import {
   FiAlertTriangle,
   FiArrowRight,
+  FiBarChart2,
   FiCalendar,
   FiCheckCircle,
   FiClock,
@@ -15,6 +16,7 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import StatCard from "../../molecules/StatCard/StatCard";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import { useAdminDashboardService } from "../../../services/useAdminDashboardService";
 import type { AdminDashboardStatsResponse } from "../../../services/useAdminDashboardService";
 import { useAuditLogService, type AuditLogResponse } from "../../../services/useAuditLogService";
@@ -81,12 +83,11 @@ const AdminDashboardPage: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h5" component="h1" fontWeight={800} gutterBottom>
-        Platform Overview
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        {isSuperAdmin ? "Full platform control, at a glance." : "Platform activity and what needs your attention."}
-      </Typography>
+      <PageHeader
+        icon={<FiBarChart2 size={20} />}
+        title="Platform Overview"
+        subtitle={isSuperAdmin ? "Full platform control, at a glance." : "Platform activity and what needs your attention."}
+      />
 
       {loadError && (
         <Alert severity="error" sx={{ mb: 2 }}>

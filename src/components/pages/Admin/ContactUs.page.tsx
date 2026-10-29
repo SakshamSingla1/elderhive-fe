@@ -20,6 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import { FiMail, FiTrash2 } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import Button from "../../atoms/Button/Button";
 import Select from "../../atoms/Select/Select";
 import TextField from "../../atoms/TextField/TextField";
@@ -115,17 +116,11 @@ const ContactUsPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiMail size={22} color="#2F6F5E" />
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Contact Us Submissions
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Messages submitted through the public landing page's contact form.
-          </Typography>
-        </Box>
-      </Stack>
+      <PageHeader
+        icon={<FiMail size={20} />}
+        title="Contact Us Submissions"
+        subtitle="Messages submitted through the public landing page's contact form."
+      />
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3}>
         <TextField

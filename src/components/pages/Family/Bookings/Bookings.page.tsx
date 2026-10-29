@@ -18,6 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import { FiCalendar, FiRepeat } from "react-icons/fi";
+import PageHeader from "../../../molecules/PageHeader/PageHeader";
 import Button from "../../../atoms/Button/Button";
 import ConfirmDialog from "../../../atoms/ConfirmDialog/ConfirmDialog";
 import { useBookingService } from "../../../../services/useBookingService";
@@ -131,17 +132,11 @@ const BookingsPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiCalendar size={22} />
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            My Bookings
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Bookings you've made for the people you care for.
-          </Typography>
-        </Box>
-      </Stack>
+      <PageHeader
+        icon={<FiCalendar size={20} />}
+        title="My Bookings"
+        subtitle="Bookings you've made for the people you care for."
+      />
 
       {loadError && (
         <Alert severity="error" sx={{ mb: 2 }}>

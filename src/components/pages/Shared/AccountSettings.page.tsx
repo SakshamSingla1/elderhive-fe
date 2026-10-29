@@ -1,5 +1,7 @@
 import React from "react";
 import { Alert, Box, Typography } from "@mui/material";
+import { FiSettings } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import ColorThemeListingTemplate from "../../templates/ColorTheme/ColorThemeListing.template";
 import NotificationPreferences from "../../molecules/NotificationPreferences/NotificationPreferences";
 import { useColorThemeListing } from "../../../hooks/useColorThemeListing";
@@ -24,9 +26,7 @@ const AccountSettingsPage: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h4" fontWeight={800} gutterBottom>
-        Account Settings
-      </Typography>
+      <PageHeader icon={<FiSettings size={20} />} title="Account Settings" subtitle="Your theme and notification preferences." />
 
       <Typography variant="h6" fontWeight={700} mt={3} mb={1}>
         Theme

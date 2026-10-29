@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Alert, Box, Card, CardContent, Divider, Rating, Skeleton, Snackbar, Stack, Typography } from "@mui/material";
 import { FiStar } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import Button from "../../atoms/Button/Button";
 import TextField from "../../atoms/TextField/TextField";
 import { useReviewService } from "../../../services/useReviewService";
@@ -105,17 +106,7 @@ const FamilyReviewsPage: React.FC = () => {
 
   return (
     <Box maxWidth={560}>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiStar size={22} />
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Leave a Review
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Share how the caretaker's visit went.
-          </Typography>
-        </Box>
-      </Stack>
+      <PageHeader icon={<FiStar size={20} />} title="Leave a Review" subtitle="Share how the caretaker's visit went." />
 
       {!bookingId ? (
         <Card variant="outlined">

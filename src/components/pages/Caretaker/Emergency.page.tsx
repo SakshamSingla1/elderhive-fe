@@ -15,6 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import { FiAlertTriangle } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import Button from "../../atoms/Button/Button";
 import { useEmergencyAlertService } from "../../../services/useEmergencyAlertService";
 import type { EmergencyAlertResponse } from "../../../services/useEmergencyAlertService";
@@ -132,17 +133,11 @@ const CaretakerEmergencyPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiAlertTriangle size={22} color="#C0392B" />
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Emergency Alerts
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Active SOS alerts within your service radius, updated live.
-          </Typography>
-        </Box>
-      </Stack>
+      <PageHeader
+        icon={<FiAlertTriangle size={20} />}
+        title="Emergency Alerts"
+        subtitle="Active SOS alerts within your service radius, updated live."
+      />
 
       {loadError && (
         <Alert severity="error" sx={{ mb: 2 }}>

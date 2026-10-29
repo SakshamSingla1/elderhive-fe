@@ -17,6 +17,7 @@ import {
 import { FiFileText } from "react-icons/fi";
 import TextField from "../../atoms/TextField/TextField";
 import Select from "../../atoms/Select/Select";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import { useAuditLogService } from "../../../services/useAuditLogService";
 import type { AuditLogResponse } from "../../../services/useAuditLogService";
 import { ActionType, EntityTypeEnum } from "../../../utils/enums";
@@ -84,17 +85,11 @@ const AuditLogPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiFileText size={22} color="#2F6F5E" />
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Audit Log
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            A read-only trail of every compliance-sensitive action taken on the platform.
-          </Typography>
-        </Box>
-      </Stack>
+      <PageHeader
+        icon={<FiFileText size={20} />}
+        title="Audit Log"
+        subtitle="A read-only trail of every compliance-sensitive action taken on the platform."
+      />
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3} flexWrap="wrap" useFlexGap>
         <Select

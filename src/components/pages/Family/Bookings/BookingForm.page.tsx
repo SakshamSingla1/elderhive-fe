@@ -4,6 +4,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Alert, Box, Card, CardContent, Checkbox, FormControlLabel, Grid, Skeleton, Stack, Typography } from "@mui/material";
 import { FiArrowLeft, FiCalendar } from "react-icons/fi";
+import PageHeader from "../../../molecules/PageHeader/PageHeader";
 import TextField from "../../../atoms/TextField/TextField";
 import Button from "../../../atoms/Button/Button";
 import CaretakerSearchAutocomplete from "../../../molecules/CaretakerSearchAutocomplete/CaretakerSearchAutocomplete";
@@ -141,12 +142,7 @@ const BookingFormPage: React.FC = () => {
           Back to services
         </Button>
       </Stack>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiCalendar size={22} />
-        <Typography variant="h5" fontWeight={800}>
-          Book {offering.name}
-        </Typography>
-      </Stack>
+      <PageHeader icon={<FiCalendar size={20} />} title={`Book ${offering.name}`} />
 
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>

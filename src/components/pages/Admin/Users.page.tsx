@@ -23,6 +23,7 @@ import { FiUserCheck, FiUserX, FiUsers } from "react-icons/fi";
 import Button from "../../atoms/Button/Button";
 import TextField from "../../atoms/TextField/TextField";
 import Select from "../../atoms/Select/Select";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import ManageUserRolesDialog from "../../molecules/ManageUserRolesDialog/ManageUserRolesDialog";
 import type { ManageUserRolesTarget } from "../../molecules/ManageUserRolesDialog/ManageUserRolesDialog";
 import { useAdminUserService } from "../../../services/useAdminUserService";
@@ -156,17 +157,11 @@ const AdminUsersPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiUsers size={22} color="#2F6F5E" />
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Users
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Search, suspend, and manage roles for every account on the platform.
-          </Typography>
-        </Box>
-      </Stack>
+      <PageHeader
+        icon={<FiUsers size={20} />}
+        title="Users"
+        subtitle="Search, suspend, and manage roles for every account on the platform."
+      />
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3}>
         <TextField

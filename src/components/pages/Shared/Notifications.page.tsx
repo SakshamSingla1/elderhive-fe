@@ -17,6 +17,7 @@ import {
   Pagination,
 } from "@mui/material";
 import { FiBell, FiCheck, FiCheckCircle } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import { useNotificationService, type NotificationResponseDTO } from "../../../services/useNotificationService";
 import { getErrorMessage, formatDateTime, formatEnumLabel} from "../../../utils/helper";
 
@@ -91,27 +92,21 @@ const NotificationsPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" rowGap={1.5}>
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <FiBell size={22} />
-          <Box>
-            <Typography variant="h5" fontWeight={800}>
-              Notifications
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Everything that's been sent to you.
-            </Typography>
-          </Box>
-        </Stack>
-        <Button
-          variant="outlined"
-          startIcon={<FiCheckCircle size={16} />}
-          onClick={handleMarkAllAsRead}
-          disabled={markingAll || !hasUnread}
-        >
-          Mark All Read
-        </Button>
-      </Stack>
+      <PageHeader
+        icon={<FiBell size={20} />}
+        title="Notifications"
+        subtitle="Everything that's been sent to you."
+        action={
+          <Button
+            variant="outlined"
+            startIcon={<FiCheckCircle size={16} />}
+            onClick={handleMarkAllAsRead}
+            disabled={markingAll || !hasUnread}
+          >
+            Mark All Read
+          </Button>
+        }
+      />
 
       {loadError && (
         <Alert severity="error" sx={{ mb: 2 }}>

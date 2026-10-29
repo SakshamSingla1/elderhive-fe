@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, Box, Chip, Paper, Skeleton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import { FiCheckCircle } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import Select from "../../atoms/Select/Select";
 import Button from "../../atoms/Button/Button";
 import CaretakerSearchAutocomplete from "../../molecules/CaretakerSearchAutocomplete/CaretakerSearchAutocomplete";
@@ -61,17 +62,11 @@ const AdminCaretakerVerificationPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiCheckCircle size={22} />
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Caretaker Verification
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Review caretaker profiles and their submitted documents.
-          </Typography>
-        </Box>
-      </Stack>
+      <PageHeader
+        icon={<FiCheckCircle size={20} />}
+        title="Caretaker Verification"
+        subtitle="Review caretaker profiles and their submitted documents."
+      />
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={2} mb={3} alignItems={{ sm: "flex-end" }}>
         <Box sx={{ minWidth: 280 }}>

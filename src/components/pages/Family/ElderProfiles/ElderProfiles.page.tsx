@@ -18,6 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import { FiEdit2, FiPlus, FiTrash2, FiUserPlus, FiUsers } from "react-icons/fi";
+import PageHeader from "../../../molecules/PageHeader/PageHeader";
 import Button from "../../../atoms/Button/Button";
 import ConfirmDialog from "../../../atoms/ConfirmDialog/ConfirmDialog";
 import { useElderProfileService, type ElderProfileResponseDTO } from "../../../../services/useElderProfileService";
@@ -78,27 +79,21 @@ const ElderProfilesPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3} flexWrap="wrap" rowGap={1.5}>
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <FiUsers size={22} />
-          <Box>
-            <Typography variant="h5" fontWeight={800}>
-              Elder Profiles
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              The people you manage care for.
-            </Typography>
-          </Box>
-        </Stack>
-        <Stack direction="row" spacing={1.5}>
-          <Button variant="outlined" startIcon={<FiUserPlus size={16} />} onClick={() => navigate("/family/elder-profiles/link")}>
-            Link Existing Elder
-          </Button>
-          <Button variant="contained" startIcon={<FiPlus size={16} />} onClick={() => navigate("/family/elder-profiles/new")}>
-            Add Elder Profile
-          </Button>
-        </Stack>
-      </Stack>
+      <PageHeader
+        icon={<FiUsers size={20} />}
+        title="Elder Profiles"
+        subtitle="The people you manage care for."
+        action={
+          <Stack direction="row" spacing={1.5}>
+            <Button variant="outlined" startIcon={<FiUserPlus size={16} />} onClick={() => navigate("/family/elder-profiles/link")}>
+              Link Existing Elder
+            </Button>
+            <Button variant="contained" startIcon={<FiPlus size={16} />} onClick={() => navigate("/family/elder-profiles/new")}>
+              Add Elder Profile
+            </Button>
+          </Stack>
+        }
+      />
 
       {loadError && (
         <Alert severity="error" sx={{ mb: 2 }}>

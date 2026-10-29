@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Alert, Box, Card, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider, Skeleton, Stack, Typography } from "@mui/material";
 import { FiArrowLeft, FiCalendar, FiMessageCircle, FiRepeat } from "react-icons/fi";
+import PageHeader from "../../../molecules/PageHeader/PageHeader";
 import Button from "../../../atoms/Button/Button";
 import { useBookingService } from "../../../../services/useBookingService";
 import type { BookingResponse } from "../../../../services/useBookingService";
@@ -233,23 +234,17 @@ const BookingDetailPage: React.FC = () => {
 
       <Card variant="outlined">
         <CardContent>
-          <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="space-between" flexWrap="wrap" rowGap={1}>
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              <FiCalendar size={22} />
-              <Box>
-                <Typography variant="h5" fontWeight={800}>
-                  Booking Details
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Booking #{booking.id}
-                </Typography>
-              </Box>
-            </Stack>
-            <Stack direction="row" spacing={1}>
-              <Chip label={formatEnumLabel(booking.status)} color={STATUS_COLOR[booking.status]} />
-              {booking.recurringGroupId && <Chip icon={<FiRepeat size={14} />} label="Recurring series" variant="outlined" />}
-            </Stack>
-          </Stack>
+          <PageHeader
+            icon={<FiCalendar size={20} />}
+            title="Booking Details"
+            subtitle={`Booking #${booking.id}`}
+            action={
+              <Stack direction="row" spacing={1}>
+                <Chip label={formatEnumLabel(booking.status)} color={STATUS_COLOR[booking.status]} />
+                {booking.recurringGroupId && <Chip icon={<FiRepeat size={14} />} label="Recurring series" variant="outlined" />}
+              </Stack>
+            }
+          />
 
           <Divider sx={{ my: 2 }} />
 

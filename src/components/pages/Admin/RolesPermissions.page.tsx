@@ -20,6 +20,7 @@ import {
   Typography,
 } from "@mui/material";
 import { FiKey, FiPlus, FiShield, FiTrash2 } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import Button from "../../atoms/Button/Button";
 import RoleFormDialog from "../../molecules/RoleFormDialog/RoleFormDialog";
 import PermissionAssignDialog from "../../molecules/PermissionAssignDialog/PermissionAssignDialog";
@@ -113,22 +114,16 @@ const RolesPermissionsPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="space-between" mb={3}>
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <FiShield size={22} color="#2F6F5E" />
-          <Box>
-            <Typography variant="h5" fontWeight={800}>
-              Roles &amp; Permissions
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Create fine-grained admin roles and assign permissions from the catalog.
-            </Typography>
-          </Box>
-        </Stack>
-        <Button variant="contained" startIcon={<FiPlus />} onClick={() => setFormTarget("new")}>
-          New Role
-        </Button>
-      </Stack>
+      <PageHeader
+        icon={<FiShield size={20} />}
+        title="Roles & Permissions"
+        subtitle="Create fine-grained admin roles and assign permissions from the catalog."
+        action={
+          <Button variant="contained" startIcon={<FiPlus />} onClick={() => setFormTarget("new")}>
+            New Role
+          </Button>
+        }
+      />
 
       {loadError && (
         <Alert severity="error" sx={{ mb: 2 }}>

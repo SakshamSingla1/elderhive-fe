@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Alert, Box, Chip, Pagination, Paper, Skeleton, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import { FiCalendar } from "react-icons/fi";
 import Select from "../../atoms/Select/Select";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import { useBookingService } from "../../../services/useBookingService";
 import type { BookingResponse } from "../../../services/useBookingService";
 import { BookingStatusEnum } from "../../../utils/enums";
@@ -63,17 +64,7 @@ const AdminBookingsPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiCalendar size={22} />
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            Bookings
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            All bookings across the platform.
-          </Typography>
-        </Box>
-      </Stack>
+      <PageHeader icon={<FiCalendar size={20} />} title="Bookings" subtitle="All bookings across the platform." />
 
       <Select
         label="Status"

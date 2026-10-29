@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Alert, Box, Card, CardContent, Chip, Divider, Skeleton, Stack, Typography } from "@mui/material";
 import { FiArrowLeft, FiCalendar } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import Select from "../../atoms/Select/Select";
 import Button from "../../atoms/Button/Button";
 import { useBookingService } from "../../../services/useBookingService";
@@ -91,13 +92,11 @@ const AdminBookingsFormPage: React.FC = () => {
           Back to bookings
         </Button>
       </Stack>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiCalendar size={22} />
-        <Typography variant="h5" fontWeight={800}>
-          Booking #{booking.id}
-        </Typography>
-        <Chip size="small" label={formatEnumLabel(booking.status)} color={STATUS_COLOR[booking.status]} />
-      </Stack>
+      <PageHeader
+        icon={<FiCalendar size={20} />}
+        title={`Booking #${booking.id}`}
+        titleAdornment={<Chip size="small" label={formatEnumLabel(booking.status)} color={STATUS_COLOR[booking.status]} />}
+      />
 
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>

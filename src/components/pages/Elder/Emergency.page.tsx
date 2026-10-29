@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Box, Card, CardContent, Skeleton, Stack, Typography } from "@mui/material";
+import { Alert, Box, Card, CardContent, Skeleton, Typography } from "@mui/material";
 import { FiAlertTriangle, FiCheckCircle } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import EmergencyAlertButton from "../../molecules/EmergencyAlertButton/EmergencyAlertButton";
 import Button from "../../atoms/Button/Button";
 import { useElderProfileService } from "../../../services/useElderProfileService";
@@ -85,12 +86,7 @@ const ElderEmergencyPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiAlertTriangle size={22} />
-        <Typography variant="h5" fontWeight={800}>
-          Emergency
-        </Typography>
-      </Stack>
+      <PageHeader icon={<FiAlertTriangle size={20} />} title="Emergency" />
 
       {loadError && (
         <Alert severity="error" sx={{ mb: 2 }}>

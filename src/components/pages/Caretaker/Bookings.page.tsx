@@ -19,6 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import { FiCalendar, FiChevronDown, FiChevronUp } from "react-icons/fi";
+import PageHeader from "../../molecules/PageHeader/PageHeader";
 import Button from "../../atoms/Button/Button";
 import ConfirmDialog from "../../atoms/ConfirmDialog/ConfirmDialog";
 import WeeklyAvailabilityView from "../../molecules/WeeklyAvailability/WeeklyAvailabilityView";
@@ -119,17 +120,11 @@ const CaretakerBookingsPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
-        <FiCalendar size={22} />
-        <Box>
-          <Typography variant="h5" fontWeight={800}>
-            My Bookings
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Accept, start, and complete the bookings families have made with you.
-          </Typography>
-        </Box>
-      </Stack>
+      <PageHeader
+        icon={<FiCalendar size={20} />}
+        title="My Bookings"
+        subtitle="Accept, start, and complete the bookings families have made with you."
+      />
 
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>
