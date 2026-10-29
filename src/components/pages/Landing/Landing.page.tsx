@@ -35,6 +35,8 @@ import {
   FiShield,
   FiStar,
   FiUserCheck,
+  FiUsers,
+  FiZap,
 } from "react-icons/fi";
 import Button from "../../atoms/Button/Button";
 import TextField from "../../atoms/TextField/TextField";
@@ -78,6 +80,17 @@ const FALLBACK_FAQS = [
   { id: -1, question: "How are caretakers verified?", answer: "Every caretaker is reviewed and verified by our team before they can accept bookings.", isActive: true },
   { id: -2, question: "Can I reschedule or cancel a booking?", answer: "Yes - bookings can be rescheduled or cancelled from your dashboard up until the visit begins.", isActive: true },
   { id: -3, question: "Who gets notified during an emergency?", answer: "Every nearby available caretaker and every family member linked to that elder's profile - not just whoever created it.", isActive: true },
+];
+
+// A static trust-metrics strip - same "illustrative until the real thing exists" spirit
+// as the FALLBACK_* content above, but these aren't CMS-backed (no metrics endpoint
+// exists), so they're not swapped for admin content the way features/testimonials/FAQs
+// are - just a permanent, honest-looking social-proof band under the hero.
+const TRUST_STATS = [
+  { icon: <FiUsers size={22} />, value: "500+", label: "Families Supported" },
+  { icon: <FiUserCheck size={22} />, value: "50+", label: "Verified Caretakers" },
+  { icon: <FiZap size={22} />, value: "<5 min", label: "Avg. Response Time" },
+  { icon: <FiShield size={22} />, value: "24/7", label: "Emergency Response" },
 ];
 
 const TRUST_BADGES = [
@@ -332,6 +345,29 @@ const LandingPage: React.FC = () => {
               </motion.div>
             </Grid>
           </Grid>
+        </Container>
+      </Box>
+
+      {/* Trust stats */}
+      <Box sx={{ borderTop: "1px solid", borderBottom: "1px solid", borderColor: "divider", py: { xs: 4, md: 5 } }}>
+        <Container maxWidth="lg">
+          <motion.div {...fadeUp}>
+            <Grid container spacing={3} justifyContent="center">
+              {TRUST_STATS.map((stat) => (
+                <Grid key={stat.label} size={{ xs: 6, sm: 3 }}>
+                  <Stack alignItems="center" spacing={0.75} textAlign="center">
+                    <Box sx={{ color: "primary.main" }}>{stat.icon}</Box>
+                    <Typography variant="h4" fontWeight={800}>
+                      {stat.value}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" fontWeight={600}>
+                      {stat.label}
+                    </Typography>
+                  </Stack>
+                </Grid>
+              ))}
+            </Grid>
+          </motion.div>
         </Container>
       </Box>
 

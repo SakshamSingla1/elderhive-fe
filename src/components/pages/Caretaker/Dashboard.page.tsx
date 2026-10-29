@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, Box, Card, CardContent, Chip, Grid, List, ListItemButton, ListItemText, Skeleton, Stack, Typography } from "@mui/material";
 import { useTheme, alpha } from "@mui/material/styles";
+import { motion } from "framer-motion";
 import dayjs from "dayjs";
 import { FiAlertTriangle, FiArrowRight, FiCalendar, FiCheckCircle, FiClock, FiMapPin, FiStar } from "react-icons/fi";
 import StatCard from "../../molecules/StatCard/StatCard";
+import DashboardHero from "../../molecules/DashboardHero/DashboardHero";
 import { useCaretakerService, type CaretakerProfileResponseDTO } from "../../../services/useCaretakerService";
 import { useBookingService, type BookingResponse } from "../../../services/useBookingService";
 import { useEmergencyAlertService, type EmergencyAlertResponse } from "../../../services/useEmergencyAlertService";
@@ -93,12 +95,7 @@ const CaretakerDashboardPage: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h5" component="h1" fontWeight={800} gutterBottom>
-        {greeting}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        {dayjs().format("dddd, MMMM D")}
-      </Typography>
+      <DashboardHero greeting={greeting} dateLabel={dayjs().format("dddd, MMMM D")} />
 
       {loadError && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -158,23 +155,28 @@ const CaretakerDashboardPage: React.FC = () => {
       )}
 
       <Grid container spacing={2} sx={{ mb: 1 }}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard label="Upcoming Bookings" value={upcomingBookings.length} icon={<FiCalendar />} accentColor={theme.palette.primary.main} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard label="This Week" value={thisWeekCount} icon={<FiClock />} accentColor={theme.palette.warning.dark} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard label="Completed" value={completedCount} icon={<FiCheckCircle />} accentColor={theme.palette.success.dark} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard
-            label="Rating"
-            value={profile?.ratingAverage ? profile.ratingAverage.toFixed(1) : "—"}
-            icon={<FiStar />}
-            accentColor={theme.palette.secondary.dark}
-          />
-        </Grid>
+        {[
+          { label: "Upcoming Bookings", value: upcomingBookings.length, icon: <FiCalendar />, accentColor: theme.palette.primary.main },
+          { label: "This Week", value: thisWeekCount, icon: <FiClock />, accentColor: theme.palette.warning.dark },
+          { label: "Completed", value: completedCount, icon: <FiCheckCircle />, accentColor: theme.palette.success.dark },
+          {
+            label: "Rating",
+            value: profile?.ratingAverage ? profile.ratingAverage.toFixed(1) : "—",
+            icon: <FiStar />,
+            accentColor: theme.palette.secondary.dark,
+          },
+        ].map((stat, i) => (
+          <Grid key={stat.label} size={{ xs: 12, sm: 6, md: 3 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: i * 0.06, ease: "easeOut" }}
+              style={{ height: "100%" }}
+            >
+              <StatCard label={stat.label} value={stat.value} icon={stat.icon} accentColor={stat.accentColor} />
+            </motion.div>
+          </Grid>
+        ))}
       </Grid>
 
       <Card>

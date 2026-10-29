@@ -5,6 +5,7 @@ import { useTheme, alpha } from "@mui/material/styles";
 import dayjs from "dayjs";
 import { FiAlertTriangle, FiEdit2, FiMail, FiMessageCircle, FiUser, FiUsers } from "react-icons/fi";
 import Button from "../../atoms/Button/Button";
+import DashboardHero from "../../molecules/DashboardHero/DashboardHero";
 import { useElderProfileService, type ElderProfileResponseDTO, type FamilyMemberSummaryDTO } from "../../../services/useElderProfileService";
 import { formatDate, getErrorMessage } from "../../../utils/helper";
 
@@ -75,12 +76,7 @@ const ElderDashboardPage: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h5" component="h1" fontWeight={800} gutterBottom>
-        {greeting}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        {dayjs().format("dddd, MMMM D")}
-      </Typography>
+      <DashboardHero greeting={greeting} dateLabel={dayjs().format("dddd, MMMM D")} />
 
       {loadError && (
         <Alert severity="error" sx={{ mb: 2 }}>

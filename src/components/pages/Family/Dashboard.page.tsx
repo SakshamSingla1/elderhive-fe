@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, Avatar, Box, Card, CardContent, Chip, Grid, List, ListItemButton, ListItemText, Skeleton, Stack, Typography } from "@mui/material";
 import { useTheme, alpha } from "@mui/material/styles";
+import { motion } from "framer-motion";
 import dayjs from "dayjs";
 import {
   FiAlertTriangle,
@@ -16,6 +17,7 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import StatCard from "../../molecules/StatCard/StatCard";
+import DashboardHero from "../../molecules/DashboardHero/DashboardHero";
 import { useElderProfileService, type ElderProfileResponseDTO } from "../../../services/useElderProfileService";
 import { useBookingService, type BookingResponse } from "../../../services/useBookingService";
 import { BookingStatusEnum } from "../../../utils/enums";
@@ -102,16 +104,11 @@ const FamilyDashboardPage: React.FC = () => {
 
   return (
     <Box>
-      <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" alignItems={{ sm: "center" }} spacing={1} mb={1}>
-        <Box>
-          <Typography variant="h5" component="h1" fontWeight={800}>
-            {greeting}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {dayjs().format("dddd, MMMM D")} — here's what's happening with your family's care.
-          </Typography>
-        </Box>
-      </Stack>
+      <DashboardHero
+        greeting={greeting}
+        dateLabel={dayjs().format("dddd, MMMM D")}
+        message="here's what's happening with your family's care"
+      />
 
       {loadError && (
         <Alert severity="error" sx={{ mt: 2 }}>
@@ -168,18 +165,23 @@ const FamilyDashboardPage: React.FC = () => {
         </Grid>
       ) : (
         <Grid container spacing={2} sx={{ my: 1 }}>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <StatCard label="Elder Profiles" value={elderProfiles.length} icon={<FiUsers />} accentColor={theme.palette.primary.main} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <StatCard label="Upcoming Bookings" value={upcomingBookings.length} icon={<FiCalendar />} accentColor={theme.palette.secondary.dark} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <StatCard label="This Week" value={thisWeekCount} icon={<FiClock />} accentColor={theme.palette.warning.dark} />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <StatCard label="Completed" value={completedCount} icon={<FiCheckCircle />} accentColor={theme.palette.success.dark} />
-          </Grid>
+          {[
+            { label: "Elder Profiles", value: elderProfiles.length, icon: <FiUsers />, accentColor: theme.palette.primary.main },
+            { label: "Upcoming Bookings", value: upcomingBookings.length, icon: <FiCalendar />, accentColor: theme.palette.secondary.dark },
+            { label: "This Week", value: thisWeekCount, icon: <FiClock />, accentColor: theme.palette.warning.dark },
+            { label: "Completed", value: completedCount, icon: <FiCheckCircle />, accentColor: theme.palette.success.dark },
+          ].map((stat, i) => (
+            <Grid key={stat.label} size={{ xs: 12, sm: 6, md: 3 }}>
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, delay: i * 0.06, ease: "easeOut" }}
+                style={{ height: "100%" }}
+              >
+                <StatCard label={stat.label} value={stat.value} icon={stat.icon} accentColor={stat.accentColor} />
+              </motion.div>
+            </Grid>
+          ))}
         </Grid>
       )}
 

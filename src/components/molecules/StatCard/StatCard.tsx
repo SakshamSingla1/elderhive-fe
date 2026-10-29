@@ -12,14 +12,19 @@ export interface StatCardProps {
   onClick?: () => void;
 }
 
-// A single number/label tile for an admin overview (Prompt 94's dashboard stats) -
-// consolidates the hand-rolled "icon in a tinted circle + big number + label" Card every
-// such page would otherwise repeat, same role ElderSphere's own StatCard plays.
+// A single number/label tile for an admin/role overview (Prompt 94's dashboard stats,
+// plus every other role's own dashboard) - consolidates the hand-rolled "icon in a tinted
+// circle + big number + label" Card every such page would otherwise repeat. The soft
+// corner glow and gradient icon badge are purely decorative (no semantics, nothing a test
+// could assert on) - every number/label still renders as plain text exactly as before.
 const StatCard: React.FC<StatCardProps> = ({ label, value, icon, accentColor = "#2F6F5E", onClick }) => (
   <Card
     onClick={onClick}
     sx={{
       height: "100%",
+      position: "relative",
+      overflow: "hidden",
+      backgroundImage: `linear-gradient(135deg, ${accentColor}14, transparent 55%)`,
       ...(onClick && {
         cursor: "pointer",
         transition: "transform 150ms ease, box-shadow 150ms ease",
@@ -27,7 +32,22 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, icon, accentColor = "
       }),
     }}
   >
-    <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+    {/* Decorative corner glow - absolute, overflow-clipped by the Card, never affects layout. */}
+    <Box
+      aria-hidden
+      sx={{
+        position: "absolute",
+        top: -28,
+        right: -28,
+        width: 96,
+        height: 96,
+        borderRadius: "50%",
+        backgroundColor: accentColor,
+        opacity: 0.08,
+        pointerEvents: "none",
+      }}
+    />
+    <CardContent sx={{ position: "relative", display: "flex", alignItems: "center", gap: 2 }}>
       {icon && (
         <Box
           sx={{
@@ -37,7 +57,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, icon, accentColor = "
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: `${accentColor}1f`,
+            backgroundImage: `linear-gradient(135deg, ${accentColor}2e, ${accentColor}14)`,
             color: accentColor,
             flexShrink: 0,
             "& svg": { fontSize: 22 },
@@ -47,7 +67,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, icon, accentColor = "
         </Box>
       )}
       <Box minWidth={0}>
-        <Typography variant="h5" fontWeight={800} noWrap lineHeight={1.2}>
+        <Typography variant="h4" fontWeight={800} noWrap lineHeight={1.2}>
           {typeof value === "number" ? value.toLocaleString() : value}
         </Typography>
         <Typography variant="body2" color="text.secondary" noWrap>

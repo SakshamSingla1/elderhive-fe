@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, Box, Card, CardContent, Chip, Grid, LinearProgress, List, ListItem, ListItemText, Skeleton, Stack, Typography } from "@mui/material";
 import { useTheme, alpha } from "@mui/material/styles";
+import { motion } from "framer-motion";
 import {
   FiAlertTriangle,
   FiArrowRight,
@@ -106,42 +107,53 @@ const AdminDashboardPage: React.FC = () => {
       ) : stats ? (
         <>
           <Grid container spacing={2} mb={3}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatCard
-                label="Bookings This Week"
-                value={stats.bookingsThisWeek}
-                icon={<FiCalendar />}
-                accentColor={theme.palette.primary.main}
-                onClick={() => navigate("/admin/bookings")}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatCard
-                label="Open Emergency Alerts"
-                value={stats.openEmergencyAlerts}
-                icon={<FiAlertTriangle />}
-                accentColor={stats.openEmergencyAlerts > 0 ? theme.palette.error.main : theme.palette.success.dark}
-                onClick={() => navigate("/admin/emergency-alerts")}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatCard
-                label="Overdue Alerts"
-                value={stats.overdueEmergencyAlerts}
-                icon={<FiClock />}
-                accentColor={stats.overdueEmergencyAlerts > 0 ? theme.palette.error.main : theme.palette.success.dark}
-                onClick={() => navigate("/admin/emergency-alerts")}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <StatCard
-                label="Pending Caretaker Verifications"
-                value={stats.pendingCaretakerVerifications}
-                icon={<FiCheckCircle />}
-                accentColor={stats.pendingCaretakerVerifications > 0 ? theme.palette.warning.dark : theme.palette.success.dark}
-                onClick={() => navigate("/admin/caretaker-verification")}
-              />
-            </Grid>
+            {[
+              {
+                label: "Bookings This Week",
+                value: stats.bookingsThisWeek,
+                icon: <FiCalendar />,
+                accentColor: theme.palette.primary.main,
+                path: "/admin/bookings",
+              },
+              {
+                label: "Open Emergency Alerts",
+                value: stats.openEmergencyAlerts,
+                icon: <FiAlertTriangle />,
+                accentColor: stats.openEmergencyAlerts > 0 ? theme.palette.error.main : theme.palette.success.dark,
+                path: "/admin/emergency-alerts",
+              },
+              {
+                label: "Overdue Alerts",
+                value: stats.overdueEmergencyAlerts,
+                icon: <FiClock />,
+                accentColor: stats.overdueEmergencyAlerts > 0 ? theme.palette.error.main : theme.palette.success.dark,
+                path: "/admin/emergency-alerts",
+              },
+              {
+                label: "Pending Caretaker Verifications",
+                value: stats.pendingCaretakerVerifications,
+                icon: <FiCheckCircle />,
+                accentColor: stats.pendingCaretakerVerifications > 0 ? theme.palette.warning.dark : theme.palette.success.dark,
+                path: "/admin/caretaker-verification",
+              },
+            ].map((stat, i) => (
+              <Grid key={stat.label} size={{ xs: 12, sm: 6, md: 3 }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: i * 0.06, ease: "easeOut" }}
+                  style={{ height: "100%" }}
+                >
+                  <StatCard
+                    label={stat.label}
+                    value={stat.value}
+                    icon={stat.icon}
+                    accentColor={stat.accentColor}
+                    onClick={() => navigate(stat.path)}
+                  />
+                </motion.div>
+              </Grid>
+            ))}
           </Grid>
 
           <Grid container spacing={2} mb={isSuperAdmin ? 3 : 0}>
