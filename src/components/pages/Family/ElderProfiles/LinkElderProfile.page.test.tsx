@@ -64,6 +64,26 @@ describe("LinkElderProfile.page", () => {
     await waitFor(() =>
       expect(createInvite).toHaveBeenCalledWith(5, { invitedEmail: "rose@example.com", invitedRole: UserTypeEnum.ELDER, relationshipLabel: "Mother" })
     );
+    expect(await screen.findByText("Invite sent to rose@example.com")).toBeInTheDocument();
+  });
+
+  it("'Link Another Elder' resets back to a blank form after a successful send", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <LinkElderProfilePage />
+      </MemoryRouter>
+    );
+
+    await user.type(screen.getByLabelText(/Elder's Full Name/), "Grandma Rose");
+    await user.type(screen.getByLabelText(/Elder's Email Address/), "rose@example.com");
+    await user.click(screen.getByRole("button", { name: "Send Link Request" }));
+
+    await screen.findByText("Invite sent to rose@example.com");
+    await user.click(screen.getByRole("button", { name: "Link Another Elder" }));
+
+    expect(screen.getByLabelText(/Elder's Full Name/)).toHaveValue("");
+    expect(screen.getByRole("button", { name: "Send Link Request" })).toBeDisabled();
   });
 
   it("shows an error message when sending the invite fails", async () => {

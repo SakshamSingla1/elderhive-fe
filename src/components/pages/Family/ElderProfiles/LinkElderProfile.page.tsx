@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, Box, Card, CardContent, Stack, Typography } from "@mui/material";
-import { FiArrowLeft, FiUserPlus } from "react-icons/fi";
+import { FiArrowLeft, FiCheckCircle, FiUserPlus } from "react-icons/fi";
 import TextField from "../../../atoms/TextField/TextField";
 import Button from "../../../atoms/Button/Button";
 import { useElderProfileService } from "../../../../services/useElderProfileService";
@@ -29,8 +29,19 @@ const LinkElderProfilePage: React.FC = () => {
   const [relationshipLabel, setRelationshipLabel] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Set once the invite actually sends - previously this page navigated away the instant
+  // it succeeded, so the only feedback a user ever got was the URL changing underneath
+  // them. Now it swaps the form for a confirmation with what was sent and where to go next.
+  const [sentTo, setSentTo] = useState<string | null>(null);
 
   const canSubmit = fullName.trim().length > 0 && email.trim().length > 0;
+
+  const resetForm = () => {
+    setFullName("");
+    setEmail("");
+    setRelationshipLabel("");
+    setSentTo(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +55,7 @@ const LinkElderProfilePage: React.FC = () => {
         invitedRole: UserTypeEnum.ELDER,
         relationshipLabel: relationshipLabel.trim() || undefined,
       });
-      navigate(BACK_PATH);
+      setSentTo(email.trim());
     } catch (err) {
       setError(getErrorMessage(err, "Could not send this link request"));
     } finally {
@@ -68,36 +79,62 @@ const LinkElderProfilePage: React.FC = () => {
 
       <Card variant="outlined">
         <CardContent>
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
+          {sentTo ? (
+            <Stack spacing={2.5} alignItems="flex-start">
+              <Stack direction="row" spacing={1.5} alignItems="center" color="success.main">
+                <FiCheckCircle size={28} />
+                <Box>
+                  <Typography variant="h6" fontWeight={700} color="text.primary">
+                    Invite sent to {sentTo}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    The profile will show as linked once they register and accept it.
+                  </Typography>
+                </Box>
+              </Stack>
+              <Stack direction="row" spacing={1.5}>
+                <Button variant="contained" onClick={resetForm}>
+                  Link Another Elder
+                </Button>
+                <Button variant="outlined" onClick={() => navigate(BACK_PATH)}>
+                  Back to Elder Profiles
+                </Button>
+              </Stack>
+            </Stack>
+          ) : (
+            <>
+              {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {error}
+                </Alert>
+              )}
+              <Typography variant="body2" color="text.secondary" mb={2.5}>
+                Enter the elder's name and email address. They'll receive an invite and must accept it
+                before the profile shows as linked to their own account.
+              </Typography>
+              <Stack component="form" spacing={2.5} onSubmit={handleSubmit}>
+                <TextField label="Elder's Full Name" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                <TextField
+                  label="Elder's Email Address"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <TextField
+                  label="Relationship (optional)"
+                  placeholder="e.g. Mother, Father, Grandparent"
+                  value={relationshipLabel}
+                  onChange={(e) => setRelationshipLabel(e.target.value)}
+                />
+                <Box>
+                  <Button type="submit" variant="contained" loading={submitting} disabled={!canSubmit}>
+                    Send Link Request
+                  </Button>
+                </Box>
+              </Stack>
+            </>
           )}
-          <Typography variant="body2" color="text.secondary" mb={2.5}>
-            Enter the elder's name and email address. They'll receive an invite and must accept it
-            before the profile shows as linked to their own account.
-          </Typography>
-          <Stack component="form" spacing={2.5} onSubmit={handleSubmit}>
-            <TextField label="Elder's Full Name" required value={fullName} onChange={(e) => setFullName(e.target.value)} />
-            <TextField
-              label="Elder's Email Address"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              label="Relationship (optional)"
-              placeholder="e.g. Mother, Father, Grandparent"
-              value={relationshipLabel}
-              onChange={(e) => setRelationshipLabel(e.target.value)}
-            />
-            <Box>
-              <Button type="submit" variant="contained" loading={submitting} disabled={!canSubmit}>
-                Send Link Request
-              </Button>
-            </Box>
-          </Stack>
         </CardContent>
       </Card>
     </Box>
