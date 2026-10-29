@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Alert, Box, Card, CardContent, Chip, Divider, Skeleton, Stack, Typography } from "@mui/material";
 import { FiAlertTriangle, FiArrowLeft } from "react-icons/fi";
 import Button from "../../atoms/Button/Button";
+import ConfirmDialog from "../../atoms/ConfirmDialog/ConfirmDialog";
 import CaretakerSearchAutocomplete from "../../molecules/CaretakerSearchAutocomplete/CaretakerSearchAutocomplete";
 import { useEmergencyAlertService } from "../../../services/useEmergencyAlertService";
 import type { EmergencyAlertResponse } from "../../../services/useEmergencyAlertService";
@@ -38,6 +39,7 @@ const AdminEmergencyAlertsFormPage: React.FC = () => {
   const [actionError, setActionError] = useState<string | null>(null);
   const [isActing, setIsActing] = useState(false);
   const [reassignCaretakerId, setReassignCaretakerId] = useState<number | null>(null);
+  const [forceResolveDialogOpen, setForceResolveDialogOpen] = useState(false);
 
   const load = useCallback(async () => {
     setIsLoading(true);
@@ -65,6 +67,7 @@ const AdminEmergencyAlertsFormPage: React.FC = () => {
       navigate(EMERGENCY_ALERTS_LISTING_PATH);
     } catch (err) {
       setActionError(getErrorMessage(err, "Could not override this alert's dispatch"));
+      setForceResolveDialogOpen(false);
     } finally {
       setIsActing(false);
     }
@@ -76,7 +79,6 @@ const AdminEmergencyAlertsFormPage: React.FC = () => {
   };
 
   const handleForceResolve = () => {
-    if (!window.confirm("Force-resolve this alert? This can't be undone.")) return;
     runOverride({ forceResolve: true });
   };
 
@@ -160,7 +162,7 @@ const AdminEmergencyAlertsFormPage: React.FC = () => {
                 <Typography variant="body2" color="text.secondary" mb={1.5}>
                   Resolves this alert immediately regardless of whether anyone has claimed it.
                 </Typography>
-                <Button variant="outlined" color="error" loading={isActing} onClick={handleForceResolve}>
+                <Button variant="outlined" color="error" loading={isActing} onClick={() => setForceResolveDialogOpen(true)}>
                   Force Resolve
                 </Button>
               </Box>
@@ -168,6 +170,16 @@ const AdminEmergencyAlertsFormPage: React.FC = () => {
           </CardContent>
         </Card>
       )}
+
+      <ConfirmDialog
+        open={forceResolveDialogOpen}
+        title="Force-resolve this alert?"
+        description="This resolves it immediately regardless of whether anyone has claimed it. This can't be undone."
+        confirmLabel="Force Resolve"
+        confirming={isActing}
+        onConfirm={handleForceResolve}
+        onClose={() => setForceResolveDialogOpen(false)}
+      />
     </Box>
   );
 };

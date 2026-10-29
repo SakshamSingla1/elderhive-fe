@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -106,11 +106,14 @@ describe("Admin EmergencyAlertsForm.page", () => {
   it("force-resolving after confirmation calls dispatchOverride with forceResolve only", async () => {
     const user = userEvent.setup();
     const service = mockService();
-    vi.spyOn(window, "confirm").mockReturnValue(true);
     renderPage();
 
     await screen.findByText("Alert #7");
     await user.click(screen.getByRole("button", { name: "Force Resolve" }));
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Force-resolve this alert?")).toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "Force Resolve" }));
 
     await waitFor(() => expect(service.dispatchOverride).toHaveBeenCalledWith(7, { forceResolve: true }));
     expect(await screen.findByText("emergency alerts listing page")).toBeInTheDocument();
@@ -119,11 +122,13 @@ describe("Admin EmergencyAlertsForm.page", () => {
   it("force-resolve does nothing if the confirmation is declined", async () => {
     const user = userEvent.setup();
     const service = mockService();
-    vi.spyOn(window, "confirm").mockReturnValue(false);
     renderPage();
 
     await screen.findByText("Alert #7");
     await user.click(screen.getByRole("button", { name: "Force Resolve" }));
+
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
 
     expect(service.dispatchOverride).not.toHaveBeenCalled();
   });
@@ -140,11 +145,12 @@ describe("Admin EmergencyAlertsForm.page", () => {
   it("shows the backend's error message and stays on the page when the override fails", async () => {
     const user = userEvent.setup();
     mockService({ dispatchOverride: vi.fn().mockRejectedValue({ response: { data: { message: "Not authorized" } } }) });
-    vi.spyOn(window, "confirm").mockReturnValue(true);
     renderPage();
 
     await screen.findByText("Alert #7");
     await user.click(screen.getByRole("button", { name: "Force Resolve" }));
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Force Resolve" }));
 
     expect(await screen.findByText("Not authorized")).toBeInTheDocument();
     expect(screen.queryByText("emergency alerts listing page")).not.toBeInTheDocument();

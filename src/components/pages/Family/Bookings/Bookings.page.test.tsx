@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -89,10 +89,7 @@ function renderPage() {
 }
 
 describe("Bookings.page", () => {
-  let confirmSpy: ReturnType<typeof vi.spyOn>;
-
   beforeEach(() => {
-    confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
     mockedUsePresenceService.mockReturnValue({ getStatus: vi.fn().mockResolvedValue({ "200": false }) });
     mockedUseWebSocket.mockReturnValue({ connected: true, subscribe: vi.fn(() => () => {}), publish: vi.fn() });
   });
@@ -146,7 +143,10 @@ describe("Bookings.page", () => {
     await screen.findByText("Robert");
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
-    expect(confirmSpy).toHaveBeenCalled();
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Cancel this booking?")).toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "Cancel Booking" }));
+
     await waitFor(() => expect(cancel).toHaveBeenCalledWith(1, false));
     await waitFor(() => expect(getMyBookingsAsFamily).toHaveBeenCalledTimes(2));
     expect(await screen.findByText("Booking cancelled")).toBeInTheDocument();
@@ -154,13 +154,15 @@ describe("Bookings.page", () => {
 
   it("does not cancel when the confirmation dialog is dismissed", async () => {
     const user = userEvent.setup();
-    confirmSpy.mockReturnValue(false);
     const cancel = vi.fn();
     mockService({ cancel });
     renderPage();
 
     await screen.findByText("Robert");
     await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Keep It" }));
 
     expect(cancel).not.toHaveBeenCalled();
   });
@@ -173,6 +175,10 @@ describe("Bookings.page", () => {
 
     await screen.findByText("Robert");
     await user.click(screen.getByRole("button", { name: "Cancel Series" }));
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Cancel the whole recurring series?")).toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "Cancel Series" }));
 
     await waitFor(() => expect(cancel).toHaveBeenCalledWith(1, true));
   });

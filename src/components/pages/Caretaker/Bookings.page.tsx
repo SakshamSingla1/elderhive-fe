@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import { FiCalendar, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import Button from "../../atoms/Button/Button";
+import ConfirmDialog from "../../atoms/ConfirmDialog/ConfirmDialog";
 import WeeklyAvailabilityView from "../../molecules/WeeklyAvailability/WeeklyAvailabilityView";
 import { useBookingService } from "../../../services/useBookingService";
 import type { BookingResponse } from "../../../services/useBookingService";
@@ -59,6 +60,7 @@ const CaretakerBookingsPage: React.FC = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [actingId, setActingId] = useState<number | null>(null);
+  const [declineTarget, setDeclineTarget] = useState<BookingResponse | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [availabilitySlots, setAvailabilitySlots] = useState<CaretakerAvailabilitySlotDTO[]>([]);
@@ -109,9 +111,10 @@ const CaretakerBookingsPage: React.FC = () => {
     }
   };
 
-  const handleDecline = (booking: BookingResponse) => {
-    if (!window.confirm("Decline this booking? The family will be notified and this can't be undone.")) return;
-    runAction(booking, () => bookingService.cancel(booking.id, false), "Booking declined");
+  const handleDecline = async () => {
+    if (!declineTarget) return;
+    await runAction(declineTarget, () => bookingService.cancel(declineTarget.id, false), "Booking declined");
+    setDeclineTarget(null);
   };
 
   return (
@@ -208,7 +211,7 @@ const CaretakerBookingsPage: React.FC = () => {
                           >
                             Confirm
                           </Button>
-                          <Button variant="text" size="small" color="error" disabled={actingId === booking.id} onClick={() => handleDecline(booking)}>
+                          <Button variant="text" size="small" color="error" disabled={actingId === booking.id} onClick={() => setDeclineTarget(booking)}>
                             Decline
                           </Button>
                         </>
@@ -247,6 +250,16 @@ const CaretakerBookingsPage: React.FC = () => {
           )}
         </>
       )}
+
+      <ConfirmDialog
+        open={declineTarget != null}
+        title="Decline this booking?"
+        description="The family will be notified and this can't be undone."
+        confirmLabel="Decline"
+        confirming={actingId === declineTarget?.id}
+        onConfirm={handleDecline}
+        onClose={() => setDeclineTarget(null)}
+      />
 
       <Snackbar open={Boolean(successMessage)} autoHideDuration={3000} onClose={() => setSuccessMessage(null)} message={successMessage} />
     </Box>

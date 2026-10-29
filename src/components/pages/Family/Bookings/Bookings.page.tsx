@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { FiCalendar, FiRepeat } from "react-icons/fi";
 import Button from "../../../atoms/Button/Button";
+import ConfirmDialog from "../../../atoms/ConfirmDialog/ConfirmDialog";
 import { useBookingService } from "../../../../services/useBookingService";
 import type { BookingResponse } from "../../../../services/useBookingService";
 import { usePresenceService } from "../../../../services/usePresenceService";
@@ -56,6 +57,7 @@ const BookingsPage: React.FC = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<{ booking: BookingResponse; cancelSeries: boolean } | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [presence, setPresence] = useState<Record<number, boolean>>({});
 
@@ -110,11 +112,9 @@ const BookingsPage: React.FC = () => {
     });
   }, [subscribe]);
 
-  const handleCancel = async (booking: BookingResponse, cancelSeries: boolean) => {
-    const confirmed = window.confirm(
-      cancelSeries ? "Cancel every booking in this recurring series? This cannot be undone." : "Cancel this booking? This cannot be undone."
-    );
-    if (!confirmed) return;
+  const handleCancel = async () => {
+    if (!cancelTarget) return;
+    const { booking, cancelSeries } = cancelTarget;
     setCancellingId(booking.id);
     setActionError(null);
     try {
@@ -125,6 +125,7 @@ const BookingsPage: React.FC = () => {
       setActionError(getErrorMessage(err, "Could not cancel this booking"));
     } finally {
       setCancellingId(null);
+      setCancelTarget(null);
     }
   };
 
@@ -234,7 +235,7 @@ const BookingsPage: React.FC = () => {
                               size="small"
                               color="error"
                               disabled={cancellingId === booking.id}
-                              onClick={() => handleCancel(booking, false)}
+                              onClick={() => setCancelTarget({ booking, cancelSeries: false })}
                             >
                               Cancel
                             </Button>
@@ -249,7 +250,7 @@ const BookingsPage: React.FC = () => {
                               size="small"
                               color="error"
                               disabled={cancellingId === booking.id}
-                              onClick={() => handleCancel(booking, true)}
+                              onClick={() => setCancelTarget({ booking, cancelSeries: true })}
                             >
                               Cancel Series
                             </Button>
@@ -270,6 +271,21 @@ const BookingsPage: React.FC = () => {
           )}
         </>
       )}
+
+      <ConfirmDialog
+        open={cancelTarget != null}
+        title={cancelTarget?.cancelSeries ? "Cancel the whole recurring series?" : "Cancel this booking?"}
+        description={
+          cancelTarget?.cancelSeries
+            ? "Every booking in this recurring series will be cancelled. This cannot be undone."
+            : "This cannot be undone."
+        }
+        confirmLabel={cancelTarget?.cancelSeries ? "Cancel Series" : "Cancel Booking"}
+        cancelLabel="Keep It"
+        confirming={cancellingId === cancelTarget?.booking.id}
+        onConfirm={handleCancel}
+        onClose={() => setCancelTarget(null)}
+      />
 
       <Snackbar open={Boolean(successMessage)} autoHideDuration={3000} onClose={() => setSuccessMessage(null)} message={successMessage} />
     </Box>

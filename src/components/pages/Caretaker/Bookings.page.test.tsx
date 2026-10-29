@@ -1,6 +1,6 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { useBookingService } from "../../../services/useBookingService";
 import type { BookingResponse } from "../../../services/useBookingService";
 import { useCaretakerService } from "../../../services/useCaretakerService";
@@ -88,12 +88,6 @@ function mockCaretakerService(getAvailability = vi.fn().mockResolvedValue([])) {
 }
 
 describe("Caretaker Bookings.page", () => {
-  let confirmSpy: ReturnType<typeof vi.spyOn>;
-
-  beforeEach(() => {
-    confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
-  });
-
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -150,19 +144,24 @@ describe("Caretaker Bookings.page", () => {
     await screen.findByText("Robert");
     await user.click(screen.getByRole("button", { name: "Decline" }));
 
-    expect(confirmSpy).toHaveBeenCalled();
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Decline this booking?")).toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "Decline" }));
+
     await waitFor(() => expect(service.cancel).toHaveBeenCalledWith(1, false));
   });
 
   it("does not decline when the confirmation dialog is dismissed", async () => {
     const user = userEvent.setup();
-    confirmSpy.mockReturnValue(false);
     const service = mockBookingService();
     mockCaretakerService();
     render(<BookingsPage />);
 
     await screen.findByText("Robert");
     await user.click(screen.getByRole("button", { name: "Decline" }));
+
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
 
     expect(service.cancel).not.toHaveBeenCalled();
   });

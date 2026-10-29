@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { FiEdit2, FiPlus, FiTrash2, FiUserPlus, FiUsers } from "react-icons/fi";
 import Button from "../../../atoms/Button/Button";
+import ConfirmDialog from "../../../atoms/ConfirmDialog/ConfirmDialog";
 import { useElderProfileService, type ElderProfileResponseDTO } from "../../../../services/useElderProfileService";
 import { getErrorMessage } from "../../../../utils/helper";
 
@@ -38,6 +39,7 @@ const ElderProfilesPage: React.FC = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ElderProfileResponseDTO | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const fetchAll = useCallback(async () => {
@@ -58,18 +60,19 @@ const ElderProfilesPage: React.FC = () => {
     fetchAll();
   }, [fetchAll]);
 
-  const handleDelete = async (profile: ElderProfileResponseDTO) => {
-    if (!window.confirm(`Remove "${profile.fullName}"? This cannot be undone.`)) return;
-    setDeletingId(profile.id);
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeletingId(deleteTarget.id);
     setActionError(null);
     try {
-      await elderProfileService.remove(profile.id);
-      setProfiles((prev) => prev.filter((p) => p.id !== profile.id));
+      await elderProfileService.remove(deleteTarget.id);
+      setProfiles((prev) => prev.filter((p) => p.id !== deleteTarget.id));
       setSuccessMessage("Elder profile removed");
     } catch (err) {
       setActionError(getErrorMessage(err, "Could not remove this elder profile"));
     } finally {
       setDeletingId(null);
+      setDeleteTarget(null);
     }
   };
 
@@ -158,7 +161,7 @@ const ElderProfilesPage: React.FC = () => {
                         size="small"
                         color="error"
                         disabled={deletingId === profile.id}
-                        onClick={() => handleDelete(profile)}
+                        onClick={() => setDeleteTarget(profile)}
                       >
                         <FiTrash2 size={16} />
                       </IconButton>
@@ -170,6 +173,16 @@ const ElderProfilesPage: React.FC = () => {
           </Table>
         </Paper>
       )}
+
+      <ConfirmDialog
+        open={deleteTarget != null}
+        title="Remove this elder profile?"
+        description={`"${deleteTarget?.fullName}" will be permanently removed. This cannot be undone.`}
+        confirmLabel="Remove"
+        confirming={deletingId === deleteTarget?.id}
+        onConfirm={handleDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
 
       <Snackbar open={Boolean(successMessage)} autoHideDuration={3000} onClose={() => setSuccessMessage(null)} message={successMessage} />
     </Box>

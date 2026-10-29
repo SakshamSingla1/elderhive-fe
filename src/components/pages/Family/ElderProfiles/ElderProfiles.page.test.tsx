@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -28,7 +28,6 @@ describe("Family ElderProfiles.page", () => {
     getMine = vi.fn().mockResolvedValue(SAMPLE_PAGE);
     remove = vi.fn().mockResolvedValue("Deleted");
     mockedUseElderProfileService.mockReturnValue({ getMine, remove } as unknown as ReturnType<typeof useElderProfileService>);
-    vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   it("lists every elder profile with its linked-account status", async () => {
@@ -67,7 +66,26 @@ describe("Family ElderProfiles.page", () => {
     const removeButtons = screen.getAllByLabelText("Remove");
     await user.click(removeButtons[0]);
 
-    expect(window.confirm).toHaveBeenCalled();
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Remove this elder profile?")).toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "Remove" }));
+
     await waitFor(() => expect(remove).toHaveBeenCalledWith(1));
+  });
+
+  it("does not remove when the confirmation dialog is cancelled", async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ElderProfilesPage />
+      </MemoryRouter>
+    );
+    await screen.findByText("Grandma Rose");
+
+    await user.click(screen.getAllByLabelText("Remove")[0]);
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+
+    expect(remove).not.toHaveBeenCalled();
   });
 });
