@@ -34,7 +34,9 @@ describe("Family Invites.page", () => {
     await user.click(screen.getByRole("button", { name: "Accept" }));
 
     await waitFor(() => expect(accept).toHaveBeenCalledWith("abc-123"));
-    expect(await screen.findByText(/Invite accepted/)).toBeInTheDocument();
+    expect(await screen.findByText("Handled this session")).toBeInTheDocument();
+    expect(screen.getByText("As Daughter")).toBeInTheDocument();
+    expect(screen.getByText("ACCEPTED")).toBeInTheDocument();
   });
 
   it("shows an error message when the backend rejects the token", async () => {

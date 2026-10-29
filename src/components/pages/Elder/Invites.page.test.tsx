@@ -41,7 +41,8 @@ describe("Elder Invites.page", () => {
     await user.click(screen.getByRole("button", { name: "Accept" }));
 
     await waitFor(() => expect(accept).toHaveBeenCalledWith("abc-123"));
-    expect(await screen.findByText(/Invite accepted/)).toBeInTheDocument();
+    expect(await screen.findByText("Handled this session")).toBeInTheDocument();
+    expect(screen.getByText("ACCEPTED")).toBeInTheDocument();
   });
 
   it("declining calls inviteService.decline with the entered token", async () => {
@@ -56,7 +57,7 @@ describe("Elder Invites.page", () => {
     await user.click(screen.getByRole("button", { name: "Decline" }));
 
     await waitFor(() => expect(decline).toHaveBeenCalledWith("abc-123"));
-    expect(await screen.findByText(/Invite declined/)).toBeInTheDocument();
+    expect(await screen.findByText("DECLINED")).toBeInTheDocument();
   });
 
   it("shows an error message when the backend rejects the token", async () => {
