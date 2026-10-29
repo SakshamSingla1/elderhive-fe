@@ -162,8 +162,8 @@ const ServiceOfferingListingTemplate: React.FC<ServiceOfferingListingTemplatePro
         <>
           <Box sx={{ display: "grid", gridTemplateColumns: GRID_COLUMNS, gap: 3, mb: 4 }}>
             {serviceOfferings.map((offering) => (
-              <Card key={offering.id} variant="outlined">
-                <CardContent>
+              <Card key={offering.id} variant="outlined" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                <CardContent sx={{ flexGrow: 1 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
                     <Typography variant="h6" fontWeight={700}>
                       {offering.name}

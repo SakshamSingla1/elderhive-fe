@@ -114,8 +114,8 @@ const ServiceCategoryListingTemplate: React.FC<ServiceCategoryListingTemplatePro
         <>
           <Box sx={{ display: "grid", gridTemplateColumns: GRID_COLUMNS, gap: 3, mb: 4 }}>
             {serviceCategories.map((category) => (
-              <Card key={category.id} variant="outlined">
-                <CardContent>
+              <Card key={category.id} variant="outlined" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                <CardContent sx={{ flexGrow: 1 }}>
                   <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
                     <Typography variant="h6" fontWeight={700}>
                       {category.name}
