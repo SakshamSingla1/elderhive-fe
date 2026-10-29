@@ -1,20 +1,31 @@
 import React, { useEffect, useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { Alert, Box, Card, CardContent, Grid, Skeleton, Snackbar, Stack, Typography } from "@mui/material";
-import { FiUser } from "react-icons/fi";
+import { Alert, Avatar, Box, Card, CardContent, Chip, Grid, LinearProgress, Skeleton, Snackbar, Stack, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import dayjs from "dayjs";
+import { FiHeart, FiPhoneCall, FiUser } from "react-icons/fi";
 import TextField from "../../atoms/TextField/TextField";
 import Select from "../../atoms/Select/Select";
 import Button from "../../atoms/Button/Button";
 import { useElderProfileService, type ElderProfileRequestDTO } from "../../../services/useElderProfileService";
 import { GenderEnum } from "../../../utils/enums";
-import { getErrorMessage } from "../../../utils/helper";
+import { getErrorMessage, formatDate } from "../../../utils/helper";
 
 const GENDER_OPTIONS = [
   { value: GenderEnum.MALE, label: "Male" },
   { value: GenderEnum.FEMALE, label: "Female" },
   { value: GenderEnum.OTHER, label: "Other" },
 ];
+
+const initials = (name: string) =>
+  (name || "?")
+    .split(" ")
+    .map((part) => part[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
 // Plain-string form state, distinct from ElderProfileRequestDTO's wire shape - gender
 // needs an empty-string "nothing selected yet" value the Select atom can hold, which
@@ -50,6 +61,18 @@ const EMPTY_VALUES: FormValues = {
   emergencyContactPhone: "",
 };
 
+// Order drives the completeness bar below - every one of these counts equally toward
+// "how filled in is this profile", gender included even though it's optional server-side.
+const COMPLETENESS_FIELDS: (keyof FormValues)[] = [
+  "fullName",
+  "dateOfBirth",
+  "gender",
+  "address",
+  "medicalConditions",
+  "emergencyContactName",
+  "emergencyContactPhone",
+];
+
 /**
  * Self-managed elder profile — GET/POST /elder-profiles/me and /elder-profiles always
  * scope to the caller when they're an ELDER (ElderProfileController#resolveOwnership,
@@ -59,9 +82,11 @@ const EMPTY_VALUES: FormValues = {
  */
 const ElderMyProfilePage: React.FC = () => {
   const elderProfileService = useElderProfileService();
+  const theme = useTheme();
 
   const [loading, setLoading] = useState(true);
   const [profileId, setProfileId] = useState<number | null>(null);
+  const [memberSince, setMemberSince] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -98,6 +123,7 @@ const ElderMyProfilePage: React.FC = () => {
       .getMyProfile()
       .then((profile) => {
         setProfileId(profile.id);
+        setMemberSince(profile.createdAt ?? null);
         formik.setValues({
           fullName: profile.fullName ?? "",
           dateOfBirth: profile.dateOfBirth ?? "",
@@ -124,10 +150,15 @@ const ElderMyProfilePage: React.FC = () => {
     return (
       <Stack spacing={2}>
         <Skeleton variant="rounded" height={48} width={240} />
+        <Skeleton variant="rounded" height={120} />
         <Skeleton variant="rounded" height={320} />
       </Stack>
     );
   }
+
+  const age = formik.values.dateOfBirth && dayjs(formik.values.dateOfBirth).isValid() ? dayjs().diff(dayjs(formik.values.dateOfBirth), "year") : null;
+  const filledCount = COMPLETENESS_FIELDS.filter((field) => Boolean(formik.values[field])).length;
+  const completenessPct = Math.round((filledCount / COMPLETENESS_FIELDS.length) * 100);
 
   return (
     <Box>
@@ -144,14 +175,54 @@ const ElderMyProfilePage: React.FC = () => {
         </Alert>
       )}
 
-      <Card variant="outlined">
+      <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>
-          {saveError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {saveError}
-            </Alert>
-          )}
-          <Stack component="form" spacing={2.5} onSubmit={formik.handleSubmit}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2.5} alignItems={{ xs: "flex-start", sm: "center" }}>
+            <Avatar sx={{ bgcolor: "primary.main", width: 64, height: 64, fontSize: 24, fontWeight: 700 }}>
+              {initials(formik.values.fullName)}
+            </Avatar>
+            <Box flex={1} minWidth={0}>
+              <Typography variant="h6" fontWeight={700} noWrap>
+                {formik.values.fullName || "Your Profile"}
+              </Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" rowGap={0.5} mt={0.5}>
+                {age != null && <Chip size="small" variant="outlined" label={`${age} years old`} />}
+                {formik.values.gender && <Chip size="small" variant="outlined" label={formik.values.gender} />}
+                {memberSince && <Chip size="small" variant="outlined" label={`Member since ${formatDate(memberSince)}`} />}
+                {!profileId && <Chip size="small" color="warning" variant="outlined" label="Not yet created" />}
+              </Stack>
+            </Box>
+          </Stack>
+          <Box mt={2.5}>
+            <Stack direction="row" justifyContent="space-between" mb={0.5}>
+              <Typography variant="caption" color="text.secondary">
+                Profile completeness
+              </Typography>
+              <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                {completenessPct}%
+              </Typography>
+            </Stack>
+            <LinearProgress
+              variant="determinate"
+              value={completenessPct}
+              sx={{ height: 8, borderRadius: 4 }}
+              color={completenessPct === 100 ? "success" : completenessPct >= 50 ? "primary" : "warning"}
+            />
+          </Box>
+        </CardContent>
+      </Card>
+
+      <Stack component="form" spacing={3} onSubmit={formik.handleSubmit}>
+        {saveError && <Alert severity="error">{saveError}</Alert>}
+
+        <Card variant="outlined">
+          <CardContent>
+            <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+              <FiUser size={18} />
+              <Typography variant="h6" fontWeight={700}>
+                Personal Details
+              </Typography>
+            </Stack>
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
@@ -190,16 +261,39 @@ const ElderMyProfilePage: React.FC = () => {
                   onChange={formik.handleChange}
                 />
               </Grid>
-              <Grid size={12}>
-                <TextField
-                  label="Medical Conditions"
-                  name="medicalConditions"
-                  multiline
-                  minRows={3}
-                  value={formik.values.medicalConditions ?? ""}
-                  onChange={formik.handleChange}
-                />
-              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+
+        <Card variant="outlined">
+          <CardContent>
+            <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+              <FiHeart size={18} color={theme.palette.error.main} />
+              <Typography variant="h6" fontWeight={700}>
+                Medical Information
+              </Typography>
+            </Stack>
+            <TextField
+              label="Medical Conditions"
+              name="medicalConditions"
+              placeholder="Allergies, chronic conditions, medications, anything a caretaker should know"
+              multiline
+              minRows={3}
+              value={formik.values.medicalConditions}
+              onChange={formik.handleChange}
+            />
+          </CardContent>
+        </Card>
+
+        <Card variant="outlined">
+          <CardContent>
+            <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+              <FiPhoneCall size={18} />
+              <Typography variant="h6" fontWeight={700}>
+                Emergency Contact
+              </Typography>
+            </Stack>
+            <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   label="Emergency Contact Name"
@@ -217,14 +311,15 @@ const ElderMyProfilePage: React.FC = () => {
                 />
               </Grid>
             </Grid>
-            <Box>
-              <Button type="submit" variant="contained" loading={formik.isSubmitting}>
-                {profileId ? "Save Changes" : "Create Profile"}
-              </Button>
-            </Box>
-          </Stack>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <Box>
+          <Button type="submit" variant="contained" loading={formik.isSubmitting}>
+            {profileId ? "Save Changes" : "Create Profile"}
+          </Button>
+        </Box>
+      </Stack>
 
       <Snackbar open={Boolean(successMessage)} autoHideDuration={3000} onClose={() => setSuccessMessage(null)} message={successMessage} />
     </Box>

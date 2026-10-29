@@ -3,12 +3,14 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
   Alert,
+  Avatar,
   Box,
   Card,
   CardContent,
   Chip,
   Divider,
   Grid,
+  LinearProgress,
   List,
   ListItem,
   ListItemText,
@@ -17,7 +19,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { FiCalendar, FiFileText, FiUpload, FiUserCheck } from "react-icons/fi";
+import { FiCalendar, FiFileText, FiMail, FiMapPin, FiPhone, FiStar, FiUpload, FiUserCheck } from "react-icons/fi";
 import TextField from "../../atoms/TextField/TextField";
 import Button from "../../atoms/Button/Button";
 import WeeklyAvailabilityEditor from "../../molecules/WeeklyAvailability/WeeklyAvailabilityEditor";
@@ -68,6 +70,19 @@ const REVIEW_STATUS_COLOR: Record<DocumentReviewStatusEnum, "default" | "success
   [DocumentReviewStatusEnum.REJECTED]: "error",
 };
 
+// Order drives the completeness bar below - every one of these counts equally toward
+// "how filled in is this profile".
+const COMPLETENESS_FIELDS: (keyof FormValues)[] = ["bio", "specialties", "yearsOfExperience", "hourlyRate", "latitude", "longitude", "serviceRadiusKm"];
+
+const initials = (name: string | null) =>
+  (name || "?")
+    .split(" ")
+    .map((part) => part[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
 /** Parses a comma/newline-separated free-text field into a trimmed, de-duplicated list -
  *  specialties has no fixed picklist yet (CaretakerProfile.specialties is a placeholder
  *  string collection, Prompt 64, until Phase 9's ServiceCategory table exists). */
@@ -89,6 +104,10 @@ const CaretakerMyProfilePage: React.FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [profileId, setProfileId] = useState<number | null>(null);
+  const [fullName, setFullName] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [phone, setPhone] = useState<string | null>(null);
+  const [ratingAverage, setRatingAverage] = useState<number | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<CaretakerVerificationStatusEnum>(CaretakerVerificationStatusEnum.PENDING);
   const [documents, setDocuments] = useState<CaretakerVerificationDocumentDTO[]>([]);
   const [docType, setDocType] = useState("");
@@ -117,6 +136,10 @@ const CaretakerMyProfilePage: React.FC = () => {
         const saved = await caretakerService.createOrUpdate(payload);
         setProfileId(saved.id);
         setVerificationStatus(saved.verificationStatus);
+        setFullName(saved.fullName);
+        setEmail(saved.email);
+        setPhone(saved.phone);
+        setRatingAverage(saved.ratingAverage);
         setSuccessMessage("Profile saved successfully");
       } catch (err) {
         setSaveError(getErrorMessage(err, "Could not save your profile"));
@@ -142,6 +165,10 @@ const CaretakerMyProfilePage: React.FC = () => {
       .then((profile) => {
         setProfileId(profile.id);
         setVerificationStatus(profile.verificationStatus);
+        setFullName(profile.fullName);
+        setEmail(profile.email);
+        setPhone(profile.phone);
+        setRatingAverage(profile.ratingAverage);
         formik.setValues({
           bio: profile.bio ?? "",
           specialties: (profile.specialties ?? []).join(", "),
@@ -185,24 +212,23 @@ const CaretakerMyProfilePage: React.FC = () => {
     return (
       <Stack spacing={2}>
         <Skeleton variant="rounded" height={48} width={240} />
+        <Skeleton variant="rounded" height={140} />
         <Skeleton variant="rounded" height={320} />
       </Stack>
     );
   }
 
+  const specialtyChips = parseSpecialties(formik.values.specialties);
+  const filledCount = COMPLETENESS_FIELDS.filter((field) => Boolean(formik.values[field])).length;
+  const completenessPct = Math.round((filledCount / COMPLETENESS_FIELDS.length) * 100);
+
   return (
     <Box>
-      <Stack direction="row" spacing={1.5} alignItems="center" mb={3} flexWrap="wrap" rowGap={1}>
+      <Stack direction="row" spacing={1.5} alignItems="center" mb={3}>
         <FiUserCheck size={22} />
         <Typography variant="h5" fontWeight={800}>
           My Profile
         </Typography>
-        <Chip
-          label={verificationStatus}
-          size="small"
-          color={VERIFICATION_STATUS_COLOR[verificationStatus]}
-          variant={verificationStatus === CaretakerVerificationStatusEnum.PENDING ? "outlined" : "filled"}
-        />
       </Stack>
 
       {loadError && (
@@ -211,24 +237,80 @@ const CaretakerMyProfilePage: React.FC = () => {
         </Alert>
       )}
 
-      <Card variant="outlined">
+      <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>
-          {saveError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {saveError}
-            </Alert>
-          )}
-          <Stack component="form" spacing={2.5} onSubmit={formik.handleSubmit}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2.5} alignItems={{ xs: "flex-start", sm: "center" }}>
+            <Avatar sx={{ bgcolor: "primary.main", width: 64, height: 64, fontSize: 24, fontWeight: 700 }}>{initials(fullName)}</Avatar>
+            <Box flex={1} minWidth={0}>
+              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" rowGap={0.5}>
+                <Typography variant="h6" fontWeight={700} noWrap>
+                  {fullName || "Your Profile"}
+                </Typography>
+                <Chip
+                  label={verificationStatus}
+                  size="small"
+                  color={VERIFICATION_STATUS_COLOR[verificationStatus]}
+                  variant={verificationStatus === CaretakerVerificationStatusEnum.PENDING ? "outlined" : "filled"}
+                />
+              </Stack>
+              <Stack direction="row" spacing={2} flexWrap="wrap" rowGap={0.5} mt={0.5}>
+                {email && (
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <FiMail size={14} />
+                    <Typography variant="body2" color="text.secondary">
+                      {email}
+                    </Typography>
+                  </Stack>
+                )}
+                {phone && (
+                  <Stack direction="row" spacing={0.5} alignItems="center">
+                    <FiPhone size={14} />
+                    <Typography variant="body2" color="text.secondary">
+                      {phone}
+                    </Typography>
+                  </Stack>
+                )}
+              </Stack>
+              <Stack direction="row" spacing={1} flexWrap="wrap" rowGap={0.5} mt={1}>
+                <Chip size="small" variant="outlined" icon={<FiStar size={13} />} label={ratingAverage != null ? ratingAverage.toFixed(1) : "No ratings yet"} />
+                {formik.values.yearsOfExperience && <Chip size="small" variant="outlined" label={`${formik.values.yearsOfExperience} yrs experience`} />}
+                {formik.values.hourlyRate && <Chip size="small" variant="outlined" label={`$${formik.values.hourlyRate}/hr`} />}
+              </Stack>
+            </Box>
+          </Stack>
+          <Box mt={2.5}>
+            <Stack direction="row" justifyContent="space-between" mb={0.5}>
+              <Typography variant="caption" color="text.secondary">
+                Profile completeness
+              </Typography>
+              <Typography variant="caption" color="text.secondary" fontWeight={700}>
+                {completenessPct}%
+              </Typography>
+            </Stack>
+            <LinearProgress
+              variant="determinate"
+              value={completenessPct}
+              sx={{ height: 8, borderRadius: 4 }}
+              color={completenessPct === 100 ? "success" : completenessPct >= 50 ? "primary" : "warning"}
+            />
+          </Box>
+        </CardContent>
+      </Card>
+
+      <Stack component="form" spacing={3} onSubmit={formik.handleSubmit}>
+        {saveError && <Alert severity="error">{saveError}</Alert>}
+
+        <Card variant="outlined">
+          <CardContent>
+            <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+              <FiUserCheck size={18} />
+              <Typography variant="h6" fontWeight={700}>
+                Professional Details
+              </Typography>
+            </Stack>
             <Grid container spacing={2}>
               <Grid size={12}>
-                <TextField
-                  label="Bio"
-                  name="bio"
-                  multiline
-                  minRows={3}
-                  value={formik.values.bio}
-                  onChange={formik.handleChange}
-                />
+                <TextField label="Bio" name="bio" multiline minRows={3} value={formik.values.bio} onChange={formik.handleChange} />
               </Grid>
               <Grid size={12}>
                 <TextField
@@ -239,8 +321,15 @@ const CaretakerMyProfilePage: React.FC = () => {
                   value={formik.values.specialties}
                   onChange={formik.handleChange}
                 />
+                {specialtyChips.length > 0 && (
+                  <Stack direction="row" spacing={0.75} flexWrap="wrap" rowGap={0.75} mt={1}>
+                    {specialtyChips.map((specialty) => (
+                      <Chip key={specialty} size="small" label={specialty} />
+                    ))}
+                  </Stack>
+                )}
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   label="Years of Experience"
                   name="yearsOfExperience"
@@ -250,7 +339,7 @@ const CaretakerMyProfilePage: React.FC = () => {
                   error={formik.touched.yearsOfExperience && formik.errors.yearsOfExperience}
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField
                   label="Hourly Rate"
                   name="hourlyRate"
@@ -260,25 +349,29 @@ const CaretakerMyProfilePage: React.FC = () => {
                   error={formik.touched.hourlyRate && formik.errors.hourlyRate}
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <TextField
-                  label="Latitude"
-                  name="latitude"
-                  type="number"
-                  value={formik.values.latitude}
-                  onChange={formik.handleChange}
-                />
+            </Grid>
+          </CardContent>
+        </Card>
+
+        <Card variant="outlined">
+          <CardContent>
+            <Stack direction="row" spacing={1} alignItems="center" mb={2}>
+              <FiMapPin size={18} />
+              <Typography variant="h6" fontWeight={700}>
+                Service Location
+              </Typography>
+            </Stack>
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              Where you're based and how far you're willing to travel for a booking.
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <TextField label="Latitude" name="latitude" type="number" value={formik.values.latitude} onChange={formik.handleChange} />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                <TextField
-                  label="Longitude"
-                  name="longitude"
-                  type="number"
-                  value={formik.values.longitude}
-                  onChange={formik.handleChange}
-                />
+              <Grid size={{ xs: 12, sm: 4 }}>
+                <TextField label="Longitude" name="longitude" type="number" value={formik.values.longitude} onChange={formik.handleChange} />
               </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
+              <Grid size={{ xs: 12, sm: 4 }}>
                 <TextField
                   label="Service Radius (km)"
                   name="serviceRadiusKm"
@@ -289,14 +382,15 @@ const CaretakerMyProfilePage: React.FC = () => {
                 />
               </Grid>
             </Grid>
-            <Box>
-              <Button type="submit" variant="contained" loading={formik.isSubmitting}>
-                {profileId ? "Save Changes" : "Create Profile"}
-              </Button>
-            </Box>
-          </Stack>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <Box>
+          <Button type="submit" variant="contained" loading={formik.isSubmitting}>
+            {profileId ? "Save Changes" : "Create Profile"}
+          </Button>
+        </Box>
+      </Stack>
 
       {profileId && (
         <Card variant="outlined" sx={{ mt: 3 }}>
