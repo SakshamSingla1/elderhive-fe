@@ -41,6 +41,11 @@ export const SIDEBAR_WIDTH = 248;
 /** Width of the desktop rail once collapsed — wide enough for a centered 24px icon plus
  *  its hit target, narrow enough to read as "minimized" rather than a second full drawer. */
 export const SIDEBAR_WIDTH_COLLAPSED = 84;
+/** Shared row height for this header and DashboardLayout's AppBar Toolbar, so the
+ *  sidebar's and topbar's bottom borders land on the same horizontal line instead of
+ *  each sizing itself independently (the sidebar from its own content+padding, the
+ *  AppBar from MUI's default responsive Toolbar height) and drifting apart. */
+export const SIDEBAR_HEADER_HEIGHT = 72;
 
 // Sorts by navIndex (ascending, stable — ties keep their original relative order), THEN
 // renders a group heading whenever an item's `group` differs from the previous item's -
@@ -61,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ navItems, roleLabel, mobileOpen = fal
 
   const content = (
     <>
-      <Toolbar sx={{ gap: 1.25, py: 2.25, px: rail ? 1.5 : 2.5, justifyContent: rail ? "center" : "flex-start" }}>
+      <Toolbar sx={{ gap: 1.25, minHeight: SIDEBAR_HEADER_HEIGHT, alignItems: "center", px: rail ? 1.5 : 2.5, justifyContent: rail ? "center" : "flex-start" }}>
         <Box
           sx={{
             width: 38,

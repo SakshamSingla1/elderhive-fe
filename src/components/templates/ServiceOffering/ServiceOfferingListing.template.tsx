@@ -13,6 +13,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Divider,
   FormControl,
   IconButton,
   InputLabel,
@@ -25,8 +26,8 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useTheme, alpha } from "@mui/material/styles";
-import { FiClock, FiDollarSign, FiEdit3, FiShoppingBag, FiTrash2 } from "react-icons/fi";
+import { useTheme, alpha, type Theme } from "@mui/material/styles";
+import { FiArrowRight, FiClock, FiDollarSign, FiEdit3, FiShoppingBag, FiTrash2 } from "react-icons/fi";
 import { useServiceCategoryService } from "../../../services/useServiceCategoryService";
 import type { ServiceCategoryResponse } from "../../../services/useServiceCategoryService";
 import { useServiceOfferingService } from "../../../services/useServiceOfferingService";
@@ -38,6 +39,18 @@ import { resolveCategoryIcon } from "../../../utils/categoryIcons";
 const SKELETON_COUNT = 6;
 const GRID_COLUMNS = { xs: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" };
 const ALL_CATEGORIES_VALUE = "ALL";
+
+// Every card gets a themed accent drawn from the live palette (never a hardcoded hex) so
+// an admin's custom ColorTheme (Phase 6) still looks correct here - rotated deterministically
+// by category so every offering in "Temple Visit" always lands on the same accent, reading
+// as a deliberate per-category identity rather than a random color per card.
+const ACCENT_PALETTE_KEYS = ["primary", "secondary", "success", "warning", "error"] as const;
+
+function getAccentColor(theme: Theme, key: string): string {
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+  return theme.palette[ACCENT_PALETTE_KEYS[hash % ACCENT_PALETTE_KEYS.length]].main;
+}
 
 interface ServiceOfferingListingTemplateProps {
   serviceOfferings: ServiceOfferingResponse[];
@@ -167,86 +180,174 @@ const ServiceOfferingListingTemplate: React.FC<ServiceOfferingListingTemplatePro
             {serviceOfferings.map((offering) => {
               const offeringCategory = categories.find((c) => c.id === offering.categoryId);
               const OfferingIcon = resolveCategoryIcon(offeringCategory?.icon);
+              const isActive = offering.status === "ACTIVE";
+              const accent = getAccentColor(theme, offeringCategory?.name ?? offering.categoryName ?? String(offering.categoryId));
               return (
               <Card
                 key={offering.id}
-                variant="outlined"
                 sx={{
                   height: "100%",
                   display: "flex",
                   flexDirection: "column",
-                  transition: "transform 150ms ease, box-shadow 150ms ease",
-                  "&:hover": { transform: "translateY(-3px)", boxShadow: 4 },
+                  position: "relative",
+                  overflow: "hidden",
+                  border: "1px solid",
+                  borderColor: alpha(accent, 0.16),
+                  filter: isActive ? "none" : "grayscale(0.6)",
+                  opacity: isActive ? 1 : 0.85,
+                  transition: "transform 220ms cubic-bezier(.2,.8,.2,1), box-shadow 220ms ease",
+                  "&:hover": {
+                    transform: "translateY(-8px)",
+                    boxShadow: `0 24px 44px -16px ${alpha(accent, 0.5)}`,
+                    "& .offering-icon-badge": { transform: "scale(1.08) rotate(-4deg)" },
+                  },
                 }}
               >
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                    <Typography variant="h6" fontWeight={700} sx={{ wordBreak: "break-word" }}>
-                      {offering.name}
-                    </Typography>
-                    <Chip size="small" label={formatEnumLabel(offering.status)} color={offering.status === "ACTIVE" ? "success" : "default"} sx={{ flexShrink: 0 }} />
-                  </Stack>
-                  {offering.categoryName && (
-                    <Stack direction="row" spacing={0.75} alignItems="center" mt={1}>
+                {/* Gradient identity band - per-category accent, always a live theme color. */}
+                <Box
+                  sx={{
+                    position: "relative",
+                    px: 2.5,
+                    py: 2.25,
+                    overflow: "hidden",
+                    backgroundImage: `linear-gradient(135deg, ${accent} 0%, ${alpha(accent, 0.72)} 100%)`,
+                  }}
+                >
+                  <Box aria-hidden sx={{ position: "absolute", top: -34, right: -24, width: 130, height: 130, borderRadius: "50%", bgcolor: alpha("#ffffff", 0.14), pointerEvents: "none" }} />
+                  <Box aria-hidden sx={{ position: "absolute", bottom: -44, left: 24, width: 96, height: 96, borderRadius: "50%", bgcolor: alpha("#ffffff", 0.08), pointerEvents: "none" }} />
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ position: "relative" }}>
+                    <Stack direction="row" spacing={1.25} alignItems="center" minWidth={0}>
                       <Box
+                        className="offering-icon-badge"
                         sx={{
-                          width: 22,
-                          height: 22,
-                          borderRadius: "6px",
+                          width: 46,
+                          height: 46,
+                          borderRadius: "14px",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          bgcolor: alpha(theme.palette.primary.main, 0.12),
-                          color: "primary.main",
+                          bgcolor: alpha("#ffffff", 0.22),
+                          backdropFilter: "blur(6px)",
+                          border: "1px solid",
+                          borderColor: alpha("#ffffff", 0.35),
+                          color: "#fff",
                           flexShrink: 0,
+                          transition: "transform 220ms ease",
                         }}
                       >
-                        <OfferingIcon size={12} />
+                        <OfferingIcon size={21} />
                       </Box>
-                      <Chip size="small" variant="outlined" label={offering.categoryName} />
+                      {offering.categoryName && (
+                        <Typography
+                          variant="caption"
+                          noWrap
+                          sx={{ color: alpha("#ffffff", 0.9), textTransform: "uppercase", letterSpacing: 0.6, fontWeight: 800 }}
+                        >
+                          {offering.categoryName}
+                        </Typography>
+                      )}
                     </Stack>
-                  )}
+                    <Chip
+                      size="small"
+                      label={isActive ? "Available" : formatEnumLabel(offering.status)}
+                      sx={{
+                        bgcolor: alpha("#ffffff", 0.22),
+                        color: "#fff",
+                        fontWeight: 700,
+                        border: "1px solid",
+                        borderColor: alpha("#ffffff", 0.35),
+                        flexShrink: 0,
+                      }}
+                    />
+                  </Stack>
+                </Box>
+
+                <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column" }}>
+                  <Typography variant="h6" fontWeight={800} sx={{ wordBreak: "break-word" }}>
+                    {offering.name}
+                  </Typography>
                   {offering.description && (
-                    <Typography variant="body2" color="text.secondary" mt={1.5}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      mt={1}
+                      sx={{
+                        display: "-webkit-box",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 3,
+                        overflow: "hidden",
+                      }}
+                    >
                       {offering.description}
                     </Typography>
                   )}
-                  <Stack direction="row" spacing={2.5} mt={1.5}>
-                    {offering.basePrice != null && (
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <FiDollarSign size={13} style={{ opacity: 0.6 }} />
-                        <Typography variant="body2" fontWeight={700}>
-                          {offering.basePrice}
-                        </Typography>
-                      </Stack>
-                    )}
-                    {offering.durationMinutes != null && (
-                      <Stack direction="row" spacing={0.5} alignItems="center">
-                        <FiClock size={13} style={{ opacity: 0.6 }} />
-                        <Typography variant="body2" color="text.secondary">
-                          {offering.durationMinutes} min
-                        </Typography>
-                      </Stack>
-                    )}
-                  </Stack>
+
+                  <Box flexGrow={1} />
+
+                  {(offering.basePrice != null || offering.durationMinutes != null) && (
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1.5} mt={2.5}>
+                      {offering.basePrice != null && (
+                        <Box sx={{ borderLeft: "3px solid", borderColor: alpha(accent, 0.45), pl: 1.5 }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ textTransform: "uppercase", letterSpacing: 0.5, fontWeight: 700, display: "block" }}>
+                            Starting at
+                          </Typography>
+                          <Stack direction="row" alignItems="baseline" spacing={0.25}>
+                            <FiDollarSign size={15} color={accent} />
+                            <Typography variant="h5" fontWeight={800} sx={{ color: accent }}>
+                              {offering.basePrice}
+                            </Typography>
+                          </Stack>
+                        </Box>
+                      )}
+                      {offering.durationMinutes != null && (
+                        <Chip
+                          size="small"
+                          variant="outlined"
+                          icon={<FiClock size={13} />}
+                          label={`${offering.durationMinutes} min`}
+                          sx={{ flexShrink: 0 }}
+                        />
+                      )}
+                    </Stack>
+                  )}
                 </CardContent>
                 {allowMutations ? (
-                  <CardActions sx={{ justifyContent: "flex-end" }}>
-                    <Tooltip title="Edit">
-                      <IconButton onClick={() => navigate(`/admin/services/${offering.id}`)} aria-label="Edit">
-                        <FiEdit3 size={16} />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete">
-                      <IconButton onClick={() => setIdPendingDelete(offering.id)} aria-label="Delete">
-                        <FiTrash2 size={16} />
-                      </IconButton>
-                    </Tooltip>
-                  </CardActions>
+                  <>
+                    <Divider />
+                    <CardActions sx={{ justifyContent: "flex-end" }}>
+                      <Tooltip title="Edit">
+                        <IconButton
+                          onClick={() => navigate(`/admin/services/${offering.id}`)}
+                          aria-label="Edit"
+                          sx={{ color: accent, "&:hover": { bgcolor: alpha(accent, 0.12) } }}
+                        >
+                          <FiEdit3 size={16} />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete">
+                        <IconButton onClick={() => setIdPendingDelete(offering.id)} aria-label="Delete">
+                          <FiTrash2 size={16} />
+                        </IconButton>
+                      </Tooltip>
+                    </CardActions>
+                  </>
                 ) : (
                   offering.status === "ACTIVE" && (
-                    <CardActions sx={{ justifyContent: "flex-end" }}>
-                      <Button size="small" variant="contained" onClick={() => navigate(`/family/bookings/new?serviceOfferingId=${offering.id}`)}>
+                    <CardActions sx={{ p: 2, pt: 0 }}>
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        endIcon={<FiArrowRight size={16} />}
+                        onClick={() => navigate(`/family/bookings/new?serviceOfferingId=${offering.id}`)}
+                        sx={{
+                          backgroundImage: `linear-gradient(135deg, ${accent}, ${alpha(accent, 0.82)})`,
+                          boxShadow: `0 10px 22px -8px ${alpha(accent, 0.65)}`,
+                          "&:hover": {
+                            backgroundImage: `linear-gradient(135deg, ${accent}, ${accent})`,
+                            boxShadow: `0 12px 26px -6px ${alpha(accent, 0.75)}`,
+                          },
+                        }}
+                      >
                         Book
                       </Button>
                     </CardActions>

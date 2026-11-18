@@ -4,7 +4,7 @@ import { AppBar, Avatar, Box, Divider, IconButton, Menu, MenuItem, Toolbar, Tool
 import { useTheme } from "@mui/material/styles";
 import { AnimatePresence, motion } from "framer-motion";
 import { FiChevronLeft, FiChevronRight, FiLogOut, FiMenu, FiSettings } from "react-icons/fi";
-import Sidebar, { SIDEBAR_WIDTH, SIDEBAR_WIDTH_COLLAPSED, type SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
+import Sidebar, { SIDEBAR_WIDTH, SIDEBAR_WIDTH_COLLAPSED, SIDEBAR_HEADER_HEIGHT, type SidebarNavItem } from "../components/molecules/Sidebar/Sidebar";
 import NotificationBell from "../components/molecules/NotificationBell/NotificationBell";
 import { useAuthenticatedUser } from "../contexts/AuthenticatedUserContext";
 
@@ -150,7 +150,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ navItems, roleLabel }
           backgroundColor: "background.paper",
         }}
       >
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between", gap: 1 }}>
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between", gap: 1, minHeight: SIDEBAR_HEADER_HEIGHT }}>
           <Box display="flex" alignItems="center" gap={1} minWidth={0}>
             {isMobile && (
               <IconButton onClick={() => setMobileOpen(true)} aria-label="Open navigation menu" edge="start">
@@ -190,7 +190,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ navItems, roleLabel }
       </AppBar>
 
       <Box component="main" sx={{ flexGrow: 1, bgcolor: "background.default", minHeight: "100vh", minWidth: 0 }}>
-        <Toolbar />
+        <Toolbar sx={{ minHeight: SIDEBAR_HEADER_HEIGHT }} />
         <Box sx={{ p: { xs: 2.5, sm: 3, md: 4 }, maxWidth: 1600, mx: "auto" }}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
