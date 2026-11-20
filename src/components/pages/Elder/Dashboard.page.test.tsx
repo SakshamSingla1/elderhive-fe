@@ -21,6 +21,8 @@ function profile(overrides: Partial<ElderProfileResponseDTO> = {}): ElderProfile
     gender: null,
     medicalConditions: null,
     address: "221B Lotus Street",
+    latitude: null,
+    longitude: null,
     emergencyContactName: "Nina Family",
     emergencyContactPhone: "+15551112222",
     ...overrides,

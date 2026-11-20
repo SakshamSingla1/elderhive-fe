@@ -42,6 +42,8 @@ function elderProfile(overrides: Partial<ElderProfileResponseDTO> = {}): ElderPr
     gender: null,
     medicalConditions: null,
     address: "221B Lotus Street",
+    latitude: null,
+    longitude: null,
     emergencyContactName: null,
     emergencyContactPhone: null,
     ...overrides,

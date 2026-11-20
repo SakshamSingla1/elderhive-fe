@@ -8,6 +8,7 @@ import PageHeader from "../../../molecules/PageHeader/PageHeader";
 import TextField from "../../../atoms/TextField/TextField";
 import Select from "../../../atoms/Select/Select";
 import Button from "../../../atoms/Button/Button";
+import AddressAutocomplete from "../../../molecules/AddressAutocomplete/AddressAutocomplete";
 import FamilyMembersPanel from "./FamilyMembersPanel";
 import { useElderProfileService, type ElderProfileRequestDTO } from "../../../../services/useElderProfileService";
 import { GenderEnum } from "../../../../utils/enums";
@@ -27,6 +28,8 @@ interface FormValues {
   gender: GenderEnum | "";
   medicalConditions: string;
   address: string;
+  latitude: number | null;
+  longitude: number | null;
   emergencyContactName: string;
   emergencyContactPhone: string;
 }
@@ -37,6 +40,8 @@ const EMPTY_VALUES: FormValues = {
   gender: "",
   medicalConditions: "",
   address: "",
+  latitude: null,
+  longitude: null,
   emergencyContactName: "",
   emergencyContactPhone: "",
 };
@@ -99,6 +104,8 @@ const ElderProfilesFormPage: React.FC = () => {
           gender: profile.gender ?? "",
           medicalConditions: profile.medicalConditions ?? "",
           address: profile.address ?? "",
+          latitude: profile.latitude ?? null,
+          longitude: profile.longitude ?? null,
           emergencyContactName: profile.emergencyContactName ?? "",
           emergencyContactPhone: profile.emergencyContactPhone ?? "",
         });
@@ -171,7 +178,15 @@ const ElderProfilesFormPage: React.FC = () => {
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField label="Address" name="address" value={formik.values.address ?? ""} onChange={formik.handleChange} />
+                <AddressAutocomplete
+                  label="Address"
+                  initialValue={formik.values.address || null}
+                  onSelect={(selection) => {
+                    formik.setFieldValue("address", selection?.address ?? "");
+                    formik.setFieldValue("latitude", selection?.latitude ?? null);
+                    formik.setFieldValue("longitude", selection?.longitude ?? null);
+                  }}
+                />
               </Grid>
               <Grid size={12}>
                 <TextField

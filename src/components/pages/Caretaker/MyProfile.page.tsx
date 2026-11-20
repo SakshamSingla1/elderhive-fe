@@ -22,6 +22,7 @@ import {
 import { FiCalendar, FiFileText, FiMail, FiMapPin, FiPhone, FiStar, FiUpload, FiUserCheck } from "react-icons/fi";
 import TextField from "../../atoms/TextField/TextField";
 import Button from "../../atoms/Button/Button";
+import AddressAutocomplete from "../../molecules/AddressAutocomplete/AddressAutocomplete";
 import WeeklyAvailabilityEditor from "../../molecules/WeeklyAvailability/WeeklyAvailabilityEditor";
 import { useCaretakerService, type CaretakerProfileRequestDTO, type CaretakerVerificationDocumentDTO } from "../../../services/useCaretakerService";
 import { useFileService } from "../../../services/useFileService";
@@ -365,11 +366,20 @@ const CaretakerMyProfilePage: React.FC = () => {
               Where you're based and how far you're willing to travel for a booking.
             </Typography>
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <TextField label="Latitude" name="latitude" type="number" value={formik.values.latitude} onChange={formik.handleChange} />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <TextField label="Longitude" name="longitude" type="number" value={formik.values.longitude} onChange={formik.handleChange} />
+              <Grid size={{ xs: 12, sm: 8 }}>
+                <AddressAutocomplete
+                  label="Address"
+                  placeholder="Search for your service location"
+                  helperText={
+                    formik.values.latitude && formik.values.longitude
+                      ? `Currently set to ${formik.values.latitude}, ${formik.values.longitude}`
+                      : undefined
+                  }
+                  onSelect={(selection) => {
+                    formik.setFieldValue("latitude", selection ? String(selection.latitude) : "");
+                    formik.setFieldValue("longitude", selection ? String(selection.longitude) : "");
+                  }}
+                />
               </Grid>
               <Grid size={{ xs: 12, sm: 4 }}>
                 <TextField

@@ -22,6 +22,10 @@ export interface ElderProfileResponseDTO {
   gender: GenderEnum | null;
   medicalConditions: string | null;
   address: string | null;
+  // Added Prompt 104 - filled by molecules/AddressAutocomplete rather than typed by hand,
+  // so a stored address carries real coordinates, not just text.
+  latitude: number | null;
+  longitude: number | null;
   emergencyContactName: string | null;
   emergencyContactPhone: string | null;
   createdAt?: string;
@@ -37,6 +41,8 @@ export interface ElderProfileRequestDTO {
   gender?: GenderEnum | null;
   medicalConditions?: string | null;
   address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   emergencyContactName?: string | null;
   emergencyContactPhone?: string | null;
 }
