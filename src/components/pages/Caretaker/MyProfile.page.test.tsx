@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import CaretakerMyProfilePage from "./MyProfile.page";
 import { useCaretakerService } from "../../../services/useCaretakerService";
 import { useFileService } from "../../../services/useFileService";
+import { useCalendarService } from "../../../services/useCalendarService";
 import { CaretakerVerificationStatusEnum, DocumentReviewStatusEnum } from "../../../utils/enums";
 
 vi.mock("../../../services/useCaretakerService", () => ({
@@ -13,9 +14,13 @@ vi.mock("../../../services/useCaretakerService", () => ({
 vi.mock("../../../services/useFileService", () => ({
   useFileService: vi.fn(),
 }));
+vi.mock("../../../services/useCalendarService", () => ({
+  useCalendarService: vi.fn(),
+}));
 
 const mockedUseCaretakerService = vi.mocked(useCaretakerService);
 const mockedUseFileService = vi.mocked(useFileService);
+const mockedUseCalendarService = vi.mocked(useCalendarService);
 
 const PROFILE = {
   id: 10, userId: 1, fullName: "Carla Caretaker", email: "c@example.com", phone: null,
@@ -45,6 +50,10 @@ describe("Caretaker MyProfile.page", () => {
     mockedUseFileService.mockReturnValue({ getDownloadUrl: (id: number) => `http://x/files/${id}/download` } as ReturnType<
       typeof useFileService
     >);
+    mockedUseCalendarService.mockReturnValue({
+      getCalendarLink: vi.fn().mockResolvedValue({ icsUrl: "https://elderhive-be.onrender.com/api/v1/caretakers/me/calendar.ics?token=abc" }),
+      regenerateCalendarLink: vi.fn(),
+    } as unknown as ReturnType<typeof useCalendarService>);
   });
 
   it("shows an empty create form when the caller has no profile yet (404)", async () => {

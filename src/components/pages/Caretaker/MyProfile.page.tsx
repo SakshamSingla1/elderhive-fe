@@ -24,6 +24,7 @@ import TextField from "../../atoms/TextField/TextField";
 import Button from "../../atoms/Button/Button";
 import AddressAutocomplete from "../../molecules/AddressAutocomplete/AddressAutocomplete";
 import ServiceRadiusMap from "../../molecules/ServiceRadiusMap/ServiceRadiusMap";
+import CaretakerCalendarSync from "../../molecules/CaretakerCalendarSync/CaretakerCalendarSync";
 import WeeklyAvailabilityEditor from "../../molecules/WeeklyAvailability/WeeklyAvailabilityEditor";
 import { useCaretakerService, type CaretakerProfileRequestDTO, type CaretakerVerificationDocumentDTO } from "../../../services/useCaretakerService";
 import { useFileService } from "../../../services/useFileService";
@@ -483,6 +484,12 @@ const CaretakerMyProfilePage: React.FC = () => {
             </Stack>
           </CardContent>
         </Card>
+      )}
+
+      {profileId && (
+        <Box sx={{ mt: 3 }}>
+          <CaretakerCalendarSync />
+        </Box>
       )}
 
       <Snackbar open={Boolean(successMessage)} autoHideDuration={3000} onClose={() => setSuccessMessage(null)} message={successMessage} />
