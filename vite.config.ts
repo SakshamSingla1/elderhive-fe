@@ -52,6 +52,10 @@ export default defineConfig({
           'vendor-forms': ['formik', 'yup'],
           'vendor-realtime': ['@stomp/stompjs', 'sockjs-client'],
           'vendor-payments': ['@stripe/react-stripe-js', '@stripe/stripe-js'],
+          // mapbox-gl alone is large (bundles its own WebGL rendering engine) - split out
+          // so it's only ever fetched by a viewer who actually opens a page using
+          // molecules/ServiceRadiusMap (Prompt 105), not on every app load.
+          'vendor-maps': ['mapbox-gl'],
         },
       },
     },

@@ -23,6 +23,7 @@ import { FiCalendar, FiFileText, FiMail, FiMapPin, FiPhone, FiStar, FiUpload, Fi
 import TextField from "../../atoms/TextField/TextField";
 import Button from "../../atoms/Button/Button";
 import AddressAutocomplete from "../../molecules/AddressAutocomplete/AddressAutocomplete";
+import ServiceRadiusMap from "../../molecules/ServiceRadiusMap/ServiceRadiusMap";
 import WeeklyAvailabilityEditor from "../../molecules/WeeklyAvailability/WeeklyAvailabilityEditor";
 import { useCaretakerService, type CaretakerProfileRequestDTO, type CaretakerVerificationDocumentDTO } from "../../../services/useCaretakerService";
 import { useFileService } from "../../../services/useFileService";
@@ -366,7 +367,7 @@ const CaretakerMyProfilePage: React.FC = () => {
               Where you're based and how far you're willing to travel for a booking.
             </Typography>
             <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 8 }}>
+              <Grid size={12}>
                 <AddressAutocomplete
                   label="Address"
                   placeholder="Search for your service location"
@@ -381,14 +382,12 @@ const CaretakerMyProfilePage: React.FC = () => {
                   }}
                 />
               </Grid>
-              <Grid size={{ xs: 12, sm: 4 }}>
-                <TextField
-                  label="Service Radius (km)"
-                  name="serviceRadiusKm"
-                  type="number"
-                  value={formik.values.serviceRadiusKm}
-                  onChange={formik.handleChange}
-                  error={formik.touched.serviceRadiusKm && formik.errors.serviceRadiusKm}
+              <Grid size={12}>
+                <ServiceRadiusMap
+                  latitude={formik.values.latitude ? Number(formik.values.latitude) : null}
+                  longitude={formik.values.longitude ? Number(formik.values.longitude) : null}
+                  radiusKm={formik.values.serviceRadiusKm ? Number(formik.values.serviceRadiusKm) : 10}
+                  onRadiusChange={(value) => formik.setFieldValue("serviceRadiusKm", String(value))}
                 />
               </Grid>
             </Grid>
